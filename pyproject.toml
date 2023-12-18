@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "data-assessment-agent"
+version = "0.1.0"
+description = "The data assessment agent is a survey type bot that uses an LLM to re-rank questions after each interaction with a user."
+authors = ["Gil Fernandes <gil.fernandes@onepointltd.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+openai = "^1.5.0"
+tomli = "2.0.1"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.12.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

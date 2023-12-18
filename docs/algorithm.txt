@@ -1,0 +1,5 @@
+1. Ask random question from topic, like e.g: Business Alignment
+2. Capture answer and ask for re-ranking of remaining questions together with given answer
+3. Ask next question
+4. Go to step 2 until a certain amount of questions is asked
+5. When next topic is reached go back and accumulate previous context to 1. until all topics are finished

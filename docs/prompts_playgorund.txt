@@ -1,0 +1,72 @@
+# Ontology from text:
+
+Extract an ontology. Do not draw it, but create a markdown table of relations with 3 columns in this order: source, target, relation name. And also create a list with 2 columns: the first contains the term name and the second column contains the term definition.
+
+Use this text as a basis:
+
+@text@
+
+Here is the ontology in the form of a markdown table and a list of terms with their definitions.
+
+**Ontology Relations:**
+
+| Source                   | Target                       | Relation Name             |
+|--------------------------|------------------------------|---------------------------|
+| Published Business Strategy | Data Strategy                 | Alignment Necessity       |
+| Current Data Strategy       | Business Strategy             | Alignment Check           |
+| Organization                | Market                        | Data Demand               |
+| Organization                | GenAI                         | Enabling Data Strategy    |
+| Organization                | Untapped Data Sources         | Business Impact           |
+| Data Governance             | Business Objectives           | Support and Alignment     |
+| Executives                  | Data Initiatives              | Support Status            |
+| Budget                      | Data Infrastructure           | Funding Allocation        |
+| Organization                | Monetization Models           | Exploration Status        |
+| Internal Teams              | Data Sharing and Collaboration | Simplification Need       |
+| Business Units/Teams        | Data Access and Analysis      | Democratization Need      |
+| Use Cases                   | Data Access and Processing    | Agility Requirement       |
+| Data Processes              | Bottlenecks                   | Existence                 |
+| Analytical Project          | Production Timeline           | Duration and Concerns     |
+| Organization                | Skill Sets                    | In-house vs External      |
+
+**Terms and Definitions:**
+
+| Term Name                      | Term Definition                                                                                                                                                     |
+|--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Business Strategy              | A formalized statement of a set of business goals, the reasons they are believed attainable, and the plan for reaching those goals.                                  |
+| Data Strategy                  | A comprehensive vision and actionable foundation for an organization's ability to harness data-related or data-dependent capability.                                 |
+| Market Demand                  | The need or desire for a product or service in a market.                                                                                                            |
+| GenAI                          | General Artificial Intelligence use cases within the organization.                                                                                                  |
+| Untapped Data Sources          | Data assets currently not used or underutilized by the organization.                                                                                                |
+| Data Governance                | A collection of practices and processes which help to ensure the formal management of data assets within an organization.                                            |
+| Data Initiatives               | Projects or programs undertaken by an organization to improve its data management and usage.                                                                         |
+| Data Infrastructure            | The foundational technology and organizational structures needed to collect, store, manage, and communicate data.                                                    |
+| Monetization Models            | Ways in which an organization can generate revenue from its data, such as through subscriptions, licensing, or providing data as a service.                          |
+| Data Sharing and Collaboration | The act of distributing, accessing, and working on data together within an organization.                                                                            |
+| Data Access and Analysis       | The process of retrieving and examining data to gain insights.                                                                                                      |
+| Data Access and Processing     | The capacity to retrieve and manipulate data for various outcomes.                                                                                                  |
+| Bottlenecks                    | Points of congestion in a system that slow down the data processing and analysis capabilities.                                                                      |
+| Production Timeline            | The schedule or timeframe required to take a project from conception to the final product.                                                                           |
+| Skill Sets                     | The range of skills and abilities that employees possess within an organization or that are brought in through external hiring to meet the organization's needs.      |
+
+This table and list represent an ontology extracted from the text, with the relations showing how different concepts interact with one another within the context of organizational data strategy, and the terms defined to provide clarity on the roles each plays.
+
+# Question Relationships
+
+Can you please build a markdown table with relationships in this order source, target and relationship between the following questions:
+
+Is there a published business strategy that data strategy needs to align to?
+Does your current data strategy align with your business strategy? Are there gaps or misalignments to address?
+Is there market demand for the type of data your organization possess?
+Are there any known GenAI use cases or would the orgranization be interested in knowing how data strategy can be enabler for GenAI?
+Are you aware of the potential business impact of analyzing and using currently untapped data sources?
+Is there data governance that aligns and support business objectives?
+Do you have executive support for data initiatives?
+Is there budget allocated for data infrastructure needs?
+Have you explored various monetization models (e.g., data licensing, data subscriptions, data-as-a-service)?
+Is there a need or opportunity to simplify data sharing and collaboration amoungst internal teams?
+Is there a need to democratize data access and empower business units or teams to access and analyze data independently?
+Are there emerging use cases that require agility in data access and processing?
+Are there bottlenecks in data access, processing, or analytics?
+How long does it take for a medium size complexity analytical project to from requirements to production? Are there any concerns about the time it takes to go live? 
+Does your organization have the necessary skills in-house, or do you rely on external expertise?
+
