@@ -22,6 +22,9 @@ class Config:
     openai_timeout = float(os.getenv("OPENAI_TIMEOUT", 30.0))
     open_ai_client = AsyncOpenAI(api_key=openai_api_key, timeout=openai_timeout)
     project_root = Path(os.getenv("PROJECT_ROOT"))
+    framework_questionnaire_yaml = Path(os.getenv("FRAMEWORK_QUESTIONNAIRE_YAML"))
+    assert framework_questionnaire_yaml.exists()
+    assert framework_questionnaire_yaml.is_file()
 
 
 cfg = Config()

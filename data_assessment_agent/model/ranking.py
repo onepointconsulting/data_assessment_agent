@@ -13,5 +13,5 @@ question_ranking_spec = {
     "name": "question_ranking",
     "description": "Ranks questions",
     "type": "object",
-    "parameters": RankedQuestionsResponse.model_computed_fields(),
+    "parameters": RankedQuestionsResponse.model_json_schema(),
 }
