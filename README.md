@@ -20,3 +20,11 @@ Here it is how you should run unit tests:
 ```
 python -m unittest
 ```
+
+## Running the server
+
+Please run the server like this from the project's directory:
+
+```
+python .\data_assessment_agent\server\assessment_server.py
+```
