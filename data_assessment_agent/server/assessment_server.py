@@ -17,9 +17,14 @@ class Commands(StrEnum):
 
 
 @sio.event
-async def connect(sid, environ):
-    logger.info("connect %s ", sid)
-    agent_session = AgentSession(sid, None)
+async def connect(sid: str, environ):
+    logger.info("connect %s %s", sid, environ)
+
+
+@sio.event
+async def start_session(sid, client_session):
+    logger.info("start_session client_session %s", client_session)
+    agent_session = AgentSession(sid, client_session)
     session_id = agent_session.session_id
     await sio.emit(Commands.START_SESSION, session_id, room=sid)
 
