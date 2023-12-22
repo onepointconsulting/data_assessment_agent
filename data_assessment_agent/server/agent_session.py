@@ -10,7 +10,11 @@ class AgentSession:
         session_id: Optional[str],
     ):
         self.socket_id = socket_id
-        self.session_id = session_id if session_id is not None and len(session_id) > 0 else str(uuid.uuid4())
+        self.session_id = (
+            session_id
+            if session_id is not None and len(session_id) > 0
+            else str(uuid.uuid4())
+        )
         agent_sessions[self.session_id] = self
 
 
