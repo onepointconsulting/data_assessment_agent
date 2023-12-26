@@ -13,10 +13,13 @@ if __name__ == "__main__":
             print(saved_topic)
             for question in questions:
                 try:
-                    db_question = Question(question=question.question, score=question.score, topic=saved_topic)
+                    db_question = Question(
+                        question=question.question,
+                        score=question.score,
+                        topic=saved_topic,
+                    )
                     save_question(db_question)
                 except:
-                    logger.exception("Failed to insert question")        
+                    logger.exception("Failed to insert question")
         except:
             logger.exception("Failed to insert topic")
-

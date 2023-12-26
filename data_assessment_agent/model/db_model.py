@@ -24,3 +24,4 @@ class QuestionnaireStatus(BaseModel):
     question: str = Field(..., description="The question the user replied")
     answer: str = Field(..., description="The answer given by the user")
     score: str = Field(..., description="The score given to the user's reply")
+    topic_count: int = Field(..., description="The last topic's current count")

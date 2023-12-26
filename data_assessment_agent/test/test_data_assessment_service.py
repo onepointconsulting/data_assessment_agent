@@ -1,7 +1,7 @@
 import unittest
 
 from data_assessment_agent.config.toml_support import prompts
-from data_assessment_agent.service.data_assessment_service import create_user_message
+from data_assessment_agent.service.ranking_service import create_user_message
 from data_assessment_agent.test.provider.ranking_prompt_provider import (
     ranking_prompt_provider,
 )
