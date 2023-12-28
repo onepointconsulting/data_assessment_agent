@@ -1,0 +1,1311 @@
+Advanced Analytics:
+  description: Advanced Analytics
+  questions:
+  - category: Advanced Analytics
+    question: What best describes the reality of your organization's advanced analytics
+      tools landscape?
+    score: 15
+  - category: Advanced Analytics
+    question: 'What type of capability do you have currently for supporting analytics
+      (example: SAS, Python, Pyspark, R, notebook, text analytics, elastic search
+      etc )?'
+    score: 15
+  - category: Advanced Analytics
+    question: What is the strength and composition of the analytics team?
+    score: 15
+  - category: Advanced Analytics
+    question: What programming language is available to be used by the analysts?
+    score: 15
+  - category: Advanced Analytics
+    question: What IDE, notebooks are used by the analysts?
+    score: 15
+  - category: Advanced Analytics
+    question: What analytical capability or algorithms are being used?
+    score: 15
+  - category: Advanced Analytics
+    question: What machine learning frameworks such as PyTorch, NumPy etc are used
+      currently?
+    score: 15
+  - category: Advanced Analytics
+    question: 'Do you provide self-service capability to analytical users in production
+      environment, and how it is currently managed?  '
+    score: 15
+  - category: Advanced Analytics
+    question: What techniques/frameworks/toolkits/libraries such as LIME (Local Interpretable
+      Model-agnostic Explanations) and SHAP (SHapley Additive exPlanations) are used
+      or are in place to make the ML models interpretable and explainable?
+    score: 15
+  - category: Advanced Analytics
+    question: What techniques/frameworks/toolkits/libraries are used or are in place
+      to make the LLM models interpretable and explainable?
+    score: 15
+  - category: Advanced Analytics
+    question: Do you version the models and where are they stored?
+    score: 15
+  - category: Advanced Analytics
+    question: Are data scientists able to collborate and easily share ML models?
+    score: 15
+  - category: Advanced Analytics
+    question: Do you expose your model through APIs?
+    score: 15
+  - category: Advanced Analytics
+    question: 'Do you serialize the model, including its architecture and weights,
+      into a single binary file or format for interoperability? '
+    score: 15
+  - category: Advanced Analytics
+    question: What techniques do you use for preserving data privacy in model training?
+      Have you considered training your models using federated learning for data privacy
+      or for edge computing?
+    score: 15
+  - category: Advanced Analytics
+    question: Do you use AutoML to automate model selection and hyperparameter tuning?
+    score: 15
+  - category: Advanced Analytics
+    question: What machine learning model evaluation frameworks and libraries do you
+      use for assessing the performance of ML models?
+    score: 15
+  - category: Advanced Analytics
+    question: Does your organization support interoperability of ML models?
+    score: 15
+  - category: Advanced Analytics
+    question: What metric evaluation framework do you use to evaluate the performance
+      of the models?
+    score: 15
+  - category: Advanced Analytics
+    question: Are there any use cases for Analytics as a Service or use cases to support
+      self service by business?
+    score: 15
+  - category: Advanced Analytics
+    question: Has the team explored the use of a data science platform?
+    score: 15
+Business Alignment:
+  description: Business Alignment
+  questions:
+  - category: Business Strategy Alignment
+    question: What are the organization's overall business goals and objectives?
+    score: 15
+  - category: Business Strategy Alignment
+    question: What are the organization's short-term and long-term business goals?
+    score: 15
+  - category: Business Strategy Alignment
+    question: How does data or data strategy support these goals?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Is there a published business strategy that data strategy needs to align
+      to?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Does your current data strategy align with your business strategy? Are
+      there gaps or misalignments to address?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Is there market demand for the type of data your organization possess?
+    score: 15
+  - category: Business Strategy Alignment
+    question: What are the primary use cases for data within your organization (e.g.,
+      reporting, analytics, machine learning)?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Are there any known GenAI use cases or would the orgranization be interested
+      in knowing how data strategy can be enabler for GenAI?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Are you aware of the potential business impact of analyzing and using
+      currently untapped data sources?
+    score: 15
+  - category: Data Ownership
+    question: Is there data governance that aligns and support business objectives?
+    score: 15
+  - category: Executive Sponsorhip
+    question: Do you have executive support for data initiatives?
+    score: 15
+  - category: Executive Sponsorhip
+    question: Is there budget allocated for data infrastructure needs?
+    score: 15
+  - category: Executive Sponsorhip
+    question: What is the budget allocated for data infrastructure needs?
+    score: 15
+  - category: Executive Sponsorhip
+    question: What is the current cost of data storage and management?
+    score: 15
+  - category: Executive Sponsorhip
+    question: Are there cost optimization opportunities?
+    score: 15
+  - category: Executive Sponsorhip
+    question: What is your budget for data-related initiatives for the coming year?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Have you explored various monetization models (e.g., data licensing,
+      data subscriptions, data-as-a-service)?
+    score: 15
+  - category: Business Strategy Alignment
+    question: What are your future data needs and growth projections?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Are there pain points or challenges related to data that stakeholders
+      have identified?
+    score: 15
+  - category: Data Agility
+    question: How do different business/product teams or departments collaborate on
+      data initiatives?
+    score: 15
+  - category: Data Agility
+    question: Is there a need or opportunity to simplify data sharing and collaboration
+      amoungst internal teams?
+    score: 15
+  - category: Business Strategy Alignment
+    question: What measures are in place to ensure business continuity in the event
+      of disasters? What tier is data lake and reporting classified as?
+    score: 15
+  - category: Data Ownership
+    question: How is data ownership and responsibility currently structured within
+      the organization? How many data owners do we have?
+    score: 15
+  - category: Data Agility
+    question: Is there a need to democratize data access and empower business units
+      or teams to access and analyze data independently?
+    score: 15
+  - category: Data Ownership
+    question: Are there ethical considerations related to data usage and sharing in
+      your industry?
+    score: 15
+  - category: Data Agility
+    question: Are there emerging use cases that require agility in data access and
+      processing?
+    score: 15
+  - category: Business Strategy Alignment
+    question: 'Can you identify specific pain points or challenges in implementation
+      of analytics use cases? '
+    score: 15
+  - category: Data Agility
+    question: Are there bottlenecks in data access, processing, or analytics?
+    score: 15
+  - category: Data Agility
+    question: Is your organization open to realigning data teams based on how data
+      is consumed?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Have you conducted market research or received inquiries from potential
+      data buyers?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Are there competitors or data providers offering similar data products
+      or services?
+    score: 15
+  - category: Business Strategy Alignment
+    question: What differentiates your data from your competitors?
+    score: 15
+  - category: Business Strategy Alignment
+    question: How can your data address specific business or industry needs?
+    score: 15
+  - category: Business Strategy Alignment
+    question: 'What are the new analytical initiatives that may have been planned
+      or communicated? '
+    score: 15
+  - category: Business Strategy Alignment
+    question: What other business use cases/capabilities are in the pipeline to be
+      implemented?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Are you aware of any initiatives that require to ingest social media
+      data or CCTV data?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Is there any plan to make analytics data highly available 24x7 to external
+      partners to monetize data?
+    score: 15
+  - category: Data Agility
+    question: 'How long does it take for a medium size complexity analytical project
+      to from requirements to production? Are there any concerns about the time it
+      takes to go live? '
+    score: 15
+  - category: Executive Sponsorhip
+    question: Is business ok with higher OPEX and lower CAPEX with higher overall
+      cost over 5 yr time period as compared to higher CAPEX and lower OPEX?
+    score: 15
+  - category: Data Agility
+    question: "What percentage of advanced analytics projects have been operationalized\
+      \ (i.e., actually integrated into business processes)?\_"
+    score: 15
+  - category: Data Agility
+    question: Does your organization have the necessary skills in-house, or do you
+      rely on external expertise?
+    score: 15
+  - category: Data Agility
+    question: Are there skill gaps that need to be addressed?
+    score: 15
+  - category: Data Agility
+    question: Is there a mandatory data training for all new comers/employess, and
+      contractors?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Are there strategic initiatives that could benefit from accessing dark
+      data?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Are there ongoing data exploration and analytics efforts to uncover
+      insights from dark data?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Are there any known use cases that the data strategy is going to drive
+      for implementation?
+    score: 15
+  - category: Business Strategy Alignment
+    question: Are there any specific data-driven initiatives in progress or planned?
+    score: 15
+Data Acquisition:
+  description: Data Acquisition
+  questions:
+  - category: Data Acquisition
+    question: How is data shared with external partners outside the organization?
+    score: 15
+  - category: Data Acquisition
+    question: How is data ingested into the data lake?
+    score: 15
+  - category: Data Acquisition
+    question: Is the data lake leveraged as real time data hub?
+    score: 15
+  - category: Data Acquisition
+    question: Are there data ingestion pipelines for bringing the data in data lake
+      in place? How many such data pipelines exist?
+    score: 15
+  - category: Data Acquisition
+    question: Is data streaming, or pushed as batch data in flat file or pulled from
+      database or consumed from systems using API?
+    score: 15
+  - category: Data Acquisition
+    question: How are different data sources integrated with the data lake?
+    score: 15
+  - category: Data Acquisition
+    question: Are there data integration challenges or bottlenecks?
+    score: 15
+  - category: Data Acquisition
+    question: How frequently is data integrated? What is the data latency for majority
+      of the data pipelines?
+    score: 15
+  - category: Data Acquisition
+    question: What data pipelines exist within your organization?
+    score: 15
+  - category: Data Acquisition
+    question: How are data pipelines documented and cataloged?
+    score: 15
+  - category: Data Acquisition
+    question: What tools and technologies are used for data transformation and processing?
+    score: 15
+  - category: Data Acquisition
+    question: How are data transformations managed and versioned?
+    score: 15
+  - category: Data Acquisition
+    question: How do you orchestrate and schedule data workflows and tasks?
+    score: 15
+  - category: Data Acquisition
+    question: Are there tools or platforms used for orchestration?
+    score: 15
+  - category: Data Acquisition
+    question: How do you monitor data pipelines for issues or anomalies?
+    score: 15
+  - category: Data Acquisition
+    question: Are there alerting mechanisms in place for data pipeline failures?
+    score: 15
+  - category: Data Acquisition
+    question: Do you track and document data lineage?
+    score: 15
+  - category: Data Acquisition
+    question: Is data lineage exported from the data pipelines in to the data catalog?
+    score: 15
+  - category: Data Acquisition
+    question: How are different versions of data assets managed?
+    score: 15
+  - category: Data Acquisition
+    question: Do you have data recovery strategies in place?
+    score: 15
+  - category: Data Acquisition
+    question: How do you optimize the performance and cost of data pipelines?
+    score: 15
+  - category: Data Acquisition
+    question: Are there processes for continuous improvement?
+    score: 15
+  - category: Data Acquisition
+    question: Is there documentation of data pipelines, workflows, and best practices?
+    score: 15
+  - category: Data Acquisition
+    question: Are these tools effectively meeting your needs?
+    score: 15
+  - category: Data Acquisition
+    question: How do you track pipeline efficiency and reliability?
+    score: 15
+  - category: Data Acquisition
+    question: How complex are the data transformations and computations?
+    score: 15
+  - category: Data Acquisition
+    question: Do you need to handle real-time or near-real-time data?
+    score: 15
+  - category: Data Acquisition
+    question: Does data arrive in real-time or batch processes?
+    score: 15
+  - category: Data Acquisition
+    question: What file formats are supported on the data lake?
+    score: 15
+Data Architecture:
+  description: Data Architecture
+  questions:
+  - category: Data Architecture
+    question: How is data accessed (dashboards, reports, APIs, etc.)?
+    score: 15
+  - category: Data Architecture
+    question: Are there data access restrictions or security measures in place?
+    score: 15
+  - category: Data Architecture
+    question: How is data used for analytics and reporting?
+    score: 15
+  - category: Data Architecture
+    question: What tools and technologies are used for data analysis?
+    score: 15
+  - category: Data Architecture
+    question: Are there data analytics skills and resources within the organization?
+    score: 15
+  - category: Data Architecture
+    question: What types of data processing and analysis are required (e.g., batch
+      processing, real-time streaming, machine learning, data warehousing)?
+    score: 15
+  - category: Data Architecture
+    question: What are the potential use cases for your data (e.g., market research,
+      predictive analytics, targeted advertising)?
+    score: 15
+  - category: Data Architecture
+    question: Is there a MDM tool used for master data? What are the master data entities
+      within the organization and what tools have been explored?
+    score: 15
+  - category: Data Architecture
+    question: Does the organization support use of open source products?
+    score: 15
+  - category: Data Architecture
+    question: Is there a design document for the data lake?
+    score: 15
+  - category: Data Architecture
+    question: Are there gaps or opportunities for improvement in your technology stack?
+    score: 15
+  - category: Data Architecture
+    question: Are there any known challenges with data silos or centralization?
+    score: 15
+  - category: Data Architecture
+    question: How do different teams or departments collaborate on data initiatives?
+    score: 15
+  - category: Data Architecture
+    question: Can you identify specific pain points or challenges in your current
+      data ecosystem?
+    score: 15
+  - category: Data Architecture
+    question: Have you reviewed the core principles of data mesh, such as domain-oriented
+      ownership, product thinking, and self-serve data infrastructure?
+    score: 15
+  - category: Data Architecture
+    question: Is there an existing published data strategy? When the data strategy
+      last refreshed and published?
+    score: 15
+  - category: Data Architecture
+    question: How do you plan to adapt your data strategy to meet evolving requirements
+      such as Gen AI use cases?
+    score: 15
+  - category: Data Architecture
+    question: Do the principles of data mesh align with your organization's goals
+      and culture?
+    score: 15
+  - category: Data Architecture
+    question: Are you open to conducting a data mesh pilot or proof of concept to
+      evaluate its feasibility and benefits within your organization?
+    score: 15
+  - category: Data Architecture
+    question: 'Are you aware of any initiatives that require to ingest unstructured
+      or semi structured data? '
+    score: 15
+  - category: Data Architecture
+    question: Is the data science platform or analytical platform vendor supported
+      or open-source? What is the annual cost, licensing model, infrastructure required,
+      and who has ownership of the platform?
+    score: 15
+  - category: Data Architecture
+    question: What is the composition of your data team (data engineers, data scientists,
+      analysts)?
+    score: 15
+  - category: Data Architecture
+    question: What is the potential business impact of analyzing and using currently
+      untapped data sources?
+    score: 15
+  - category: Data Architecture
+    question: Are there strategic initiatives that could benefit from accessing dark
+      data?
+    score: 15
+  - category: Data Architecture
+    question: Are there ongoing data exploration and analytics efforts to uncover
+      insights from dark data?
+    score: 15
+  - category: Data Architecture
+    question: How many data zones are there in the data lake?
+    score: 15
+  - category: Data Architecture
+    question: What is the data lake folder hierarchy?
+    score: 15
+  - category: Data Architecture
+    question: What is data partitioning strategy?
+    score: 15
+  - category: Data Architecture
+    question: Is there any terminology server to centralize storage of reference data
+      sets?
+    score: 15
+Data Assets:
+  description: Data Assets
+  questions:
+  - category: Data Assets
+    question: How does your company acquire data and ensure data quality?
+    score: 15
+  - category: Data Assets
+    question: What types of data does the organization collect and store?
+    score: 15
+  - category: Data Assets
+    question: Where is the data located (databases, data warehouses, cloud platforms,
+      etc.)?
+    score: 15
+  - category: Data Assets
+    question: What are the types and sources of data that your organization deals
+      with (e.g., structured, semi-structured, unstructured)?
+    score: 15
+  - category: Data Assets
+    question: What are the different types of data persistance stores within the organization
+      such as RDBMS, No SQL databases, Graph databases and so on?
+    score: 15
+  - category: Data Assets
+    question: What NoSql Databases are used?
+    score: 15
+  - category: Data Assets
+    question: What Graph databases have been used or explored so far?
+    score: 15
+  - category: Data Assets
+    question: What are the data sources corresponding to the data domains?
+    score: 15
+  - category: Data Assets
+    question: What is the approximate total volume of data on the data lake?
+    score: 15
+  - category: Data Assets
+    question: What sources generate or contribute to your data (e.g., IoT devices,
+      applications, websites, manual entry)?
+    score: 15
+  - category: Data Assets
+    question: What external data sources are leveraged for insights or decision-making?
+    score: 15
+  - category: Data Assets
+    question: How do you ensure the quality and reliability of external data?
+    score: 15
+  - category: Data Assets
+    question: Do you have an inventory of all data assets, including their location
+      and sensitivity?
+    score: 15
+  - category: Data Assets
+    question: How is data classified? Have data assets been classified based on their
+      importance and sensitivity?
+    score: 15
+  - category: Data Assets
+    question: Are there cost optimization opportunities for data storage?
+    score: 15
+  - category: Data Assets
+    question: Do you have tools or teams dedicated to analyzing dark data?
+    score: 15
+  - category: Data Assets
+    question: How does dark data fit into your overall data governance framework and
+      data strategy?
+    score: 15
+  - category: Data Assets
+    question: Are there plans to bring dark data into alignment with organizational
+      goals?
+    score: 15
+  - category: Data Assets
+    question: Where is reference data stored and how is it accessed within the data
+      lake?
+    score: 15
+  - category: Data Assets
+    question: How is reference data managed?
+    score: 15
+  - category: Data Assets
+    question: Are there duplicate copies of ungoverned data in the organization?
+    score: 15
+  - category: Data Assets
+    question: Is there a data catalog in place?
+    score: 15
+  - category: Data Assets
+    question: Does the catalog include metadata, data lineage, and data usage information?
+    score: 15
+  - category: Data Assets
+    question: What data sources is the data catalog integrated with?
+    score: 15
+  - category: Data Assets
+    question: Does the data catalog support dynamic or auto discovery of data assets?
+    score: 15
+  - category: Data Assets
+    question: How frequently is the data catalog refreshed to reflect changes in the
+      schema of the backend data sources?
+    score: 15
+  - category: Data Assets
+    question: Does the data catalog govern NoSQL and event driven messages or schema?
+    score: 15
+  - category: Data Assets
+    question: Does the data catalog support tagging data attributes as PII or senstive
+      data fields?
+    score: 15
+Data Governance:
+  description: Data Governance
+  questions:
+  - category: Data Governance
+    question: Is there an established data governance program or framework in place?
+      Is there a published data governance charter?
+    score: 15
+  - category: Data Governance
+    question: Who are the key stakeholders involved in data governance decision-making
+      and implementation?
+    score: 15
+  - category: Data Governance
+    question: Is there CxO level sponsorship for the data governance program?
+    score: 15
+  - category: Data Governance
+    question: Are data domain, data ownership and stewardship roles defined and communicated
+      in the charter?
+    score: 15
+  - category: Data Governance
+    question: How many data owners, stewards or custodians are assigned to each data
+      domain?
+    score: 15
+  - category: Data Governance
+    question: Who is responsible for data governance within the organization? Is there
+      a central team or is data governance federated?
+    score: 15
+  - category: Data Governance
+    question: What is the level of awareness and understanding of data governance
+      among employees? Is there a a training program to create awareness?
+    score: 15
+  - category: Data Governance
+    question: Is there a clear alignment of business data owners within the line of
+      business responsible for data assets within the organization?
+    score: 15
+  - category: Data Governance
+    question: Is there a culture of data governance and data stewardship within the
+      organization?
+    score: 15
+  - category: Data Governance
+    question: How are data governance principles and practices communicated and promoted?
+    score: 15
+  - category: Data Governance
+    question: Have there been any external audits or assessments of your data governance
+      practices?
+    score: 15
+  - category: Data Governance
+    question: What were the findings, and how have they been addressed?
+    score: 15
+  - category: Data Governance
+    question: How do you engage with and involve business units and IT in data governance?
+    score: 15
+  - category: Data Governance
+    question: What are the major challenges and pain points related to data governance?
+    score: 15
+  - category: Data Governance
+    question: Are there specific areas where improvement is needed?
+    score: 15
+  - category: Data Governance
+    question: Is there comprehensive documentation of data governance policies, procedures,
+      and standards?
+    score: 15
+  - category: Data Governance
+    question: What tools and technology are used for data governance (e.g., data catalog,
+      data lineage)?
+    score: 15
+  - category: Data Governance
+    question: Are these tools effective in supporting data governance efforts?
+    score: 15
+  - category: Data Governance
+    question: What processes are in place for data governance, including data capture,
+      validation, and reporting?
+    score: 15
+  - category: Data Governance
+    question: Are data governance workflows documented and followed?
+    score: 15
+  - category: Data Governance
+    question: How do you measure the effectiveness of your data governance efforts?
+    score: 15
+  - category: Data Governance
+    question: What key performance indicators (KPIs) are used to assess data quality
+      and governance success?
+    score: 15
+  - category: Data Governance
+    question: Is there ongoing data governance education and awareness programs?
+    score: 15
+  - category: Data Governance
+    question: Are employees provided with yearly mandatory training on data governance
+      best practices?
+    score: 15
+  - category: Data Governance
+    question: Do you have a data governance roadmap or plan for future improvements?
+    score: 15
+  - category: Data Governance
+    question: What are the prioritized initiatives and goals for enhancing data governance?
+    score: 15
+  - category: Data Governance
+    question: Do you have processes for managing data from external sources or partners?
+    score: 15
+  - category: Data Governance
+    question: Do you have DataOps framework for management and governance of data
+      or data assets throughout its lifecycle?
+    score: 15
+  - category: Data Governance
+    question: Is there data retention policy and how is it enforced?
+    score: 15
+  - category: Data Governance
+    question: How is data backed up and archived and deleted when it reaches the end
+      of its lifecycle?
+    score: 15
+  - category: Data Governance
+    question: Are there data disposal procedures in place?
+    score: 15
+  - category: Data Governance
+    question: How is the Master data managed?
+    score: 15
+Data Modelling:
+  description: Data Modelling
+  questions:
+  - category: Data Modelling
+    question: What tool is used by the data modellers?
+    score: 15
+  - category: Data Modelling
+    question: How do the data modellers collaborate and share the data models?
+    score: 15
+  - category: Data Modelling
+    question: What the key data domains and how are the data modellers aligned to
+      the domains?
+    score: 15
+  - category: Data Modelling
+    question: Is there a conceptual, logical and physical data model for the entire
+      organization or just few selected data domains?
+    score: 15
+  - category: Data Modelling
+    question: Is there a naming convention that is enforced?
+    score: 15
+  - category: Data Modelling
+    question: Is there a data dictionary for the data models?
+    score: 15
+  - category: Data Modelling
+    question: How are the data models published?
+    score: 15
+  - category: Data Modelling
+    question: Are there sufficient read licenses for viewers to view the data models?
+    score: 15
+  - category: Data Modelling
+    question: do the data modellers model only relationship data to be stored in databases
+      or do they model for NoSQL databases as well?
+    score: 15
+  - category: Data Modelling
+    question: Is graph data modelling relevant to the organization? Do the data modellers
+      have adequete training to model knowledge graphs if relevant to the organization?
+    score: 15
+  - category: Data Modelling
+    question: Do the data modellers use data vault or explored the use of data vault?
+      Are they trained to model data using data vault?
+    score: 15
+  - category: Data Modelling
+    question: Are the data modellers trained to identify PII data attributes in the
+      data models?
+    score: 15
+  - category: Data Modelling
+    question: Do the data modellers use a tool to generate the physical data models
+      or generate DML?
+    score: 15
+  - category: Data Modelling
+    question: Do data modellers model messages/events that are to be published on
+      an event stream such as Kafka?
+    score: 15
+Data Privacy:
+  description: Data Privacy
+  questions:
+  - category: Data Privacy
+    question: How do you handle sensitive or personally identifiable information (PII)?
+    score: 15
+  - category: Data Privacy
+    question: Do you have policies and procedures in place to ensure data privacy
+      (e.g., compliance with GDPR, HIPAA)?
+    score: 15
+  - category: Data Privacy
+    question: How do you handle customer and employee data privacy? What tools or
+      technology is used?
+    score: 15
+  - category: Data Privacy
+    question: Do you use any tokenization tools to tokenize PII data fields?
+    score: 15
+  - category: Data Privacy
+    question: What are the most common tokens used?
+    score: 15
+  - category: Data Privacy
+    question: 'How and where consent by the customer to share data captured and stored? '
+    score: 15
+  - category: Data Privacy
+    question: Is consent across multiple LOBs stored in a central repository and exposed
+      as API?
+    score: 15
+  - category: Data Privacy
+    question: How is right to forget as part of GDPR compliance implemented?
+    score: 15
+Data Quality:
+  description: Data Quality
+  questions:
+  - category: Data Quality
+    question: How is data quality measured and monitored?
+    score: 15
+  - category: Data Quality
+    question: Are there data validation and cleansing processes?
+    score: 15
+  - category: Data Quality
+    question: Is there an Audit, Balance & Control Framework that the organisation
+      has built or adopted?
+    score: 15
+  - category: Data Quality
+    question: Are data quality standards and guidelines defined and enforced?
+    score: 15
+  - category: Data Quality
+    question: Who are the key stakeholders responsible for data quality?
+    score: 15
+  - category: Data Quality
+    question: Have you conducted data profiling exercises to understand the characteristics
+      of your data?
+    score: 15
+  - category: Data Quality
+    question: What tools or methods are used for data profiling?
+    score: 15
+  - category: Data Quality
+    question: What data quality metrics or Key Performance Indicators (KPIs) are in
+      place?
+    score: 15
+  - category: Data Quality
+    question: How do you measure data accuracy, completeness, consistency, and timeliness?
+    score: 15
+  - category: Data Quality
+    question: Have you established data quality standards and guidelines?
+    score: 15
+  - category: Data Quality
+    question: Do you have data validation processes in place to catch errors at the
+      point of entry?
+    score: 15
+  - category: Data Quality
+    question: How are data anomalies and discrepancies identified and corrected?
+    score: 15
+  - category: Data Quality
+    question: What tools and technologies are used for data quality monitoring and
+      improvement?
+    score: 15
+  - category: Data Quality
+    question: Are these tools effective in addressing data quality issues?
+    score: 15
+  - category: Data Quality
+    question: What is the process for conducting data quality assessments?
+    score: 15
+  - category: Data Quality
+    question: How frequently are data quality assessments performed?
+    score: 15
+  - category: Data Quality
+    question: Who is responsible for data quality within the organization?
+    score: 15
+  - category: Data Quality
+    question: Are data quality responsibilities clearly defined?
+    score: 15
+  - category: Data Quality
+    question: How do you validate data accuracy and completeness?
+    score: 15
+  - category: Data Quality
+    question: Are there automated tests or manual checks in place?
+    score: 15
+  - category: Data Quality
+    question: How do you clean and enrich data to improve quality?
+    score: 15
+  - category: Data Quality
+    question: What processes are used to standardize and normalize data?
+    score: 15
+  - category: Data Quality
+    question: Do you have real-time or batch data quality monitoring in place?
+    score: 15
+  - category: Data Quality
+    question: How do you detect and respond to data quality issues as they arise?
+    score: 15
+  - category: Data Quality
+    question: Have you implemented specific initiatives to address data quality challenges?
+    score: 15
+  - category: Data Quality
+    question: What were the outcomes of these initiatives?
+    score: 15
+  - category: Data Quality
+    question: How is data quality information communicated to stakeholders?
+    score: 15
+  - category: Data Quality
+    question: Do you have data quality dashboards or reports?
+    score: 15
+  - category: Data Quality
+    question: What are the major challenges and pain points related to data quality?
+    score: 15
+  - category: Data Quality
+    question: Are there specific areas where data quality improvement is needed?
+    score: 15
+  - category: Data Quality
+    question: How comprehensive and high-quality is your data?
+    score: 15
+  - category: Data Quality
+    question: Are there critical data quality issues that need to be addressed?
+    score: 15
+  - category: Data Quality
+    question: What data quality issues have been identified, and how are they addressed?
+    score: 15
+  - category: Data Quality
+    question: How do you ensure data quality and compliance when integrating external
+      data?
+    score: 15
+  - category: Data Quality
+    question: How do you ensure data quality and governance to maintain the value
+      of your data assets?
+    score: 15
+Data Security:
+  description: Data Security
+  questions:
+  - category: Data Security
+    question: Are there specific industry regulations or legal requirements that impact
+      your data strategy?
+    score: 15
+  - category: Data Security
+    question: Are you compliant with relevant data regulations such as GDPR?
+    score: 15
+  - category: Data Security
+    question: How do you handle sensitive data?
+    score: 15
+  - category: Data Security
+    question: What measures are in place to protect data from security breaches?
+    score: 15
+  - category: Data Security
+    question: Do you have a disaster recovery plan for data?
+    score: 15
+  - category: Data Security
+    question: Are data access permissions aligned with business needs and regulations?
+    score: 15
+  - category: Data Security
+    question: How is data protected against unauthorized access and breaches?
+    score: 15
+  - category: Data Security
+    question: Who has access to what data, and how is access controlled and audited?
+    score: 15
+  - category: Data Security
+    question: How is data security and compliance ensured throughout the data lifecycle?
+    score: 15
+  - category: Data Security
+    question: Do you use a keystore to manage the keys? What keystore do you use?
+    score: 15
+  - category: Data Security
+    question: Do you use your own keystore for managing keys stored on the cloud?
+    score: 15
+  - category: Data Security
+    question: Are there opportunities to collaborate with other organizations to enhance
+      the value of your data?
+    score: 15
+  - category: Data Security
+    question: Can you tap into industry data ecosystems or consortiums?
+    score: 15
+  - category: Data Security
+    question: Do you have a well defined Role Based access control policy in place
+      with roles aligned to AD groups?
+    score: 15
+  - category: Data Security
+    question: Is there a well defined process to add users to the AD groups?
+    score: 15
+  - category: Data Security
+    question: Are there any policies that use attribute based access control for row
+      based filtering?
+    score: 15
+  - category: Data Security
+    question: What tools are used for Audit compliance (Splunk, Guardium or other
+      approved method)?
+    score: 15
+  - category: Data Security
+    question: What compliance laws or frameworks such as GDPR, CCPA, NIST, HIPAA,
+      FISMA, SOX, PCI, FIPS are relevant to the organization and that the organization
+      needs to adhere to?
+    score: 15
+  - category: Data Security
+    question: What is the process to identify if data is PII, PHI, and PCI according
+      to the compliance?
+    score: 15
+  - category: Data Security
+    question: What process and tools are used for bringing prod data in to lower envrionment
+      after psuedo anaonymization of the data?
+    score: 15
+  - category: Data Security
+    question: Do you have process defined and tools identified for generating synthetic
+      data?
+    score: 15
+  - category: Data Security
+    question: Are you aware of any legal challenges that would prohibit sharing data
+      internally among the lines of business?
+    score: 15
+  - category: Data Security
+    question: Who performs security code reviews to identify and address vulnerabilities
+      in the model's code and dependencies?
+    score: 15
+  - category: Data Security
+    question: Do you secure the transfer of model weights and configurations between
+      training environments, deployment environments, and remote clients?
+    score: 15
+  - category: Data Security
+    question: What practises do you use for securing ML models?
+    score: 15
+  - category: Data Security
+    question: 'How do you encrypt ML models? '
+    score: 15
+  - category: Data Security
+    question: Do you encrypt the model weights and parameters?
+    score: 15
+  - category: Data Security
+    question: Do you implement regular key rotation procedures to minimize the risk
+      associated with long-lived encryption keys?
+    score: 15
+  - category: Data Security
+    question: Do you ensure that the models deployed as containers are secured, and
+      encryption keys are appropriately managed within the containerized environment?
+      What product or tool do you use to secure the containers?
+    score: 15
+  - category: Data Security
+    question: How do you handle sensitive data and ensure ethical data practices?
+    score: 15
+Dataops:
+  description: Dataops
+  questions:
+  - category: Dataops
+    question: Can you define what does DevOps/DataOps pipeline look like?
+    score: 15
+  - category: Dataops
+    question: Are there dedicated DataOps teams or roles within the organization?
+    score: 15
+  - category: Dataops
+    question: How do teams collaborate on DevOps/DataOps tasks and projects?
+    score: 15
+  - category: Dataops
+    question: What tools and technologies are used for DevOps/DataOps automation?
+    score: 15
+  - category: Dataops
+    question: How are DevOps/DataOps principles and practices communicated and promoted?
+    score: 15
+  - category: Dataops
+    question: What are the major challenges and pain points related to DevOps/DataOps?
+    score: 15
+  - category: Dataops
+    question: Are there specific areas where improvement is needed?
+    score: 15
+  - category: Dataops
+    question: What are your future plans and initiatives for enhancing DevOps/DataOps
+      capabilities?
+    score: 15
+  - category: Dataops
+    question: Do you have a roadmap for DevOps/DataOps improvements?
+    score: 15
+  - category: Dataops
+    question: What metrics and Key Performance Indicators (KPIs) are used to measure
+      DevOps/DataOps success?
+    score: 15
+  - category: Dataops
+    question: Are these tools effectively meeting your needs?
+    score: 15
+  - category: Dataops
+    question: What are the current known pain points that you are aware that you would
+      like to see it addressed?
+    score: 15
+  - category: Dataops
+    question: Are there any specific topics that you would like to discuss or topics
+      to be addressed as part of the assessment?
+    score: 15
+  - category: Dataops
+    question: How are data pipelines deployed to production?
+    score: 15
+  - category: Dataops
+    question: Do you have processes for promoting changes from development to production?
+    score: 15
+  - category: Dataops
+    question: What is the process for rolling back data changes in case of issues?
+    score: 15
+  - category: Dataops
+    question: Is there a culture of collaboration and automation within the DevOps/DataOps
+      teams?
+    score: 15
+Infrastructure:
+  description: Infrastructure
+  questions:
+  - category: Infrastructure
+    question: Is your data lake on-prem or on cloud? If data lake is on-prem do you
+      use open source or Cloudera? If on cloud, which Cloud Service Provider (CSP)
+      do you use?
+    score: 15
+  - category: Infrastructure
+    question: Are you considering a cloud-based data infrastructure, on-premises solutions,
+      or a hybrid approach for your analytics needs?
+    score: 15
+  - category: Infrastructure
+    question: Does your organization have a comprehensive cloud infrastructure strategy
+      to support workloads federated over on-premise and multiple cloud service providers?
+    score: 15
+  - category: Infrastructure
+    question: 'If on-prem, what is the footprint of the infrastructure? What applications
+      are on those on-prem servers? '
+    score: 15
+  - category: Infrastructure
+    question: Is there a private cloud or plans to introduce a private cloud?
+    score: 15
+  - category: Infrastructure
+    question: Is your data infrastructure scalable to handle growing data volumes?
+    score: 15
+  - category: Infrastructure
+    question: ' Does your organization support a cost-effective strategy of utilizing
+      serverless computing?'
+    score: 15
+  - category: Infrastructure
+    question: What technologies and platforms are used for data storage and management?
+    score: 15
+  - category: Infrastructure
+    question: Is there an object storage server on-prem?
+    score: 15
+  - category: Infrastructure
+    question: Are there any known performance bottlenecks?
+    score: 15
+  - category: Infrastructure
+    question: What are the latency requirements for data access?
+    score: 15
+  - category: Infrastructure
+    question: What is the latency between clouds if your organization is using multi-cloud
+      strategy and have transactional workloads and analytical workloads on separate
+      clouds?
+    score: 15
+  - category: Infrastructure
+    question: How do you anticipate data volumes and processing needs will grow over
+      time? Does your organization have a strategy to scale your existing infrastructure
+      for AI/ML workloads?
+    score: 15
+  - category: Infrastructure
+    question: Is your data infrastructure designed to scale horizontally or vertically?
+    score: 15
+  - category: Infrastructure
+    question: Do you have backup and disaster recovery strategies in place for your
+      data infrastructure?
+    score: 15
+  - category: Infrastructure
+    question: How do you ensure data resilience and availability?
+    score: 15
+  - category: Infrastructure
+    question: 'Do you deploy ML models in containers (e.g., Docker)? '
+    score: 15
+  - category: Infrastructure
+    question: Do you use any GPU clusters or FPGA's or any specialized hardware for
+      analytics?
+    score: 15
+  - category: Infrastructure
+    question: Do you perform any edge or fog computing? Does your organization have
+      use cases for edge or fog computing? What does the infrastructure footprint
+      look like at the edge?
+    score: 15
+  - category: Infrastructure
+    question: Do you have any analytics use cases for which you need SSD?
+    score: 15
+  - category: Infrastructure
+    question: Do you have any analytics use cases for which you need VM with excessively
+      large amounts of memory?
+    score: 15
+  - category: Infrastructure
+    question: 'What is the infrastructure for storing cold data? '
+    score: 15
+  - category: Infrastructure
+    question: 'How are data retention policies enforced for data stored? '
+    score: 15
+  - category: Infrastructure
+    question: Are all data assets including on-prem and cloud integrated with CMDB
+      or Software Asset Management tool?
+    score: 15
+  - category: Infrastructure
+    question: How are costs associated with data assets or analytics on the cloud
+      tracked, analyzed and optimized? Is tagging policy used?
+    score: 15
+  - category: Infrastructure
+    question: Who does the FinOps for data?
+    score: 15
+  - category: Infrastructure
+    question: How frequest is the infrastucture footprint analyzed and capacity added?
+    score: 15
+  - category: Infrastructure
+    question: What is the reaction time when a request is made to increase the infrastructure
+      capacity?
+    score: 15
+  - category: Infrastructure
+    question: Do you have the necessary technology infrastructure to support data
+      monetization efforts (e.g., data platforms, data marketplaces)?
+    score: 15
+  - category: Infrastructure
+    question: Do lot of analytical projects frequently need to add infrastructure?
+    score: 15
+Reporting:
+  description: Reporting
+  questions:
+  - category: Reporting
+    question: If there are multiple tools, is there a plan to rationalize reporting
+      tools?
+    score: 15
+  - category: Reporting
+    question: Is there a semantic layer defined within the reporting tool?
+    score: 15
+  - category: Reporting
+    question: Who are the consumers of the reports? Do you have any external users
+      for the reports?
+    score: 15
+  - category: Reporting
+    question: Are these reports operational in nature or do they use historical data?
+    score: 15
+  - category: Reporting
+    question: Are there any SLAs for the reports?
+    score: 15
+  - category: Reporting
+    question: How many scheduled reports are currently generated?
+    score: 15
+  - category: Reporting
+    question: Do the scheduled reports have any visualization embdeeded or is it all
+      tabular data?
+    score: 15
+  - category: Reporting
+    question: How are reports deployed or accessed by the users?
+    score: 15
+  - category: Reporting
+    question: What is the largest size in MB for the report? How many pages does it
+      have?
+    score: 15
+  - category: Reporting
+    question: How many dashboards are deployed in production for data driven insights?
+    score: 15
+  - category: Reporting
+    question: Does business prefer dashboards over scheduled reports?
+    score: 15
+  - category: Reporting
+    question: Are there any reports that are outsourced to any 3rd parties? Is there
+      desire to bring that reporting in-house?
+    score: 15
+  - category: Reporting
+    question: Is there a plan to consolidate reporting?
+    score: 15
+  - category: Reporting
+    question: What are the data sources for the reports?
+    score: 15
+  - category: Reporting
+    question: Is ther reporting server highly available? Is it active/active or active/passive?
+      In what regision is tha active server deployed?
+    score: 15
+  - category: Reporting
+    question: Is the reporting server on-prem or on cloud?
+    score: 15
+  - category: Reporting
+    question: Is there a DR envrionment for the reporting server?
+    score: 15
+  - category: Reporting
+    question: What is the archival policy for reports?
+    score: 15
+  - category: Reporting
+    question: How is PII protected within reports?
+    score: 15
+  - category: Reporting
+    question: Are reports with sensitive data encrypted or secured if they are emailed
+      to end users?
+    score: 15
+  - category: Reporting
+    question: Is there an option for the users to run their own queries against the
+      data and generate the reports or perform self-service reports?
+    score: 15
+  - category: Reporting
+    question: How long does it (weeks or months?) typically take from the time business
+      defines KPI's and the time it takes to generate a report corresponding to the
+      KPI's?
+    score: 15
+  - category: Reporting
+    question: Does business have the ability to create reports without IT involvement?
+      Is there desire for business to do self service reporting?
+    score: 15
+  - category: Reporting
+    question: Is there desire from business to query data using conversational AI?
+    score: 15
+  - category: Reporting
+    question: Is there a plan to increase the number of dashboards/reports to become
+      data driven organization?
+    score: 15
+  - category: Reporting
+    question: What are the current known pain points that you are aware that you would
+      like to see addressed?
+    score: 15
+  - category: Reporting
+    question: Are there any specific topics that you would like to discuss or topics
+      to be addressed as part of the assessment?
+    score: 15
+Testing:
+  description: Testing
+  questions:
+  - category: Testing
+    question: What methods are used for data testing and validation of data pipelines?
+    score: 15
+  - category: Testing
+    question: Who tests your ML models before they are deployed in PROD? Do data scientists
+      do all the testing or is there a dedicated team?
+    score: 15
+  - category: Testing
+    question: Do you or does your team test AI models including ML, LLM models with
+      the same vigor as you do for software testing?
+    score: 15
+  - category: Testing
+    question: Do you or does your team create test plans and perform unit testing,
+      functional testing, performance testing, UAT, A/B testing?
+    score: 15
+  - category: Testing
+    question: Do you or does your team test ML models for bias and drift?
+    score: 15
+  - category: Testing
+    question: Do you or does your team implement continuous monitoring of your ML
+      model in production to ensure it maintains its performance over time?
+    score: 15
+  - category: Testing
+    question: Do you or does your team perform any benchmarking of the ML model performance?
+    score: 15
+  - category: Testing
+    question: Do you or does your team compute the performance metrics of the models
+      and present it to the analytics team?
+    score: 15
+  - category: Testing
+    question: Do you or does your team bring any PII data from PROD and use it as
+      it is for testing?
+    score: 15
+  - category: Testing
+    question: What controls are in place to ensure there is no leakage of PII or sensitive
+      data?
+    score: 15
+  - category: Testing
+    question: What tools do you or does your team use to remove PII from test data?
+    score: 15
+  - category: Testing
+    question: Does your team use any synthetic data? If yes, how is the synthetic
+      data generated? If No, would your team be interested in learning more about
+      test data generation for ML models?
+    score: 15
+  - category: Testing
+    question: Is your testing pipeline automated or manual? Are there scripts for
+      model evaluation or regression testing?
+    score: 15
+  - category: Testing
+    question: 'Does your team or security team test the ML models agasint adversarial
+      attacks? '
+    score: 15
+  - category: Testing
+    question: Does your team test the models's resilence agasint data poisoning attacks?
+    score: 15
+  - category: Testing
+    question: What are the current known pain points that you are aware that you would
+      like to see it addressed?
+    score: 15
+  - category: Testing
+    question: Are there any specific topics that you would like to discuss or topics
+      to be addressed as part of the assessment?
+    score: 15

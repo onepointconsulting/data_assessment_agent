@@ -27,7 +27,7 @@ class QuestionnaireStatus(BaseModel):
     answer: Optional[str] = Field(
         default=None, description="The answer given by the user"
     )
-    score: Optional[str] = Field(
+    score: Optional[int] = Field(
         default=None, description="The score given to the user's reply"
     )
     topic_count: Optional[int] = Field(

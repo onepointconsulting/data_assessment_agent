@@ -122,6 +122,18 @@ How long does it take for a medium size complexity analytical project to from re
 Does your organization have the necessary skills in-house, or do you rely on external expertise?
 
 
+--------------------------------------------------------------
+
+Scoring Prompt
+==============
+
+Based on the following question and answer can you please give me a score from 1 to 10, based on the level of confidence a user displays in his or her response and the degree to which the user answers the questions in a way which really answers the question. Before answering with a score, please explain your reasoning in a step by step manner.
+
+Question: What best describes the reality of your organization's advanced analytics tools landscape?
+
+Answer: Our  advanced analytics tools landscape includes a data lake based on Snowflake which hosts the data used by our Power BI reports. We are currently not using any advanced features of Power BI related to machine learning. Power BI is in this context only a visualization instrument.
+
+
 
 
 

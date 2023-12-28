@@ -1,0 +1,52 @@
+Business Alignment:
+  description: Is this business aligned to its goals in terms of its data strategy?
+  questions: 
+    - category: Business Strategy Alignment
+      question: Is there a published business strategy that data strategy needs to align to?
+      score: 10
+    - category: Business Strategy Alignment
+      question: Does your current data strategy align with your business strategy? Are there gaps or misalignments to address?
+      score: 10
+    - category: Business Strategy Alignment
+      question: Is there market demand for the type of data your organization possess?
+      score: 10
+    - category: Business Strategy Alignment
+      question: Are there any known GenAI use cases or would the orgranization be interested in knowing how data strategy can be enabler for GenAI?
+      score: 15
+    - category: Business Strategy Alignment
+      question: Are you aware of the potential business impact of analyzing and using currently untapped data sources?
+      score: 15
+    - category: Data Ownership
+      question: Is there data governance that aligns and support business objectives?
+      score: 15
+    - category: Executive Sponsorhip
+      question: Do you have executive support for data initiatives?
+      score: 15
+    - category: Business Strategy Alignment
+      question: Have you explored various monetization models (e.g., data licensing, data subscriptions, data-as-a-service)?
+      score: 15
+    - category: Data Agility
+      question: Is there a need or opportunity to simplify data sharing and collaboration amoungst internal teams?
+      score: 15
+    - category: Data Agility
+      question: Is there a need to democratize data access and empower business units or teams to access and analyze data independently?
+      score: 15
+    - category: Data Agility
+      question: Are there emerging use cases that require agility in data access and processing?
+      score: 15
+    - category: Data Agility
+      question: Are there bottlenecks in data access, processing, or analytics?
+      score: 15
+    - category: Data Agility
+      question: How long does it take for a medium size complexity analytical project to from requirements to production? Are there any concerns about the time it takes to go live?
+      score: 15
+    - category: Data Agility
+      question: Does your organization have the necessary skills in-house, or do you rely on external expertise? 
+      score: 15
+
+Data Architecture:
+  description: Enterprise Data Architecture (EDA) refers to a set of master blueprints designed to align IT programs and information assets with an organization's business strategy.
+  questions:
+    - category: Data Architecture
+      question: Is there a MDM tool used for master data? What are the master data entities within the organization and what tools have been explored?
+      score: 10

@@ -18,7 +18,6 @@ def create_cursor(func: Callable) -> Any:
     with connect_to_db() as conn:
         with conn.cursor() as cur:
             return func(cur)
-        
 
 
 def handle_select_func(query: str, query_params: dict):
@@ -28,6 +27,7 @@ def handle_select_func(query: str, query_params: dict):
             query_params,
         )
         return list(cur.fetchall())
+
     return func
 
 
@@ -131,19 +131,35 @@ def save_questionnaire_status(
     questionnaire_status: QuestionnaireStatus,
 ) -> QuestionnaireStatus:
     def process_save(cur: cursor):
-        cur.execute(
-            """
-insert into public.tb_questionnaire_status(session_id, topic, question, answer, score)
-values(%(session_id)s, %(topic)s, %(question)s, %(answer)s, %(score)s) returning id
-            """,
-            {
-                "session_id": questionnaire_status.session_id,
-                "topic": questionnaire_status.topic,
-                "question": questionnaire_status.question,
-                "answer": questionnaire_status.answer,
-                "score": questionnaire_status.score,
-            },
-        )
+        if questionnaire_status.id is None:
+            cur.execute(
+                """
+    insert into public.tb_questionnaire_status(session_id, topic, question, answer, score)
+    values(%(session_id)s, %(topic)s, %(question)s, %(answer)s, %(score)s) returning id
+                """,
+                {
+                    "session_id": questionnaire_status.session_id,
+                    "topic": questionnaire_status.topic,
+                    "question": questionnaire_status.question,
+                    "answer": questionnaire_status.answer,
+                    "score": questionnaire_status.score,
+                },
+            )
+        else:
+            cur.execute(
+                """
+    update public.tb_questionnaire_status set session_id = %(session_id)s, topic = %(topic)s, question = %(question)s, answer = %(answer)s, score = %(score)s
+    where id = %(id)s returning id
+                """,
+                {
+                    "session_id": questionnaire_status.session_id,
+                    "topic": questionnaire_status.topic,
+                    "question": questionnaire_status.question,
+                    "answer": questionnaire_status.answer,
+                    "score": questionnaire_status.score,
+                    "id": questionnaire_status.id,
+                },
+            )
         created_id = cur.fetchone()[0]
         return QuestionnaireStatus(
             id=created_id,
@@ -163,8 +179,8 @@ def select_last_question(session_id: str) -> Union[QuestionnaireStatus, None]:
         cur.execute(
             """
 select s.id, s.session_id, s.topic, s.question, s.answer, s.score, s.created_at, 
-(select count(*) from public.tb_questionnaire_status qs1 where qs1.session_id = %(session_id)s and qs1.topic = s.topic and answer is null) topic_count,
-(select t.question_amount - count(*) from public.tb_questionnaire_status qs1 where qs1.session_id = %(session_id)s and qs1.topic = s.topic and answer is null) topic_missing
+(select count(distinct(qs1.question)) from public.tb_questionnaire_status qs1 where qs1.session_id = %(session_id)s and qs1.topic = s.topic and answer is not null) topic_count,
+(select t.question_amount - count(distinct(qs1.question)) from public.tb_questionnaire_status qs1 where qs1.session_id = %(session_id)s and qs1.topic = s.topic and qs1.answer is not null) topic_missing
 from public.tb_questionnaire_status s
 inner join tb_topic t on t.name = s.topic 
 where session_id = %(session_id)s 
@@ -196,6 +212,7 @@ order by id desc limit 1""",
         score=score,
         created_at=created_at,
         topic_count=topic_count,
+        topic_missing=topic_missing
     )
 
 
@@ -213,7 +230,9 @@ group by question)"""
     return [t[0] for t in remaining_questions]
 
 
-def select_answered_questions_in_topic(session_id: str, topic: str) -> Union[List[str], None]:
+def select_answered_questions_in_topic(
+    session_id: str, topic: str
+) -> Union[List[str], None]:
     query = """
 select question, (select answer from tb_questionnaire_status where id = max(s.id)) from tb_questionnaire_status s
 where session_id = %(session_id)s and topic = %(topic)s and answer is not null
@@ -224,8 +243,22 @@ group by question"""
     return [f"{t[0]}\n{t[1]}" for t in answered_questions]
 
 
-def select_last_question(session_id: str) -> Union[List[str], None]:
-    pass
+def select_last_empty_question(session_id: str) -> Union[QuestionnaireStatus, None]:
+    query = """
+select id, session_id, topic, question, created_at from tb_questionnaire_status
+where session_id = %(session_id)s and answer is null
+order by id desc limit 1
+"""
+    parameter_map = {"session_id": session_id}
+    handle_select = handle_select_func(query, parameter_map)
+    unanswered_questions: list = create_cursor(handle_select)
+    if len(unanswered_questions) > 0:
+        (id, session_id, topic, question, created_at) = unanswered_questions[0]
+        return QuestionnaireStatus(
+            id=id, session_id=session_id, topic=topic, question=question
+        )
+    else:
+        return None
 
 
 if __name__ == "__main__":
@@ -248,11 +281,15 @@ if __name__ == "__main__":
     assert questions is not None
     last_question = select_last_question("")
     assert last_question is None
-    questions = select_remaining_questions('b8ce68f0-f754-4af8-8822-97dac817250d', 'Advanced Analytics')
+    questions = select_remaining_questions(
+        "b8ce68f0-f754-4af8-8822-97dac817250d", "Advanced Analytics"
+    )
     for i, question in enumerate(questions):
         print(question)
 
     print("= answered_question =")
-    answered_questions = select_answered_questions_in_topic('b8ce68f0-f754-4af8-8822-97dac817250d', 'Advanced Analytics')
+    answered_questions = select_answered_questions_in_topic(
+        "b8ce68f0-f754-4af8-8822-97dac817250d", "Advanced Analytics"
+    )
     for i, answered_question in enumerate(answered_questions):
         print(answered_question)
