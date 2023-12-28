@@ -18,6 +18,17 @@ def create_cursor(func: Callable) -> Any:
     with connect_to_db() as conn:
         with conn.cursor() as cur:
             return func(cur)
+        
+
+
+def handle_select_func(query: str, query_params: dict):
+    def func(cur: cursor):
+        cur.execute(
+            query,
+            query_params,
+        )
+        return list(cur.fetchall())
+    return func
 
 
 def select_topic(topic: Topic):
@@ -47,8 +58,8 @@ def save_topic(topic: Topic) -> Topic:
     def process_save(cur: cursor):
         cur.execute(
             """
-            INSERT INTO tb_topic (name, description)
-            VALUES (%(name)s, %(description)s) RETURNING id;
+            INSERT INTO tb_topic (name, description, question_amount)
+            VALUES (%(name)s, %(description)s, 5) RETURNING id;
             """,
             {"name": topic.name, "description": topic.description},
         )
@@ -143,6 +154,7 @@ values(%(session_id)s, %(topic)s, %(question)s, %(answer)s, %(score)s) returning
             session_id=questionnaire_status.session_id,
             topic_count=questionnaire_status.topic_count,
         )
+
     return create_cursor(process_save)
 
 
@@ -150,9 +162,12 @@ def select_last_question(session_id: str) -> Union[QuestionnaireStatus, None]:
     def handle_select(cur: cursor):
         cur.execute(
             """
-select id, session_id, topic, question, answer, score, created_at, 
-(select count(*) from public.tb_questionnaire_status qs1 where session_id = %(session_id)s and qs1.topic = topic) topic_count
-from public.tb_questionnaire_status where session_id = %(session_id)s 
+select s.id, s.session_id, s.topic, s.question, s.answer, s.score, s.created_at, 
+(select count(*) from public.tb_questionnaire_status qs1 where qs1.session_id = %(session_id)s and qs1.topic = s.topic and answer is null) topic_count,
+(select t.question_amount - count(*) from public.tb_questionnaire_status qs1 where qs1.session_id = %(session_id)s and qs1.topic = s.topic and answer is null) topic_missing
+from public.tb_questionnaire_status s
+inner join tb_topic t on t.name = s.topic 
+where session_id = %(session_id)s 
 order by id desc limit 1""",
             {"session_id": session_id},
         )
@@ -170,6 +185,7 @@ order by id desc limit 1""",
         score,
         created_at,
         topic_count,
+        topic_missing,
     ) = statuses[0]
     return QuestionnaireStatus(
         id=id,
@@ -181,6 +197,35 @@ order by id desc limit 1""",
         created_at=created_at,
         topic_count=topic_count,
     )
+
+
+def select_remaining_questions(session_id: str, topic: str) -> Union[List[str], None]:
+    query = """
+select q.question from public.tb_question q 
+inner join public.tb_topic t on q.topic_id = t.id
+where t.name = %(topic)s and not exists(select question from public.tb_questionnaire_status
+where session_id = %(session_id)s and q.question = question
+and topic = %(topic)s
+group by question)"""
+    parameter_map = {"session_id": session_id, "topic": topic}
+    handle_select = handle_select_func(query, parameter_map)
+    remaining_questions: list = create_cursor(handle_select)
+    return [t[0] for t in remaining_questions]
+
+
+def select_answered_questions_in_topic(session_id: str, topic: str) -> Union[List[str], None]:
+    query = """
+select question, (select answer from tb_questionnaire_status where id = max(s.id)) from tb_questionnaire_status s
+where session_id = %(session_id)s and topic = %(topic)s and answer is not null
+group by question"""
+    parameter_map = {"session_id": session_id, "topic": topic}
+    handle_select = handle_select_func(query, parameter_map)
+    answered_questions: list = create_cursor(handle_select)
+    return [f"{t[0]}\n{t[1]}" for t in answered_questions]
+
+
+def select_last_question(session_id: str) -> Union[List[str], None]:
+    pass
 
 
 if __name__ == "__main__":
@@ -203,3 +248,11 @@ if __name__ == "__main__":
     assert questions is not None
     last_question = select_last_question("")
     assert last_question is None
+    questions = select_remaining_questions('b8ce68f0-f754-4af8-8822-97dac817250d', 'Advanced Analytics')
+    for i, question in enumerate(questions):
+        print(question)
+
+    print("= answered_question =")
+    answered_questions = select_answered_questions_in_topic('b8ce68f0-f754-4af8-8822-97dac817250d', 'Advanced Analytics')
+    for i, answered_question in enumerate(answered_questions):
+        print(answered_question)

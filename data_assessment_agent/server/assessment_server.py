@@ -1,11 +1,17 @@
 import socketio
+import json
 from aiohttp import web
+import asyncer
 
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.server.agent_session import AgentSession
 from data_assessment_agent.config.config import cfg
-from data_assessment_agent.service.data_assessment_service import initial_question
-from data_assessment_agent.service.persistence_service import select_last_question
+from data_assessment_agent.service.data_assessment_service import (
+    initial_question,
+    select_next_question,
+)
+from data_assessment_agent.service.persistence_service import save_questionnaire_status
+from data_assessment_agent.model.db_model import create_questionnaire_status
 from data_assessment_agent.model.transport import ServerMessage
 
 from enum import StrEnum
@@ -35,7 +41,7 @@ async def start_session(sid, client_session):
             If there are less question that the the threshold, use ChatGPt to generate a ranking and then pick the top question and send it
             Else if you need another topic, ask ChatGPT to choose the next topic, then pick a question in that topic and send it
         if there is no topic, select the first question in the database and send it
-        
+
     """
     logger.info("start_session client_session %s", client_session)
     agent_session = AgentSession(sid, client_session)
@@ -43,19 +49,28 @@ async def start_session(sid, client_session):
     await sio.emit(Commands.START_SESSION, session_id, room=sid)
     no_session_available = client_session is None or client_session == ""
     if no_session_available:
-        first_question = initial_question()
+        next_question = initial_question()
     else:
-        first_question = select_last_question(session_id)
-        if first_question is None:
-            first_question = initial_question()
+        next_question = select_next_question(session_id)
+    # Before you emit, store the next question without the answer and score in tb_questionnaire_status
+    questionnaire_status = create_questionnaire_status(session_id, next_question)
+    await asyncer.asyncify(save_questionnaire_status)(
+        questionnaire_status=questionnaire_status
+    )
     await sio.emit(
-            Commands.SERVER_MESSAGE,
-            ServerMessage(
-                response=first_question.question, sources=None, sessionId=session_id
-            ).model_dump_json(),
-            room=sid,
-        )
+        Commands.SERVER_MESSAGE,
+        ServerMessage(
+            response=next_question.question, sources=None, sessionId=session_id
+        ).model_dump_json(),
+        room=sid,
+    )
 
+
+@sio.event
+async def client_message(sid, message):
+    (id, _, message) = json.loads(message)
+    session_id = id
+    
 
 
 @sio.event

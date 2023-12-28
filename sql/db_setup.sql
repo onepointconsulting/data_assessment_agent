@@ -16,6 +16,7 @@ CREATE TABLE public.tb_topic
     id serial NOT NULL,
     name character varying(256) NOT NULL,
     description character varying(4096),
+    question_amount int NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -43,8 +44,8 @@ CREATE TABLE public.tb_questionnaire_status
     session_id character varying(36) NOT NULL,
     topic character varying(256) NOT NULL,
     question character varying(1024) NOT NULL,
-    answer character varying(4096) NOT NULL,
-    score integer NOT NULL,
+    answer character varying(4096) NULL,
+    score integer NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
 

@@ -15,3 +15,6 @@ question_ranking_spec = {
     "type": "object",
     "parameters": RankedQuestionsResponse.model_json_schema(),
 }
+
+if __name__ == "__main__":
+    print(RankedQuestionsResponse.model_json_schema())
