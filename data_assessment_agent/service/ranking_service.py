@@ -103,8 +103,6 @@ if __name__ == "__main__":
             print(i, question)
 
     question_answers, ranking_topics_str = topics_ranking_prompt_provider()
-    ranked_topics = asyncio.run(
-        rank_topics(question_answers, ranking_topics_str)
-    )
+    ranked_topics = asyncio.run(rank_topics(question_answers, ranking_topics_str))
     for i, topic in enumerate(ranked_topics):
         print(i, topic)

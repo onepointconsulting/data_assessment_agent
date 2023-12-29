@@ -1,7 +1,7 @@
 [ranking]
 system_message = "You are a knowledge worker, an expert in knowing priorities"
 user_message = """Given these questions and answers between === START QUESTION_ANSWER === and === END QUENSTION_ANSWER ===, 
-can you please re-rank the questions you can find between === START RANKING_QUESTIONS === and === END RANKING_QUESTIONS === in terms of prominence to assess this topic: "{topic}"?
+can you please re-rank the questions (from most relevant to most irrelevant) you can find between === START RANKING_QUESTIONS === and === END RANKING_QUESTIONS === in terms of prominence to assess this topic: "{topic}"?
 
 === START QUESTION_ANSWER ===
 {question_answers}
@@ -14,7 +14,7 @@ can you please re-rank the questions you can find between === START RANKING_QUES
 [ranking.topics]
 system_message = "You are a knowledge worker, an expert in knowing priorities"
 user_message = """Given these questions and answers between === START QUESTION_ANSWER === and === END QUENSTION_ANSWER ===, 
-can you please re-rank the topics you can find between === START RANKING_TOPICS === and === END RANKING_TOPICS ===?
+can you please re-rank the topics (from most relevant to most irrelevant) you can find between === START RANKING_TOPICS === and === END RANKING_TOPICS ===?
 
 === START QUESTION_ANSWER ===
 {question_answers}

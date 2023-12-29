@@ -218,13 +218,37 @@ order by id desc limit 1""",
 
 def select_remaining_questions(session_id: str, topic: str) -> Union[List[str], None]:
     query = """
-select q.question from public.tb_question q 
-inner join public.tb_topic t on q.topic_id = t.id
-where t.name = %(topic)s and not exists(select question from public.tb_questionnaire_status
-where session_id = %(session_id)s and q.question = question
-and topic = %(topic)s
-group by question)"""
+SELECT Q.QUESTION
+FROM PUBLIC.TB_QUESTION Q
+INNER JOIN PUBLIC.TB_TOPIC T ON Q.TOPIC_ID = T.ID
+WHERE T.NAME = %(topic)s
+	AND NOT EXISTS
+		(SELECT QUESTION
+			FROM PUBLIC.TB_QUESTIONNAIRE_STATUS
+			WHERE SESSION_ID = %(session_id)s
+				AND Q.QUESTION = QUESTION
+				AND TOPIC = %(topic)s
+			GROUP BY QUESTION)"""
     parameter_map = {"session_id": session_id, "topic": topic}
+    return handle_select_remaining(query, parameter_map)
+
+
+def select_remaining_topics(session_id: str) -> Union[List[str], None]:
+    query = """
+SELECT T.NAME
+FROM TB_TOPIC T
+WHERE NOT EXISTS
+    (SELECT S.TOPIC
+        FROM TB_QUESTIONNAIRE_STATUS S
+        WHERE SESSION_ID = %(session_id)s
+            AND S.ANSWER IS NOT NULL
+            AND T.NAME = S.TOPIC
+        GROUP BY S.TOPIC)"""
+    parameter_map = {"session_id": session_id}
+    return handle_select_remaining(query, parameter_map)
+
+
+def handle_select_remaining(query: str, parameter_map: dict) -> Union[List[str], None]:
     handle_select = handle_select_func(query, parameter_map)
     remaining_questions: list = create_cursor(handle_select)
     return [t[0] for t in remaining_questions]
@@ -234,10 +258,34 @@ def select_answered_questions_in_topic(
     session_id: str, topic: str
 ) -> Union[List[str], None]:
     query = """
-select question, (select answer from tb_questionnaire_status where id = max(s.id)) from tb_questionnaire_status s
-where session_id = %(session_id)s and topic = %(topic)s and answer is not null
-group by question"""
+SELECT QUESTION,
+	(SELECT ANSWER
+		FROM TB_QUESTIONNAIRE_STATUS
+		WHERE ID = MAX(S.ID))
+FROM TB_QUESTIONNAIRE_STATUS S
+WHERE SESSION_ID = %(session_id)s
+	AND TOPIC = %(topic)s
+	AND ANSWER IS NOT NULL
+GROUP BY QUESTION"""
     parameter_map = {"session_id": session_id, "topic": topic}
+    return handle_question_answers_select(query, parameter_map)
+
+
+def select_answered_questions_in_session(session_id: str) -> Union[List[str], None]:
+    query = """
+SELECT S.QUESTION,
+	S.ANSWER
+FROM TB_QUESTIONNAIRE_STATUS S
+WHERE SESSION_ID = %(session_id)s
+	AND S.ANSWER IS NOT NULL
+ORDER BY S.ID"""
+    parameter_map = {"session_id": session_id}
+    return handle_question_answers_select(query, parameter_map)
+
+
+def handle_question_answers_select(
+    query: str, parameter_map: dict
+) -> Union[List[str], None]:
     handle_select = handle_select_func(query, parameter_map)
     answered_questions: list = create_cursor(handle_select)
     return [f"{t[0]}\n{t[1]}" for t in answered_questions]
@@ -245,9 +293,16 @@ group by question"""
 
 def select_last_empty_question(session_id: str) -> Union[QuestionnaireStatus, None]:
     query = """
-select id, session_id, topic, question, created_at from tb_questionnaire_status
-where session_id = %(session_id)s and answer is null
-order by id desc limit 1
+SELECT ID,
+	SESSION_ID,
+	TOPIC,
+	QUESTION,
+	CREATED_AT
+FROM TB_QUESTIONNAIRE_STATUS
+WHERE SESSION_ID = %(session_id)s
+	AND ANSWER IS NULL
+ORDER BY ID DESC
+LIMIT 1
 """
     parameter_map = {"session_id": session_id}
     handle_select = handle_select_func(query, parameter_map)
@@ -257,6 +312,36 @@ order by id desc limit 1
         return QuestionnaireStatus(
             id=id, session_id=session_id, topic=topic, question=question
         )
+    else:
+        return None
+    
+
+def select_random_question_from_topic(topic: str) -> Union[Question, None]:
+    query = """
+SELECT Q.ID,
+	Q.QUESTION,
+	Q.SCORE,
+	Q.TOPIC_ID,
+	T.NAME TOPIC_NAME,
+	T.DESCRIPTION TOPIC_DESCRIPTION,
+
+	(SELECT COUNT(*)
+		FROM TB_QUESTION
+		WHERE TOPIC_ID = T.ID) TOPIC_COUNT
+FROM TB_QUESTION Q
+INNER JOIN TB_TOPIC T ON Q.TOPIC_ID = T.ID
+WHERE T.NAME = %(topic)s
+ORDER BY RANDOM()
+LIMIT 1
+"""
+    parameter_map = {"topic": topic}
+    handle_select = handle_select_func(query, parameter_map)
+    questions: list = create_cursor(handle_select)
+    if len(questions) > 0:
+        (id, question, score, topic_id, topic_name, topic_description, _) = questions[0]
+        topic = Topic(id=topic_id, name=topic_name, description=topic_description)
+        question = Question(id=id, question=question, score=score, topic=topic)
+        return question
     else:
         return None
 
@@ -281,15 +366,32 @@ if __name__ == "__main__":
     assert questions is not None
     last_question = select_last_question("")
     assert last_question is None
+    print("== remaining questions ==")
     questions = select_remaining_questions(
         "b8ce68f0-f754-4af8-8822-97dac817250d", "Advanced Analytics"
     )
     for i, question in enumerate(questions):
         print(question)
 
-    print("= answered_question =")
+    print("== answered_question in topic ==")
     answered_questions = select_answered_questions_in_topic(
         "b8ce68f0-f754-4af8-8822-97dac817250d", "Advanced Analytics"
     )
     for i, answered_question in enumerate(answered_questions):
         print(answered_question)
+
+    print("== answered_question overall ==")
+    answered_questions = select_answered_questions_in_session(
+        "b8ce68f0-f754-4af8-8822-97dac817250d"
+    )
+    for i, answered_question in enumerate(answered_questions):
+        print(answered_question)
+
+    print("== Remaining topics ==")
+    remaining_topics = select_remaining_topics("b8ce68f0-f754-4af8-8822-97dac817250d")
+    for i, remaining_topic in enumerate(remaining_topics):
+        print(remaining_topic)
+
+    print("== Random question from topic ==")
+    random_question = select_random_question_from_topic("Advanced Analytics")
+    print(random_question)
