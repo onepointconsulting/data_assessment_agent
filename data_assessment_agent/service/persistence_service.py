@@ -212,7 +212,7 @@ order by id desc limit 1""",
         score=score,
         created_at=created_at,
         topic_count=topic_count,
-        topic_missing=topic_missing
+        topic_missing=topic_missing,
     )
 
 

@@ -7,3 +7,7 @@ def create_analytics_topic():
 
 def create_dummy_topic():
     return Topic(name="dummy", description="dummy")
+
+
+def create_topic_list():
+    return [create_analytics_topic().name, "Data Acquisition", "Business Alignment"]

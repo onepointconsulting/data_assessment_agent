@@ -37,9 +37,7 @@ async def connect(sid: str, environ):
 async def send_error(sid: str, msg: str):
     await sio.emit(
         Commands.SERVER_MESSAGE,
-        ServerMessage(
-            response=msg, sources=None, sessionId=''
-        ).model_dump_json(),
+        ServerMessage(response=msg, sources=None, sessionId="").model_dump_json(),
         room=sid,
     )
 

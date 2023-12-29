@@ -25,3 +25,22 @@ How long does it take for a medium size complexity analytical project to from re
 Does your organization have the necessary skills in-house, or do you rely on external expertise?
 """
     return topic, question_answers, ranking_questions
+
+
+def topics_ranking_prompt_provider() -> Tuple[str, str]:
+    question_answers = """What best describes the reality of your organization's advanced analytics tools landscape?
+Our advanced analytics tools landscape includes a data lake based on Snowflake which hosts the data used by our Power BI reports. We are currently not using any advanced features of Power BI related to machine learning. Power BI is in this context only a visualization instrument.
+"""
+    ranking_topics_str = """
+Business Alignment
+Data Acquisition
+Data Architecture
+Data Assets
+Data Governance
+Data Modelling
+Data Privacy
+Data Quality
+Data Security
+Dataops
+"""
+    return question_answers, ranking_topics_str

@@ -9,6 +9,13 @@ class RankedQuestionsResponse(BaseModel):
     )
 
 
+class RankedTopicsResponse(BaseModel):
+    ranked_topics: List[str] = Field(
+        ...,
+        description="The list of ranked topics according to a set of responses",
+    )
+
+
 question_ranking_spec = {
     "name": "question_ranking",
     "description": "Ranks questions",
@@ -16,5 +23,13 @@ question_ranking_spec = {
     "parameters": RankedQuestionsResponse.model_json_schema(),
 }
 
+topic_ranking_spec = {
+    "name": "topic_ranking",
+    "description": "Ranks topics according to a set of questions",
+    "type": "object",
+    "parameters": RankedTopicsResponse.model_json_schema(),
+}
+
 if __name__ == "__main__":
     print(RankedQuestionsResponse.model_json_schema())
+    print(RankedTopicsResponse.model_json_schema())
