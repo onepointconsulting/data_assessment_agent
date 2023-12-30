@@ -1,6 +1,7 @@
 from typing import Union, Optional
 from pydantic import BaseModel, Field
 
+from data_assessment_agent.model.assessment_framework import Question as DomainQuestion
 from data_assessment_agent.config.log_factory import logger
 
 
@@ -36,15 +37,21 @@ class QuestionnaireStatus(BaseModel):
     topic_missing: Optional[int] = Field(
         default=None, description="How many questions missing to finish the topic"
     )
+    previous_answer_count: Optional[int] = Field(
+        default=None, description="How many answers equal to this one were answered"
+    )
 
 
 def create_questionnaire_status(
-    session_id: str, question: Union[Question, QuestionnaireStatus]
+    session_id: str, question: Union[Question, DomainQuestion, QuestionnaireStatus]
 ):
     logger.info("create_questionnaire_status question type: %s", type(question))
-    topic_name = (
-        question.topic.name if isinstance(question, Question) else question.topic
-    )
+    if isinstance(question, Question):
+        topic_name = question.topic.name
+    elif isinstance(question, DomainQuestion):
+        topic_name = question.category
+    elif isinstance(question, QuestionnaireStatus):
+        topic_name = question.topic
     return QuestionnaireStatus(
         session_id=session_id, topic=topic_name, question=question.question
     )

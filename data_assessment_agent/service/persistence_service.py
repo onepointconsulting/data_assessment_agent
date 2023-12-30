@@ -178,13 +178,34 @@ def select_last_question(session_id: str) -> Union[QuestionnaireStatus, None]:
     def handle_select(cur: cursor):
         cur.execute(
             """
-select s.id, s.session_id, s.topic, s.question, s.answer, s.score, s.created_at, 
-(select count(distinct(qs1.question)) from public.tb_questionnaire_status qs1 where qs1.session_id = %(session_id)s and qs1.topic = s.topic and answer is not null) topic_count,
-(select t.question_amount - count(distinct(qs1.question)) from public.tb_questionnaire_status qs1 where qs1.session_id = %(session_id)s and qs1.topic = s.topic and qs1.answer is not null) topic_missing
-from public.tb_questionnaire_status s
-inner join tb_topic t on t.name = s.topic 
-where session_id = %(session_id)s 
-order by id desc limit 1""",
+SELECT S.ID,
+	S.SESSION_ID,
+	S.TOPIC,
+	S.QUESTION,
+	S.ANSWER,
+	S.SCORE,
+	S.CREATED_AT,
+
+	(SELECT COUNT(DISTINCT(QS1.QUESTION))
+		FROM PUBLIC.TB_QUESTIONNAIRE_STATUS QS1
+		WHERE QS1.SESSION_ID = %(session_id)s
+			AND QS1.TOPIC = S.TOPIC
+			AND ANSWER IS NOT NULL) TOPIC_COUNT,
+
+	(SELECT T.QUESTION_AMOUNT - COUNT(DISTINCT(QS1.QUESTION))
+		FROM PUBLIC.TB_QUESTIONNAIRE_STATUS QS1
+		WHERE QS1.SESSION_ID = %(session_id)s
+			AND QS1.TOPIC = S.TOPIC
+			AND QS1.ANSWER IS NOT NULL) TOPIC_MISSING,
+
+    (SELECT COUNT(*) FROM PUBLIC.TB_QUESTIONNAIRE_STATUS QS2
+		WHERE QS2.QUESTION = S.QUESTION AND QS2.SESSION_ID = S.SESSION_ID 
+	 		AND QS2.ANSWER IS NOT NULL) PREVIOUS_ANSWER_COUNT
+FROM PUBLIC.TB_QUESTIONNAIRE_STATUS S
+INNER JOIN TB_TOPIC T ON T.NAME = S.TOPIC
+WHERE SESSION_ID = %(session_id)s
+ORDER BY ID DESC
+LIMIT 1""",
             {"session_id": session_id},
         )
         return list(cur.fetchall())
@@ -202,6 +223,7 @@ order by id desc limit 1""",
         created_at,
         topic_count,
         topic_missing,
+        previous_answer_count
     ) = statuses[0]
     return QuestionnaireStatus(
         id=id,
@@ -213,6 +235,7 @@ order by id desc limit 1""",
         created_at=created_at,
         topic_count=topic_count,
         topic_missing=topic_missing,
+        previous_answer_count=previous_answer_count
     )
 
 
@@ -228,6 +251,7 @@ WHERE T.NAME = %(topic)s
 			WHERE SESSION_ID = %(session_id)s
 				AND Q.QUESTION = QUESTION
 				AND TOPIC = %(topic)s
+                AND ANSWER IS NOT NULL
 			GROUP BY QUESTION)"""
     parameter_map = {"session_id": session_id, "topic": topic}
     return handle_select_remaining(query, parameter_map)
@@ -314,7 +338,7 @@ LIMIT 1
         )
     else:
         return None
-    
+
 
 def select_random_question_from_topic(topic: str) -> Union[Question, None]:
     query = """

@@ -1,7 +1,6 @@
 import socketio
 import json
 from aiohttp import web
-import asyncer
 
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.server.agent_session import AgentSession
@@ -15,6 +14,7 @@ from data_assessment_agent.service.persistence_service import (
     select_last_empty_question,
 )
 from data_assessment_agent.model.db_model import create_questionnaire_status
+from data_assessment_agent.model.assessment_framework import Question
 from data_assessment_agent.model.transport import ServerMessage
 
 from enum import StrEnum
@@ -63,45 +63,67 @@ async def start_session(sid, client_session):
         next_question = initial_question()
     else:
         next_question = await select_next_question(session_id)
-    # Before you emit, store the next question without the answer and score in tb_questionnaire_status
-    questionnaire_status = create_questionnaire_status(session_id, next_question)
-    save_questionnaire_status(questionnaire_status=questionnaire_status)
-    await sio.emit(
-        Commands.SERVER_MESSAGE,
-        ServerMessage(
-            response=next_question.question, sources=None, sessionId=session_id
-        ).model_dump_json(),
-        room=sid,
-    )
+    if next_question is None:
+        await handle_missing_question(sid, session_id)
+        return
+    save_incomplete_answer(session_id, next_question)
+    await send_question_to_client(sid, session_id, next_question)
 
 
 @sio.event
-async def client_message(sid, message):
+async def client_message(sid: str, message):
     message_dict = json.loads(message)
     session_id = message_dict.get("id", None)
     if session_id is None:
-        send_error(sid, "No session id. Please refresh the page and try again.")
+        await send_error(sid, "No session id. Please refresh the page and try again.")
         return
     questionnaire_status = select_last_empty_question(session_id)
     if questionnaire_status is None:
-        send_error(sid, "Internal error. Please refresh the page and try again.")
+        await send_error(sid, "Internal error. Please refresh the page and try again.")
         return
     answer = message_dict.get("message", None)
     if answer is None or answer.strip() == "":
-        send_error(sid, "No message. Please refresh the page and try again.")
+        await send_error(sid, "No message. Please refresh the page and try again.")
         return
     questionnaire_status.answer = answer
     # TODO: Scoring will be defined later.
     questionnaire_status.score = 0
     save_questionnaire_status(questionnaire_status)
     next_question = await select_next_question(session_id)
+    if next_question is None:
+        await handle_missing_question(sid, session_id)
+        return
+    save_incomplete_answer(session_id, next_question)
+    await send_question_to_client(sid, session_id, next_question)
+
+
+async def send_question_to_client(sid: str, session_id: str, next_question: Question):
+    response = f"""Topic: {next_question.category}
+
+**{next_question.question}**
+"""
     await sio.emit(
         Commands.SERVER_MESSAGE,
         ServerMessage(
-            response=next_question.question, sources=None, sessionId=session_id
+            response=response, sources=None, sessionId=session_id
         ).model_dump_json(),
         room=sid,
     )
+
+async def handle_missing_question(sid: str, session_id: str):
+    await sio.emit(
+        Commands.SERVER_MESSAGE,
+        ServerMessage(
+            response="No question available. Please refresh the page and try again.", sources=None, sessionId=session_id
+        ).model_dump_json(),
+        room=sid,
+    )
+
+
+def save_incomplete_answer(session_id, next_question):
+    """Before you emit, store the next question without the answer and score in tb_questionnaire_status"""
+    questionnaire_status = create_questionnaire_status(session_id, next_question)
+    save_questionnaire_status(questionnaire_status=questionnaire_status)
 
 
 @sio.event

@@ -7,9 +7,10 @@ from data_assessment_agent.service.persistence_service import (
     select_answered_questions_in_topic,
     select_answered_questions_in_session,
     select_remaining_topics,
-    select_random_question_from_topic
+    select_random_question_from_topic,
 )
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
+from data_assessment_agent.config.log_factory import logger
 
 questionnaire_questions = load_questions()
 
@@ -23,31 +24,46 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
     first_question = select_last_question(session_id)
     if first_question is None:
         return initial_question()
-    elif first_question.answer is None:
+    elif first_question.answer is None and first_question.previous_answer_count == 0:
         # This means that the question has not been answered yet
-        return first_question
-    elif first_question.answer is not None:
-        # Case: unanswered question
+        return Question(
+            question=first_question.question,
+            category=first_question.topic,
+            score=first_question.score if first_question.score is not None else 0,
+        )
+    else:
+        # Case: unanswered question or the question was already answered and we need a new one
         # Get the topic and the count
         topic = first_question.topic
         missing_in_topic = first_question.topic_missing
         if missing_in_topic > 0:
+            logger.info("There are missing questions in topic")
             # Get all previously answered questions
             question_answers_list = select_answered_questions_in_topic(
                 session_id, topic
             )
             question_answers = "\n".join(question_answers_list)
+            logger.info("Answered questions: %s", question_answers)
             # There are missing questions in this topic
             questions = select_remaining_questions(session_id, topic)
+            if questions is None:
+                return None
+            logger.info("== Remaining questions ==")
+            for q in questions:
+                logger.info(q)
             ranking_questions = "\n".join(questions)
             # Let ChatGPT sort the questions
             ranked_questions = await rank_questions(
                 topic, question_answers, ranking_questions
             )
-            if len(ranked_questions) > 0:
-                return Question(category=topic, question=ranked_questions[0], score=0)
+            while len(ranked_questions) > 0:
+                candidate_question = ranked_questions[0]
+                if candidate_question in questions:
+                    return Question(category=topic, question=candidate_question, score=0)
+                ranked_questions = ranked_questions[1:]
             return None
         else:
+            logger.info("Selecting next topic")
             # There are no questions left. Select the next topic
             # Get all question and answers from this session
             # Get all topics covered in this session
@@ -64,6 +80,4 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
             selected_topic = missing_topics[0]
             # Start with a random question in this topic
             selected_question = select_random_question_from_topic(selected_topic)
-            return selected_question
-            
-                
+            return Question(category=selected_question.topic.name, question=selected_question.question, score=0)
