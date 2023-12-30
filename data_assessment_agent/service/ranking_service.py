@@ -16,6 +16,7 @@ from data_assessment_agent.model.ranking import (
 async def create_completion(
     system_message: str, user_message: str, function_spec: dict
 ) -> ChatCompletion:
+    logger.info("completion user message: %s", user_message)
     messages = [
         {"role": "system", "content": system_message},
         {"role": "user", "content": user_message},
@@ -102,7 +103,11 @@ if __name__ == "__main__":
         for i, question in enumerate(ranked_questions):
             print(i, question)
 
-    question_answers, ranking_topics_str = topics_ranking_prompt_provider()
-    ranked_topics = asyncio.run(rank_topics(question_answers, ranking_topics_str))
-    for i, topic in enumerate(ranked_topics):
-        print(i, topic)
+    def test_topic_ranking():
+        question_answers, ranking_topics_str = topics_ranking_prompt_provider()
+        ranked_topics = asyncio.run(rank_topics(question_answers, ranking_topics_str))
+        for i, topic in enumerate(ranked_topics):
+            print(i, topic)
+
+    test_question_ranking()
+    test_topic_ranking()

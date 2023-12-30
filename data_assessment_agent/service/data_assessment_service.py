@@ -7,7 +7,7 @@ from data_assessment_agent.service.persistence_service import (
     select_answered_questions_in_topic,
     select_answered_questions_in_session,
     select_remaining_topics,
-    select_random_question_from_topic,
+    select_random_question_from_topic
 )
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
 from data_assessment_agent.config.log_factory import logger
@@ -17,7 +17,12 @@ questionnaire_questions = load_questions()
 
 def initial_question() -> Question:
     assert len(questionnaire_questions) > 0
-    return questionnaire_questions[0]
+    db_question = questionnaire_questions[0]
+    return Question(
+        question=db_question.question,
+        category=db_question.topic.name,
+        score=db_question.score if db_question.score is not None else 0,
+    )
 
 
 async def select_next_question(session_id: str) -> Union[Question, None]:
@@ -26,11 +31,7 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
         return initial_question()
     elif first_question.answer is None and first_question.previous_answer_count == 0:
         # This means that the question has not been answered yet
-        return Question(
-            question=first_question.question,
-            category=first_question.topic,
-            score=first_question.score if first_question.score is not None else 0,
-        )
+        return create_question(first_question.topic, first_question.question)
     else:
         # Case: unanswered question or the question was already answered and we need a new one
         # Get the topic and the count
@@ -59,7 +60,7 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
             while len(ranked_questions) > 0:
                 candidate_question = ranked_questions[0]
                 if candidate_question in questions:
-                    return Question(category=topic, question=candidate_question, score=0)
+                    return create_question(topic, candidate_question)
                 ranked_questions = ranked_questions[1:]
             return None
         else:
@@ -80,4 +81,14 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
             selected_topic = missing_topics[0]
             # Start with a random question in this topic
             selected_question = select_random_question_from_topic(selected_topic)
-            return Question(category=selected_question.topic.name, question=selected_question.question, score=0)
+            return create_question(selected_question.topic.name, selected_question.question)
+
+
+def create_question(topic_name: str, question: str) -> Question:
+    return Question(
+        category=topic_name,
+        question=question,
+        score=0,
+        question_count=-1,
+        total_questions_in_topic=-1
+    )

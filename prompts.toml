@@ -11,6 +11,7 @@ can you please re-rank the questions (from most relevant to most irrelevant) you
 {ranking_questions}
 === END RANKING_QUESTIONS ==="""
 
+
 [ranking.topics]
 system_message = "You are a knowledge worker, an expert in knowing priorities"
 user_message = """Given these questions and answers between === START QUESTION_ANSWER === and === END QUENSTION_ANSWER ===, 

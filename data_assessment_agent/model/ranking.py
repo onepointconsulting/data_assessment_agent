@@ -5,14 +5,14 @@ from pydantic import BaseModel, Field
 class RankedQuestionsResponse(BaseModel):
     ranked_questions: List[str] = Field(
         ...,
-        description="The list of ranked questions according to a specific topic",
+        description="The list of ranked questions according to a specific topic. Should have not more than 4 items",
     )
 
 
 class RankedTopicsResponse(BaseModel):
     ranked_topics: List[str] = Field(
         ...,
-        description="The list of ranked topics according to a set of responses",
+        description="The list of ranked topics according to a set of responses. Should have not more than 4 items",
     )
 
 

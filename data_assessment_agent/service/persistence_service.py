@@ -4,7 +4,12 @@ import psycopg2
 from psycopg2.extensions import connection
 from psycopg2.extensions import cursor
 from data_assessment_agent.config.config import db_cfg
-from data_assessment_agent.model.db_model import Topic, Question, QuestionnaireStatus
+from data_assessment_agent.model.db_model import (
+    Topic,
+    Question,
+    QuestionnaireStatus,
+    QuestionnaireCounts,
+)
 
 
 def connect_to_db() -> connection:
@@ -58,10 +63,10 @@ def save_topic(topic: Topic) -> Topic:
     def process_save(cur: cursor):
         cur.execute(
             """
-            INSERT INTO tb_topic (name, description, question_amount)
-            VALUES (%(name)s, %(description)s, 5) RETURNING id;
+            INSERT INTO tb_topic (name, description, question_amount, preferred_topic_order)
+            VALUES (%(name)s, %(description)s, 5, %(preferred_topic_order)s) RETURNING id;
             """,
-            {"name": topic.name, "description": topic.description},
+            {"name": topic.name, "description": topic.description, "preferred_topic_order": topic.preferred_topic_order},
         )
         created_id = cur.fetchone()[0]
         topic.id = created_id
@@ -110,17 +115,36 @@ def load_questions() -> List[Question]:
     def handle_select(cur: cursor):
         cur.execute(
             """
-select q.id, q.question, q.score, t.id topic_id, t.name topic_name, t.description topic_description
-from tb_question q inner join tb_topic t 
-on q.topic_id = t.id 
-order by id"""
+SELECT Q.ID,
+	Q.QUESTION,
+	Q.SCORE,
+	T.ID TOPIC_ID,
+	T.NAME TOPIC_NAME,
+	T.DESCRIPTION TOPIC_DESCRIPTION,
+    T.QUESTION_AMOUNT
+FROM TB_QUESTION Q
+INNER JOIN TB_TOPIC T ON Q.TOPIC_ID = T.ID
+ORDER BY T.PREFERRED_TOPIC_ORDER, Q.ID"""
         )
         return list(cur.fetchall())
 
     questions: list = create_cursor(handle_select)
     final_questions = []
-    for id, question, score, topic_id, topic_name, topic_description in questions:
-        topic = Topic(id=topic_id, name=topic_name, description=topic_description)
+    for (
+        id,
+        question,
+        score,
+        topic_id,
+        topic_name,
+        topic_description,
+        question_amount,
+    ) in questions:
+        topic = Topic(
+            id=topic_id,
+            name=topic_name,
+            description=topic_description,
+            question_amount=question_amount,
+        )
         final_questions.append(
             Question(id=id, question=question, score=score, topic=topic)
         )
@@ -223,7 +247,7 @@ LIMIT 1""",
         created_at,
         topic_count,
         topic_missing,
-        previous_answer_count
+        previous_answer_count,
     ) = statuses[0]
     return QuestionnaireStatus(
         id=id,
@@ -235,7 +259,7 @@ LIMIT 1""",
         created_at=created_at,
         topic_count=topic_count,
         topic_missing=topic_missing,
-        previous_answer_count=previous_answer_count
+        previous_answer_count=previous_answer_count,
     )
 
 
@@ -368,6 +392,64 @@ LIMIT 1
         return question
     else:
         return None
+
+
+def select_questionnaire_counts(session_id: str) -> QuestionnaireCounts:
+    query = """
+SELECT S.TOPIC,
+
+	(SELECT COUNT(DISTINCT(S1.QUESTION))
+		FROM PUBLIC.TB_QUESTIONNAIRE_STATUS S1
+		WHERE S1.TOPIC = S.TOPIC
+            AND SESSION_ID = %(session_id)s) QUESTION_COUNT,
+	T.QUESTION_AMOUNT QUESTION_TOTAL,
+
+	(SELECT COUNT(*)
+		FROM TB_TOPIC TF
+		WHERE TF.NAME IN
+				(SELECT SF.TOPIC
+					FROM PUBLIC.TB_QUESTIONNAIRE_STATUS SF
+					INNER JOIN TB_TOPIC TF1 ON TF1.NAME = SF.TOPIC
+					WHERE SF.ANSWER IS NOT NULL
+						AND SESSION_ID = %(session_id)s
+					GROUP BY SF.TOPIC,
+						TF1.QUESTION_AMOUNT
+					HAVING COUNT(*) = TF1.QUESTION_AMOUNT)) FINISHED_TOPIC_COUNT,
+
+	(SELECT COUNT(*)
+		FROM TB_TOPIC) TOPIC_COUNT
+FROM PUBLIC.TB_QUESTIONNAIRE_STATUS S
+INNER JOIN PUBLIC.TB_TOPIC T ON S.TOPIC = T.NAME
+WHERE SESSION_ID = %(session_id)s
+ORDER BY S.ID DESC
+LIMIT 1
+"""
+    parameter_map = {"session_id": session_id}
+    handle_select = handle_select_func(query, parameter_map)
+    counts: list = create_cursor(handle_select)
+    if len(counts) > 0:
+        (
+            topic,
+            question_count,
+            question_total,
+            finished_topic_count,
+            topic_total,
+        ) = counts[0]
+        return QuestionnaireCounts(
+            topic=topic,
+            question_count=question_count,
+            question_total=question_total,
+            finished_topic_count=finished_topic_count,
+            topic_total=topic_total,
+        )
+    else:
+        return QuestionnaireCounts(
+            topic="",
+            question_count=0,
+            question_total=0,
+            finished_topic_count=0,
+            topic_total=0,
+        )
 
 
 if __name__ == "__main__":

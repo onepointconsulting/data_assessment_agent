@@ -12,6 +12,7 @@ from data_assessment_agent.service.data_assessment_service import (
 from data_assessment_agent.service.persistence_service import (
     save_questionnaire_status,
     select_last_empty_question,
+    select_questionnaire_counts
 )
 from data_assessment_agent.model.db_model import create_questionnaire_status
 from data_assessment_agent.model.assessment_framework import Question
@@ -63,11 +64,7 @@ async def start_session(sid, client_session):
         next_question = initial_question()
     else:
         next_question = await select_next_question(session_id)
-    if next_question is None:
-        await handle_missing_question(sid, session_id)
-        return
-    save_incomplete_answer(session_id, next_question)
-    await send_question_to_client(sid, session_id, next_question)
+    await handle_next_question(next_question, sid, session_id)
 
 
 @sio.event
@@ -90,15 +87,26 @@ async def client_message(sid: str, message):
     questionnaire_status.score = 0
     save_questionnaire_status(questionnaire_status)
     next_question = await select_next_question(session_id)
+    await handle_next_question(next_question, sid, session_id)
+
+
+async def handle_next_question(next_question: Question, sid: str, session_id: str):
     if next_question is None:
         await handle_missing_question(sid, session_id)
         return
     save_incomplete_answer(session_id, next_question)
+    questionnaire_counts = select_questionnaire_counts(session_id)
+    next_question.question_count = questionnaire_counts.question_count
+    next_question.total_questions_in_topic = questionnaire_counts.question_total
+    next_question.finished_topic_count = questionnaire_counts.finished_topic_count + 1
+    next_question.topic_total = questionnaire_counts.topic_total
     await send_question_to_client(sid, session_id, next_question)
 
 
 async def send_question_to_client(sid: str, session_id: str, next_question: Question):
-    response = f"""Topic: {next_question.category}
+    response = f"""Topic: {next_question.category} ({next_question.finished_topic_count} out of {next_question.topic_total} topic(s))
+
+Question {next_question.question_count} out of {next_question.total_questions_in_topic} in this topic
 
 **{next_question.question}**
 """
@@ -110,11 +118,14 @@ async def send_question_to_client(sid: str, session_id: str, next_question: Ques
         room=sid,
     )
 
+
 async def handle_missing_question(sid: str, session_id: str):
     await sio.emit(
         Commands.SERVER_MESSAGE,
         ServerMessage(
-            response="No question available. Please refresh the page and try again.", sources=None, sessionId=session_id
+            response="No question available. Please refresh the page and try again.",
+            sources=None,
+            sessionId=session_id,
         ).model_dump_json(),
         room=sid,
     )

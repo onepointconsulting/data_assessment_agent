@@ -7,7 +7,8 @@ if __name__ == "__main__":
     assessment_framework = import_framework_objects()
     assert assessment_framework is not None
     for category, questions in assessment_framework.categories.items():
-        topic = Topic(name=category, description=category)
+        preferred_topic_order = assessment_framework.preferred_order[category]
+        topic = Topic(name=category, description=category, preferred_topic_order=preferred_topic_order)
         try:
             saved_topic = save_topic(topic)
             print(saved_topic)

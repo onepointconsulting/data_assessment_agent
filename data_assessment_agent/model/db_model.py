@@ -11,6 +11,12 @@ class Topic(BaseModel):
     description: Union[str, None] = Field(
         default=None, description="The topic description"
     )
+    question_amount: Union[int, None] = Field(
+        default=5, description="The amount of questions in this topic"
+    )
+    preferred_topic_order: Union[int, None] = Field(
+        default=0, description="The field used to order the topics"
+    )
 
 
 class Question(BaseModel):
@@ -40,6 +46,20 @@ class QuestionnaireStatus(BaseModel):
     previous_answer_count: Optional[int] = Field(
         default=None, description="How many answers equal to this one were answered"
     )
+
+
+class QuestionnaireCounts(BaseModel):
+    topic: str = Field(..., description="The current topic for the current session")
+    question_count: int = Field(
+        ..., description="The count of finished questions in the last topic"
+    )
+    question_total: int = Field(
+        ..., description="The total questions in the current topic"
+    )
+    finished_topic_count: int = Field(
+        ..., description="The total number of finished topics"
+    )
+    topic_total: int = Field(..., description="The total count of topics")
 
 
 def create_questionnaire_status(

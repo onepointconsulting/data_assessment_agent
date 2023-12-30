@@ -17,6 +17,7 @@ CREATE TABLE public.tb_topic
     name character varying(256) NOT NULL,
     description character varying(4096),
     question_amount int NOT NULL,
+    preferred_topic_order int NULL,
     PRIMARY KEY (id)
 );
 

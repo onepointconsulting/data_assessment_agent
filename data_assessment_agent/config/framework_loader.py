@@ -17,9 +17,10 @@ def import_framework() -> dict:
 
 def import_framework_objects() -> AssessmentFramework:
     framework_dict = import_framework()
-    assessment_framework = AssessmentFramework(categories={})
+    assessment_framework = AssessmentFramework(categories={}, preferred_order={})
     for category, properties in framework_dict.items():
         questions = properties.get("questions", [])
+        preferred_topic_order = properties.get("preferred_topic_order", 0)
         framework_questions = [
             Question(
                 category=question["category"],
@@ -29,4 +30,5 @@ def import_framework_objects() -> AssessmentFramework:
             for question in questions
         ]
         assessment_framework.categories[category] = framework_questions
+        assessment_framework.preferred_order[category] = preferred_topic_order
     return assessment_framework
