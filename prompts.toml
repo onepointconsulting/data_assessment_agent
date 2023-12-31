@@ -25,3 +25,16 @@ can you please re-rank the topics (from most relevant to most irrelevant) you ca
 {ranking_topics}
 === END RANKING_TOPICS ==="""
 
+[sentiment]
+system_message = "You are an expert in terms of determining the sentiment or emotion expressed in a piece of text."
+user_message = """Classify the sentiment of the following question given a specific question. 
+The question can be found between === START QUESTION === and === END QUENSTION === and the answer can be found between === START ANSWER === and === END ANSWER ===
+
+=== START QUESTION ===
+{question}
+=== END QUENSTION ===
+
+=== START ANSWER ===
+{answer}
+=== END ANSWER ==="""
+
