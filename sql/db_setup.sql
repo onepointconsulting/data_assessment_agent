@@ -46,7 +46,7 @@ CREATE TABLE public.tb_questionnaire_status
     question character varying(1024) NOT NULL,
     answer character varying(4096) NULL,
     score integer NULL,
-    affirmative_sentiment_score int,
+    sentiment_id int,
     created_at TIMESTAMP DEFAULT NOW()
 );
 

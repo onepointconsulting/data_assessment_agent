@@ -1,6 +1,7 @@
 from typing import Union, Optional
 from pydantic import BaseModel, Field
 
+from data_assessment_agent.model.sentiment import Sentiment
 from data_assessment_agent.model.assessment_framework import Question as DomainQuestion
 from data_assessment_agent.config.log_factory import logger
 
@@ -36,6 +37,9 @@ class QuestionnaireStatus(BaseModel):
     )
     score: Optional[int] = Field(
         default=None, description="The score given to the user's reply"
+    )
+    sentiment: Optional[str] = Field(
+        default=Sentiment.UNKNOWN, description="The score given to the user's reply"
     )
     topic_count: Optional[int] = Field(
         default=None, description="The last topic's current count"

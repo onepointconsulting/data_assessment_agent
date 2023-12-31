@@ -1,6 +1,7 @@
 import socketio
 import json
 from aiohttp import web
+from enum import StrEnum
 
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.server.agent_session import AgentSession
@@ -14,11 +15,13 @@ from data_assessment_agent.service.persistence_service import (
     select_last_empty_question,
     select_questionnaire_counts,
 )
-from data_assessment_agent.model.db_model import create_questionnaire_status
 from data_assessment_agent.model.assessment_framework import Question
 from data_assessment_agent.model.transport import ServerMessage
-
-from enum import StrEnum
+from data_assessment_agent.model.db_model import (
+    create_questionnaire_status,
+    QuestionnaireStatus,
+)
+from data_assessment_agent.service.sentiment_service import get_answer_sentiment
 
 sio = socketio.AsyncServer(cors_allowed_origins=cfg.websocket_cors_allowed_origins)
 app = web.Application()
@@ -85,7 +88,7 @@ async def client_message(sid: str, message):
     questionnaire_status.answer = answer
     # TODO: Scoring will be defined later.
     questionnaire_status.score = 0
-    save_questionnaire_status(questionnaire_status)
+    await score_and_save_questionnaire_status(questionnaire_status)
     next_question = await select_next_question(session_id)
     await handle_next_question(next_question, sid, session_id)
 
@@ -129,6 +132,16 @@ async def handle_missing_question(sid: str, session_id: str):
         ).model_dump_json(),
         room=sid,
     )
+
+
+async def score_and_save_questionnaire_status(
+    questionnaire_status: QuestionnaireStatus,
+):
+    question = questionnaire_status.question
+    answer = questionnaire_status.answer
+    if answer is not None and len(answer) > 0:
+        questionnaire_status.sentiment = await get_answer_sentiment(question, answer)
+        save_questionnaire_status(questionnaire_status)
 
 
 def save_incomplete_answer(session_id, next_question):

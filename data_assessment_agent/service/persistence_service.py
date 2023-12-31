@@ -157,13 +157,19 @@ ORDER BY T.PREFERRED_TOPIC_ORDER, Q.ID"""
 
 def save_questionnaire_status(
     questionnaire_status: QuestionnaireStatus,
-) -> QuestionnaireStatus:
+) -> Union[QuestionnaireStatus, None]:
     def process_save(cur: cursor):
         if questionnaire_status.id is None:
             cur.execute(
                 """
-    insert into public.tb_questionnaire_status(session_id, topic, question, answer, score)
-    values(%(session_id)s, %(topic)s, %(question)s, %(answer)s, %(score)s) returning id
+insert into public.tb_questionnaire_status(session_id, topic, question, answer, score, sentiment_id)
+select %(session_id)s, %(topic)s, %(question)s, %(answer)s, %(score)s, (select id from tb_sentiment_score where name = %(sentiment)s)
+where not exists(
+    select * from tb_questionnaire_status
+        where session_id = %(session_id)s
+        and topic = %(topic)s
+        and question = %(question)s
+) returning id
                 """,
                 {
                     "session_id": questionnaire_status.session_id,
@@ -171,12 +177,14 @@ def save_questionnaire_status(
                     "question": questionnaire_status.question,
                     "answer": questionnaire_status.answer,
                     "score": questionnaire_status.score,
+                    "sentiment": questionnaire_status.sentiment,
                 },
             )
         else:
             cur.execute(
                 """
-    update public.tb_questionnaire_status set session_id = %(session_id)s, topic = %(topic)s, question = %(question)s, answer = %(answer)s, score = %(score)s
+    update public.tb_questionnaire_status set session_id = %(session_id)s, topic = %(topic)s, 
+        question = %(question)s, answer = %(answer)s, score = %(score)s, sentiment_id = (select id from tb_sentiment_score where name = %(sentiment)s)
     where id = %(id)s returning id
                 """,
                 {
@@ -186,18 +194,23 @@ def save_questionnaire_status(
                     "answer": questionnaire_status.answer,
                     "score": questionnaire_status.score,
                     "id": questionnaire_status.id,
+                    "sentiment": questionnaire_status.sentiment,
                 },
             )
-        created_id = cur.fetchone()[0]
-        return QuestionnaireStatus(
-            id=created_id,
-            question=questionnaire_status.question,
-            answer=questionnaire_status.answer,
-            topic=questionnaire_status.topic,
-            score=questionnaire_status.score,
-            session_id=questionnaire_status.session_id,
-            topic_count=questionnaire_status.topic_count,
-        )
+        result = cur.fetchone()
+        if result is not None and len(result) > 0:
+            created_id = result[0]
+            return QuestionnaireStatus(
+                id=created_id,
+                question=questionnaire_status.question,
+                answer=questionnaire_status.answer,
+                topic=questionnaire_status.topic,
+                score=questionnaire_status.score,
+                session_id=questionnaire_status.session_id,
+                topic_count=questionnaire_status.topic_count,
+            )
+        else:
+            return None
 
     return create_cursor(process_save)
 
