@@ -66,7 +66,11 @@ def save_topic(topic: Topic) -> Topic:
             INSERT INTO tb_topic (name, description, question_amount, preferred_topic_order)
             VALUES (%(name)s, %(description)s, 5, %(preferred_topic_order)s) RETURNING id;
             """,
-            {"name": topic.name, "description": topic.description, "preferred_topic_order": topic.preferred_topic_order},
+            {
+                "name": topic.name,
+                "description": topic.description,
+                "preferred_topic_order": topic.preferred_topic_order,
+            },
         )
         created_id = cur.fetchone()[0]
         topic.id = created_id

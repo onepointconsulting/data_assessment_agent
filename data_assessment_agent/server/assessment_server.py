@@ -12,7 +12,7 @@ from data_assessment_agent.service.data_assessment_service import (
 from data_assessment_agent.service.persistence_service import (
     save_questionnaire_status,
     select_last_empty_question,
-    select_questionnaire_counts
+    select_questionnaire_counts,
 )
 from data_assessment_agent.model.db_model import create_questionnaire_status
 from data_assessment_agent.model.assessment_framework import Question
