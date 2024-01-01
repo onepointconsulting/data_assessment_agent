@@ -1,4 +1,6 @@
 from typing import Union, Optional
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 from data_assessment_agent.model.sentiment import Sentiment
@@ -25,6 +27,7 @@ class Question(BaseModel):
     question: str = Field(..., description="The question to ask the user")
     score: int = Field(..., description="What kind of score is asked from the user")
     topic: Topic = Field(..., description="The topic ttp which the question belongs")
+    preferred_order: Union[int, None] = Field(default=0, description="The question id")
 
 
 class QuestionnaireStatus(BaseModel):
@@ -79,3 +82,15 @@ def create_questionnaire_status(
     return QuestionnaireStatus(
         session_id=session_id, topic=topic_name, question=question.question
     )
+
+
+class SessionReport(BaseModel):
+    topic: str = Field(..., description="The question's topic")
+    question: str = Field(..., description="The question")
+    answer: str = Field(..., description="The answer to the question")
+    score: int = Field(..., description="The calculated score")
+    sentiment: str = Field(
+        ..., description="The sentiment of the answer towards the question"
+    )
+    created_at: datetime = Field(..., description="The creation timestamp")
+    updated_at: datetime = Field(..., description="The update timestamp")

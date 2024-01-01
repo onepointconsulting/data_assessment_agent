@@ -19,6 +19,7 @@ def create_if_not_exists(path: Path):
     """
     if not path.exists():
         path.mkdir(parents=True, exist_ok=True)
+    assert path.exists(), f"Path {path} does not exist."
 
 
 class Config:
@@ -52,6 +53,12 @@ class Config:
     websocket_server = os.getenv("WEBSOCKET_SERVER", "0.0.0.0")
     websocket_port = int(os.getenv("WEBSOCKET_PORT", 8080))
     websocket_cors_allowed_origins = os.getenv("WEBSOCKET_CORS_ALLOWED_ORIGINS", "*")
+
+    # Reporting
+    report_tmp_path_str = os.getenv("REPORT_TMP_PATH")
+    assert report_tmp_path_str is not None
+    report_tmp_path = Path(report_tmp_path_str)
+    create_if_not_exists(report_tmp_path)
 
 
 class DBConfig:

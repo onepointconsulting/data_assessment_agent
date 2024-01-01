@@ -7,7 +7,7 @@ from data_assessment_agent.service.persistence_service import (
     select_answered_questions_in_topic,
     select_answered_questions_in_session,
     select_remaining_topics,
-    select_random_question_from_topic,
+    select_initial_question_from_topic,
 )
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
 from data_assessment_agent.config.log_factory import logger
@@ -80,7 +80,7 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
                 return None
             selected_topic = missing_topics[0]
             # Start with a random question in this topic
-            selected_question = select_random_question_from_topic(selected_topic)
+            selected_question = select_initial_question_from_topic(selected_topic)
             return create_question(
                 selected_question.topic.name, selected_question.question
             )

@@ -22,10 +22,13 @@ from data_assessment_agent.model.db_model import (
     QuestionnaireStatus,
 )
 from data_assessment_agent.service.sentiment_service import get_answer_sentiment
+from data_assessment_agent.service.reporting_service import generate_session_report
 
 sio = socketio.AsyncServer(cors_allowed_origins=cfg.websocket_cors_allowed_origins)
 app = web.Application()
 sio.attach(app)
+
+routes = web.RouteTableDef()
 
 
 class Commands(StrEnum):
@@ -155,5 +158,16 @@ def disconnect(sid, environ):
     logger.info("disconnect %s ", sid)
 
 
+# HTTP part
+@routes.get("/report/{session_id}")
+async def get_handler(request: web.Request) -> web.Response:
+    session_id = request.match_info.get('session_id', None)
+    if session_id is None:
+        raise web.HTTPNotFound(text="No session id specified")
+    report_path = generate_session_report(session_id)
+    return web.FileResponse(report_path, headers={'CONTENT-DISPOSITION': f'attachment; filename="{report_path.name}"'})
+
+
 if __name__ == "__main__":
+    app.add_routes(routes)
     web.run_app(app, host=cfg.websocket_server, port=cfg.websocket_port)

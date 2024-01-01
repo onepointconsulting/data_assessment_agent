@@ -31,7 +31,9 @@ async def extract_answer_sentiment(chat_completion: ChatCompletion) -> str:
     logger.info("Extracting answer sentiment")
     arguments = extract_function_call_arguments(chat_completion)
     key = "sentiment"
-    return arguments.get(key, Sentiment.UNKNOWN)
+    value = arguments.get(key, Sentiment.UNKNOWN)
+    logger.info("Sentiment value type %s", type(value))
+    return value if isinstance(value, str) else Sentiment.UNKNOWN
 
 
 if __name__ == "__main__":

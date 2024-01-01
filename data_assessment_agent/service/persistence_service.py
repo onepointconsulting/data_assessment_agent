@@ -9,6 +9,7 @@ from data_assessment_agent.model.db_model import (
     Question,
     QuestionnaireStatus,
     QuestionnaireCounts,
+    SessionReport,
 )
 
 
@@ -83,13 +84,14 @@ def save_question(question: Question) -> Question:
     def process_save(cur: cursor):
         cur.execute(
             """
-            INSERT INTO tb_question (question, score, topic_id)
-            VALUES (%(question)s, %(score)s, (select id from tb_topic where name = %(topic_name)s)) RETURNING id;
+            INSERT INTO tb_question (question, score, topic_id, preferred_question_order)
+            VALUES (%(question)s, %(score)s, (select id from tb_topic where name = %(topic_name)s), %(preferred_question_order)s) RETURNING id;
             """,
             {
                 "question": question.question,
                 "score": question.score,
                 "topic_name": question.topic.name,
+                "preferred_question_order": question.preferred_order,
             },
         )
         created_id = cur.fetchone()[0]
@@ -184,7 +186,8 @@ where not exists(
             cur.execute(
                 """
     update public.tb_questionnaire_status set session_id = %(session_id)s, topic = %(topic)s, 
-        question = %(question)s, answer = %(answer)s, score = %(score)s, sentiment_id = (select id from tb_sentiment_score where name = %(sentiment)s)
+        question = %(question)s, answer = %(answer)s, score = %(score)s, sentiment_id = (select id from tb_sentiment_score where name = %(sentiment)s),
+        updated_at = NOW()
     where id = %(id)s returning id
                 """,
                 {
@@ -381,7 +384,7 @@ LIMIT 1
         return None
 
 
-def select_random_question_from_topic(topic: str) -> Union[Question, None]:
+def select_initial_question_from_topic(topic: str) -> Union[Question, None]:
     query = """
 SELECT Q.ID,
 	Q.QUESTION,
@@ -396,7 +399,7 @@ SELECT Q.ID,
 FROM TB_QUESTION Q
 INNER JOIN TB_TOPIC T ON Q.TOPIC_ID = T.ID
 WHERE T.NAME = %(topic)s
-ORDER BY RANDOM()
+ORDER BY preferred_question_order
 LIMIT 1
 """
     parameter_map = {"topic": topic}
@@ -469,6 +472,45 @@ LIMIT 1
         )
 
 
+def select_session_report(session_id: str) -> List[SessionReport]:
+    query = """
+SELECT S.TOPIC,
+	S.QUESTION,
+	S.ANSWER,
+	S.SCORE,
+	SS.NAME SENTIMENT,
+    S.CREATED_AT,
+    S.UPDATED_AT
+FROM TB_QUESTIONNAIRE_STATUS S
+INNER JOIN TB_SENTIMENT_SCORE SS ON S.SENTIMENT_ID = SS.ID
+WHERE S.SESSION_ID = %(session_id)s
+	AND S.ANSWER IS NOT NULL
+"""
+    parameter_map = {"session_id": session_id}
+    handle_select = handle_select_func(query, parameter_map)
+    report_list: list = create_cursor(handle_select)
+    return [
+        SessionReport(
+            topic=topic,
+            question=question,
+            answer=answer,
+            score=score,
+            sentiment=sentiment,
+            created_at=created_at,
+            updated_at=updated_at,
+        )
+        for (
+            topic,
+            question,
+            answer,
+            score,
+            sentiment,
+            created_at,
+            updated_at,
+        ) in report_list
+    ]
+
+
 if __name__ == "__main__":
     from data_assessment_agent.test.provider import topic_provider, question_provider
 
@@ -516,5 +558,10 @@ if __name__ == "__main__":
         print(remaining_topic)
 
     print("== Random question from topic ==")
-    random_question = select_random_question_from_topic("Advanced Analytics")
+    random_question = select_initial_question_from_topic("Advanced Analytics")
     print(random_question)
+
+    print("=== Session Report ===")
+    report_entries = select_session_report("b8ce68f0-f754-4af8-8822-97dac817250d")
+    for report in report_entries:
+        print(report)

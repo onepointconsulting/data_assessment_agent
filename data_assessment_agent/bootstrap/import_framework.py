@@ -16,12 +16,13 @@ if __name__ == "__main__":
         try:
             saved_topic = save_topic(topic)
             print(saved_topic)
-            for question in questions:
+            for i, question in enumerate(questions):
                 try:
                     db_question = Question(
                         question=question.question,
                         score=question.score,
                         topic=saved_topic,
+                        preferred_order=i,
                     )
                     save_question(db_question)
                 except:
