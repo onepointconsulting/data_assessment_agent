@@ -1,8 +1,17 @@
+-- For newer versions of Postgres
 CREATE DATABASE data_assessment_questionnaire
     WITH
     OWNER = postgres
     ENCODING = 'UTF8'
     LOCALE_PROVIDER = 'libc'
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+
+-- For older versions of Postgres
+CREATE DATABASE data_assessment_questionnaire
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
     CONNECTION LIMIT = -1
     IS_TEMPLATE = False;
 

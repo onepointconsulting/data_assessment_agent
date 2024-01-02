@@ -13,6 +13,46 @@ pip install poetry
 poetry install
 ```
 
+### Installing Postgres
+
+You will need to install Postgres. In Linux you can use this command:
+
+```bash
+ apt install postgresql
+```
+
+And then you will need to access Postgres to run commands in `psql`. You can run the psql tool using as root:
+
+```bash
+sudo -u postgres psql template1
+```
+
+Make also sure that you change the postgres user's password.
+
+```sql
+ALTER USER postgres with encrypted password 'your_password';
+```
+
+Make sure that you create your database too with:
+
+```sql
+CREATE DATABASE data_assessment_questionnaire
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+```
+
+The logout from `psql` and access the newly created database with:
+
+```bash
+sudo -u postgres psql data_assessment_questionnaire
+```
+
+And create all tables with the commands in `sql\db_setup.sql`.
+
+
 ## Running Unit Tests
 
 Here it is how you should run unit tests:
