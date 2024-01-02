@@ -18,6 +18,13 @@ class Question(BaseModel):
     topic_total: Optional[int] = Field(
         default=None, description="The total amount of topics"
     )
+    initial: bool = Field(
+        default=False, description="Whether this is the first question ever or not."
+    )
+    final: bool = Field(
+        default=False,
+        description="Whether we have reached the end of the questionnaire",
+    )
 
 
 class AssessmentFramework(BaseModel):
@@ -27,3 +34,11 @@ class AssessmentFramework(BaseModel):
     preferred_order: Dict[str, int] = Field(
         ..., description="The preferred order for each of the categories"
     )
+
+
+class SessionMessage(BaseModel):
+    next_question: Question = Field(
+        ..., description="The next question to be sent to the client"
+    )
+    sid: str = Field(..., description="The websocket room session id")
+    session_id: str = Field(..., description="The application's session identifier")

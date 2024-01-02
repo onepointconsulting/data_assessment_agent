@@ -14,8 +14,9 @@ from data_assessment_agent.service.persistence_service import (
     save_questionnaire_status,
     select_last_empty_question,
     select_questionnaire_counts,
+    select_topics,
 )
-from data_assessment_agent.model.assessment_framework import Question
+from data_assessment_agent.model.assessment_framework import Question, SessionMessage
 from data_assessment_agent.model.transport import ServerMessage
 from data_assessment_agent.model.db_model import (
     create_questionnaire_status,
@@ -50,7 +51,7 @@ async def send_error(sid: str, msg: str):
 
 
 @sio.event
-async def start_session(sid, client_session):
+async def start_session(sid: str, client_session):
     """
     Start the session.
 
@@ -70,7 +71,14 @@ async def start_session(sid, client_session):
         next_question = initial_question()
     else:
         next_question = await select_next_question(session_id)
-    await handle_next_question(next_question, sid, session_id)
+    session_message = SessionMessage(
+        next_question=next_question, sid=sid, session_id=session_id
+    )
+    if next_question.final:
+        await handle_final_question(session_message)
+    else:
+        await handle_initial_question(session_message)
+        await handle_next_question(session_message)
 
 
 @sio.event
@@ -93,10 +101,20 @@ async def client_message(sid: str, message):
     questionnaire_status.score = 0
     await score_and_save_questionnaire_status(questionnaire_status)
     next_question = await select_next_question(session_id)
-    await handle_next_question(next_question, sid, session_id)
+    if next_question.final:
+        await handle_final_question(session_message)
+    else:
+        await handle_next_question(
+            SessionMessage(next_question=next_question, sid=sid, session_id=session_id)
+        )
 
 
-async def handle_next_question(next_question: Question, sid: str, session_id: str):
+async def handle_next_question(session_message: SessionMessage):
+    next_question, sid, session_id = (
+        session_message.next_question,
+        session_message.sid,
+        session_message.session_id,
+    )
     if next_question is None:
         await handle_missing_question(sid, session_id)
         return
@@ -130,11 +148,58 @@ async def handle_missing_question(sid: str, session_id: str):
         Commands.SERVER_MESSAGE,
         ServerMessage(
             response="No question available. Please refresh the page and try again.",
-            sources=None,
             sessionId=session_id,
         ).model_dump_json(),
         room=sid,
     )
+
+
+async def handle_initial_question(session_message: SessionMessage):
+    next_question, sid, session_id = (
+        session_message.next_question,
+        session_message.sid,
+        session_message.session_id,
+    )
+    topics = select_topics()
+    topics_str = ", ".join(topics)
+    if next_question.initial:
+        await sio.emit(
+            Commands.SERVER_MESSAGE,
+            ServerMessage(
+                response=f"""
+### Welcome to the {cfg.product_name} quizz
+The data assessment framework chatbot will now guide you through a set of questions about the following topics:
+
+{topics_str}
+""",
+                sessionId=session_id,
+            ).model_dump_json(),
+            room=sid,
+        )
+
+
+async def handle_final_question(session_message: SessionMessage):
+    next_question, sid, session_id = (
+        session_message.next_question,
+        session_message.sid,
+        session_message.session_id,
+    )
+    if next_question.final:
+        report_url = f"{cfg.report_url_base}/{session_id}"
+        await sio.emit(
+            Commands.SERVER_MESSAGE,
+            ServerMessage(
+                response=f"""
+### Thank you for finishing the {cfg.product_name} quizz
+
+You can download the report from [{report_url}]({report_url}).
+
+Your score will come soon!
+    """,
+                sessionId=session_id,
+            ).model_dump_json(),
+            room=sid,
+        )
 
 
 async def score_and_save_questionnaire_status(
@@ -161,11 +226,14 @@ def disconnect(sid, environ):
 # HTTP part
 @routes.get("/report/{session_id}")
 async def get_handler(request: web.Request) -> web.Response:
-    session_id = request.match_info.get('session_id', None)
+    session_id = request.match_info.get("session_id", None)
     if session_id is None:
         raise web.HTTPNotFound(text="No session id specified")
     report_path = generate_session_report(session_id)
-    return web.FileResponse(report_path, headers={'CONTENT-DISPOSITION': f'attachment; filename="{report_path.name}"'})
+    return web.FileResponse(
+        report_path,
+        headers={"CONTENT-DISPOSITION": f'attachment; filename="{report_path.name}"'},
+    )
 
 
 if __name__ == "__main__":

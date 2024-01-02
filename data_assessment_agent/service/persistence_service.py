@@ -511,6 +511,17 @@ WHERE S.SESSION_ID = %(session_id)s
     ]
 
 
+def select_topics() -> List[str]:
+    query = """
+SELECT NAME
+FROM TB_TOPIC
+ORDER BY NAME
+"""
+    handle_select = handle_select_func(query, {})
+    topics: list = create_cursor(handle_select)
+    return [t[0] for t in topics]
+
+
 if __name__ == "__main__":
     from data_assessment_agent.test.provider import topic_provider, question_provider
 
@@ -565,3 +576,8 @@ if __name__ == "__main__":
     report_entries = select_session_report("b8ce68f0-f754-4af8-8822-97dac817250d")
     for report in report_entries:
         print(report)
+
+    print("=== Topics ===")
+    topics = select_topics()
+    for topic in topics:
+        print(topic)

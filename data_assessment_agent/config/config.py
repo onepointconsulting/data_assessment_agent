@@ -45,6 +45,8 @@ class Config:
     framework_questionnaire_yaml = Path(os.getenv("FRAMEWORK_QUESTIONNAIRE_YAML"))
     assert framework_questionnaire_yaml.exists()
     assert framework_questionnaire_yaml.is_file()
+    product_name = os.getenv("PRODUCT_NAME")
+    assert product_name is not None
 
     # Initialize the OpenAI client
     open_ai_client = AsyncOpenAI(api_key=openai_api_key, timeout=openai_timeout)
@@ -59,6 +61,8 @@ class Config:
     assert report_tmp_path_str is not None
     report_tmp_path = Path(report_tmp_path_str)
     create_if_not_exists(report_tmp_path)
+    report_url_base = os.getenv("REPORT_URL_BASE")
+    assert report_url_base is not None
 
 
 class DBConfig:

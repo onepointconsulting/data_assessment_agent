@@ -22,6 +22,7 @@ def initial_question() -> Question:
         question=db_question.question,
         category=db_question.topic.name,
         score=db_question.score if db_question.score is not None else 0,
+        initial=True,
     )
 
 
@@ -68,11 +69,12 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
             # There are no questions left. Select the next topic
             # Get all question and answers from this session
             # Get all topics covered in this session
-            question_answers = select_answered_questions_in_session(session_id)
+            question_answers_list = select_answered_questions_in_session(session_id)
+            question_answers = "\n".join(question_answers_list)
             ranking_topics = select_remaining_topics(session_id)
             if len(ranking_topics) == 0:
                 # We reached probably the end of the questionnaire
-                return None
+                return Question(question="", category="", score=0, final=True)
             ranking_topics_str = "\n".join(ranking_topics)
             # Ask ChatGPT to rank the topics
             missing_topics = await rank_topics(question_answers, ranking_topics_str)
