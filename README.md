@@ -18,7 +18,8 @@ poetry install
 You will need to install Postgres. In Linux you can use this command:
 
 ```bash
- apt install postgresql
+ sudo apt install postgresql
+ sudo apt install libpq-dev
 ```
 
 And then you will need to access Postgres to run commands in `psql`. You can run the psql tool using as root:
@@ -61,10 +62,16 @@ Here it is how you should run unit tests:
 python -m unittest
 ```
 
+## Bootstraping the database
+
+```
+python ./data_assessment_agent/bootstrap/import_framework.py
+```
+
 ## Running the server
 
 Please run the server like this from the project's directory:
 
 ```
-python .\data_assessment_agent\server\assessment_server.py
+python ./data_assessment_agent/server/assessment_server.py
 ```
