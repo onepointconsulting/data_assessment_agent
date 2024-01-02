@@ -1,0 +1,28 @@
+OPENAI_API_KEY=<your key>
+OPENAI_TEMPERATURE=0
+# OPENAI_MODEL=gpt-3.5-turbo-16k-0613
+OPENAI_MODEL=gpt-4-1106-preview
+OPENAI_TIMEOUT=60
+
+# Project related
+PROJECT_ROOT=/development/playground/agents/data_assessment_agent
+FRAMEWORK_QUESTIONNAIRE_YAML=/development/playground/agents/data_assessment_agent/docs/OnePoint_Data_Strategy_Assessment_Framework_with_scoring_v2.yaml
+PRODUCT_NAME=Data Assessment Companion
+
+WEBSOCKET_SERVER=127.0.0.1
+WEBSOCKET_PORT=8083
+WEBSOCKET_CORS_ALLOWED_ORIGINS=*
+REPORT_URL_BASE=http://127.0.0.1:8083/report
+
+# DB configuration
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_NAME=data_assessment_questionnaire
+DB_USER=postgres
+DB_PASSWORD=<your pass>
+
+# Reporting
+REPORT_TMP_PATH=/tmp/data_assessment_agent
+
+# UI related
+UI_FOLDER=/development/playground/agents/data_assessment_agent/ui
