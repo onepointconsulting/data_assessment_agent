@@ -42,6 +42,10 @@ async def connect(sid: str, environ):
     logger.info("connect %s %s", sid, environ)
 
 
+async def send_internal_error(sid: str):
+    await send_error(sid, "Internal error. Please refresh the page and try again.")
+
+
 async def send_error(sid: str, msg: str):
     await sio.emit(
         Commands.SERVER_MESSAGE,
@@ -66,47 +70,56 @@ async def start_session(sid: str, client_session):
     agent_session = AgentSession(sid, client_session)
     session_id = agent_session.session_id
     await sio.emit(Commands.START_SESSION, session_id, room=sid)
-    no_session_available = client_session is None or client_session == ""
-    if no_session_available:
-        next_question = initial_question()
-    else:
-        next_question = await select_next_question(session_id)
-    session_message = SessionMessage(
-        next_question=next_question, sid=sid, session_id=session_id
-    )
-    if next_question.final:
-        await handle_final_question(session_message)
-    else:
-        await handle_initial_question(session_message)
-        await handle_next_question(session_message)
+    try:
+        no_session_available = client_session is None or client_session == ""
+        if no_session_available:
+            next_question = initial_question()
+        else:
+            next_question = await select_next_question(session_id)
+        session_message = SessionMessage(
+            next_question=next_question, sid=sid, session_id=session_id
+        )
+        if next_question.final:
+            await handle_final_question(session_message)
+        else:
+            await handle_initial_question(session_message)
+            await handle_next_question(session_message)
+    except:
+        logger.error("Could not start session")
+        await send_internal_error(sid)
 
 
 @sio.event
 async def client_message(sid: str, message):
-    message_dict = json.loads(message)
-    session_id = message_dict.get("id", None)
-    if session_id is None:
-        await send_error(sid, "No session id. Please refresh the page and try again.")
-        return
-    questionnaire_status = select_last_empty_question(session_id)
-    if questionnaire_status is None:
-        await send_error(sid, "Internal error. Please refresh the page and try again.")
-        return
-    answer = message_dict.get("message", None)
-    if answer is None or answer.strip() == "":
-        await send_error(sid, "No message. Please refresh the page and try again.")
-        return
-    questionnaire_status.answer = answer
-    # TODO: Scoring will be defined later.
-    questionnaire_status.score = 0
-    await score_and_save_questionnaire_status(questionnaire_status)
-    next_question = await select_next_question(session_id)
-    if next_question.final:
-        await handle_final_question(session_message)
-    else:
-        await handle_next_question(
-            SessionMessage(next_question=next_question, sid=sid, session_id=session_id)
-        )
+    try:
+        message_dict = json.loads(message)
+        session_id = message_dict.get("id", None)
+        if session_id is None:
+            await send_error(sid, "No session id. Please refresh the page and try again.")
+            return
+        questionnaire_status = select_last_empty_question(session_id)
+        if questionnaire_status is None:
+            await send_internal_error(sid)
+            return
+        answer = message_dict.get("message", None)
+        if answer is None or answer.strip() == "":
+            await send_error(sid, "No message. Please refresh the page and try again.")
+            return
+        questionnaire_status.answer = answer
+        # TODO: Scoring will be defined later.
+        questionnaire_status.score = 0
+        await score_and_save_questionnaire_status(questionnaire_status)
+        next_question = await select_next_question(session_id)
+        if next_question.final:
+            await handle_final_question(session_message)
+        else:
+            await handle_next_question(
+                SessionMessage(next_question=next_question, sid=sid, session_id=session_id)
+            )
+    except:
+        logger.error("Could not process user message")
+        await send_internal_error(sid)
+
 
 
 async def handle_next_question(session_message: SessionMessage):
