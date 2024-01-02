@@ -95,7 +95,9 @@ async def client_message(sid: str, message):
         message_dict = json.loads(message)
         session_id = message_dict.get("id", None)
         if session_id is None:
-            await send_error(sid, "No session id. Please refresh the page and try again.")
+            await send_error(
+                sid, "No session id. Please refresh the page and try again."
+            )
             return
         questionnaire_status = select_last_empty_question(session_id)
         if questionnaire_status is None:
@@ -114,12 +116,13 @@ async def client_message(sid: str, message):
             await handle_final_question(session_message)
         else:
             await handle_next_question(
-                SessionMessage(next_question=next_question, sid=sid, session_id=session_id)
+                SessionMessage(
+                    next_question=next_question, sid=sid, session_id=session_id
+                )
             )
     except:
         logger.error("Could not process user message")
         await send_internal_error(sid)
-
 
 
 async def handle_next_question(session_message: SessionMessage):
@@ -141,7 +144,7 @@ async def handle_next_question(session_message: SessionMessage):
 
 
 async def send_question_to_client(sid: str, session_id: str, next_question: Question):
-    response = f"""Topic: {next_question.category} ({next_question.finished_topic_count} out of {next_question.topic_total} topic(s))
+    response = f"""Topic: {next_question.category} ({next_question.finished_topic_count} out of {next_question.topic_total} topics)
 
 Question {next_question.question_count} out of {next_question.total_questions_in_topic} in this topic
 
@@ -249,6 +252,12 @@ async def get_handler(request: web.Request) -> web.Response:
     )
 
 
+@routes.get("/")
+async def get_handler(_):
+    raise web.HTTPFound("/index.html")
+
+
 if __name__ == "__main__":
     app.add_routes(routes)
+    app.router.add_static("/", path=cfg.ui_folder.as_posix(), name="ui")
     web.run_app(app, host=cfg.websocket_server, port=cfg.websocket_port)

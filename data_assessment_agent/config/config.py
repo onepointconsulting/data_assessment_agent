@@ -64,6 +64,12 @@ class Config:
     report_url_base = os.getenv("REPORT_URL_BASE")
     assert report_url_base is not None
 
+    # UI
+    ui_folder_str = os.getenv("UI_FOLDER")
+    assert ui_folder_str is not None
+    ui_folder = Path(ui_folder_str)
+    create_if_not_exists(ui_folder)
+
 
 class DBConfig:
     db_name = os.getenv("DB_NAME")
