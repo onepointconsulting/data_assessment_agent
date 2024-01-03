@@ -28,13 +28,22 @@ can you please re-rank the topics (from most relevant to most irrelevant) you ca
 [sentiment]
 system_message = "You are an expert in terms of determining the sentiment or emotion expressed in a piece of text."
 user_message = """Classify the sentiment of the following question given a specific question. 
-The question can be found between === START QUESTION === and === END QUENSTION === and the answer can be found between === START ANSWER === and === END ANSWER ===
+The question can be found between === START QUESTION === and === END QUESTION === and the answer can be found between === START ANSWER === and === END ANSWER ===
 
 === START QUESTION ===
 {question}
-=== END QUENSTION ===
+=== END QUESTION ===
 
 === START ANSWER ===
 {answer}
 === END ANSWER ==="""
 
+[suggestion]
+system_message = "You are a helpful assistant who gives suggestions in British English"
+user_message = """Give a list of possible answers for the question that can be found between === START QUESTION === and === END QUESTION ===.
+You do not need to give factual answers, just some possible answers to this question. If the answer is affirmative use a simple "Yes" or negative a simple "No" as the text answer.
+
+=== START QUESTION ===
+{question}
+=== END QUESTION ===
+"""

@@ -94,6 +94,17 @@ def create_questionnaire_status(
     )
 
 
+def create_db_suggested_response(
+    suggested_response: SuggestedResponse, question: Question
+) -> DbSuggestedResponse:
+    return DbSuggestedResponse(
+        title=suggested_response.title,
+        subtitle=suggested_response.subtitle,
+        body=suggested_response.body,
+        question=question,
+    )
+
+
 class SessionReport(BaseModel):
     topic: str = Field(..., description="The question's topic")
     question: str = Field(..., description="The question")

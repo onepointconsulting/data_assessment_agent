@@ -133,6 +133,18 @@ VALUES(%(title)s, %(subtitle)s, %(body)s, %(question_id)s) RETURNING ID
     return create_cursor(process_save)
 
 
+def delete_question(question: Question):
+    create_cursor(
+        lambda cur: cur.execute(
+            """
+            DELETE FROM tb_question
+            where id = %(id)s;
+            """,
+            {"id": question.id},
+        )
+    )
+
+
 def delete_suggested_response(id: int):
     create_cursor(
         lambda cur: cur.execute(
@@ -145,14 +157,13 @@ def delete_suggested_response(id: int):
     )
 
 
-def delete_question(question: Question):
+def clear_suggested_responses():
     create_cursor(
         lambda cur: cur.execute(
             """
-            DELETE FROM tb_question
-            where id = %(id)s;
-            """,
-            {"id": question.id},
+                TRUNCATE TABLE TB_SUGGESTED_RESPONSE;
+                """,
+            {"id": id},
         )
     )
 
@@ -517,6 +528,28 @@ LIMIT 1
             finished_topic_count=0,
             topic_total=0,
         )
+    
+
+def select_suggestions(question: str, topic: str) -> List[DbSuggestedResponse]:
+    query = """
+SELECT Q.ID, Q.QUESTION, Q.SCORE, T.ID, T.NAME, T.DESCRIPTION, S.ID, S.TITLE, S.SUBTITLE, S.BODY
+FROM TB_SUGGESTED_RESPONSE S
+INNER JOIN TB_QUESTION Q ON Q.ID = S.QUESTION_ID
+INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
+WHERE Q.QUESTION = %(question)s
+	AND T.NAME = %(topic)s
+"""
+    parameter_map = {"question": question, "topic": topic}
+    handle_select = handle_select_func(query, parameter_map)
+    response_list: list = create_cursor(handle_select)
+    res_list = []
+    for r in response_list:
+        (question_id, question, score, topic_id, topic_name, topic_description, suggestion_id, suggestion_title, suggestion_subtitle, suggestion_body) = r
+        topic = Topic(id=topic_id, name=topic_name, description=topic_description)
+        db_question = Question(id=question_id, question=question, score=score, topic=topic)
+        suggestion = DbSuggestedResponse(id=suggestion_id, title=suggestion_title, subtitle=suggestion_subtitle, body=suggestion_body, question=db_question)
+        res_list.append(suggestion)
+    return res_list
 
 
 def select_session_report(session_id: str) -> List[SessionReport]:
@@ -640,3 +673,8 @@ if __name__ == "__main__":
     assert saved_suggestion.id is not None
 
     delete_suggested_response(saved_suggestion.id)
+
+    print("=== Suggestions ===")
+    suggestions = select_suggestions("What are the organization's overall business goals and objectives?", "Business Alignment")
+    for s in suggestions:
+        print(s)
