@@ -8,7 +8,8 @@ class SuggestedResponse(BaseModel):
         ..., description="The secondary title of the suggested message"
     )
     body: str = Field(
-        ..., description="The whole text that is eventually used as a response"
+        ...,
+        description="The whole text of the suggested response. Should be no more that 1024 characters long",
     )
 
 
@@ -55,3 +56,17 @@ class SessionMessage(BaseModel):
     )
     sid: str = Field(..., description="The websocket room session id")
     session_id: str = Field(..., description="The application's session identifier")
+
+
+class SuggestedResponseList(BaseModel):
+    suggested_responses: List[SuggestedResponse] = Field(
+        ..., description="The list with suggested responses"
+    )
+
+
+suggested_response_list_spec = {
+    "name": "suggested_response",
+    "description": "Suggested responses for a specific question",
+    "type": "object",
+    "parameters": SuggestedResponseList.model_json_schema(),
+}
