@@ -1,5 +1,15 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 from pydantic import BaseModel, Field
+
+
+class SuggestedResponse(BaseModel):
+    title: str = Field(..., description="The title of the suggested message")
+    subtitle: Union[str, None] = Field(
+        ..., description="The secondary title of the suggested message"
+    )
+    body: str = Field(
+        ..., description="The whole text that is eventually used as a response"
+    )
 
 
 class Question(BaseModel):
@@ -24,6 +34,9 @@ class Question(BaseModel):
     final: bool = Field(
         default=False,
         description="Whether we have reached the end of the questionnaire",
+    )
+    suggestions: List[SuggestedResponse] = Field(
+        default=[], description="The suggested responses for this question"
     )
 
 

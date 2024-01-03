@@ -4,7 +4,10 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from data_assessment_agent.model.sentiment import Sentiment
-from data_assessment_agent.model.assessment_framework import Question as DomainQuestion
+from data_assessment_agent.model.assessment_framework import (
+    Question as DomainQuestion,
+    SuggestedResponse,
+)
 from data_assessment_agent.config.log_factory import logger
 
 
@@ -28,6 +31,13 @@ class Question(BaseModel):
     score: int = Field(..., description="What kind of score is asked from the user")
     topic: Topic = Field(..., description="The topic ttp which the question belongs")
     preferred_order: Union[int, None] = Field(default=0, description="The question id")
+
+
+class DbSuggestedResponse(SuggestedResponse):
+    id: Union[int, None] = Field(default=None, description="The suggested response id")
+    question: Question = Field(
+        ..., description="The question to which this suggested response is associated"
+    )
 
 
 class QuestionnaireStatus(BaseModel):

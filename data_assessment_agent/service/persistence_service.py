@@ -5,6 +5,7 @@ from psycopg2.extensions import connection
 from psycopg2.extensions import cursor
 from data_assessment_agent.config.config import db_cfg
 from data_assessment_agent.model.db_model import (
+    DbSuggestedResponse,
     Topic,
     Question,
     QuestionnaireStatus,
@@ -64,8 +65,8 @@ def save_topic(topic: Topic) -> Topic:
     def process_save(cur: cursor):
         cur.execute(
             """
-            INSERT INTO tb_topic (name, description, question_amount, preferred_topic_order)
-            VALUES (%(name)s, %(description)s, 5, %(preferred_topic_order)s) RETURNING id;
+INSERT INTO TB_TOPIC (NAME, DESCRIPTION, QUESTION_AMOUNT, PREFERRED_TOPIC_ORDER)
+VALUES (%(name)s, %(description)s, 5, %(preferred_topic_order)s) RETURNING ID;
             """,
             {
                 "name": topic.name,
@@ -84,8 +85,8 @@ def save_question(question: Question) -> Question:
     def process_save(cur: cursor):
         cur.execute(
             """
-            INSERT INTO tb_question (question, score, topic_id, preferred_question_order)
-            VALUES (%(question)s, %(score)s, (select id from tb_topic where name = %(topic_name)s), %(preferred_question_order)s) RETURNING id;
+INSERT INTO TB_QUESTION (QUESTION, SCORE, TOPIC_ID, PREFERRED_QUESTION_ORDER)
+VALUES (%(question)s, %(score)s, (SELECT ID FROM TB_TOPIC WHERE NAME = %(topic_name)s), %(preferred_question_order)s) RETURNING ID;
             """,
             {
                 "question": question.question,
@@ -103,6 +104,45 @@ def save_question(question: Question) -> Question:
         )
 
     return create_cursor(process_save)
+
+
+def save_suggested_response(
+    suggested_response: DbSuggestedResponse,
+) -> DbSuggestedResponse:
+    assert (
+        suggested_response.question.id is not None
+    ), "There is no question id. Make sure it exists to store the suggestion"
+
+    def process_save(cur: cursor):
+        cur.execute(
+            """
+INSERT INTO PUBLIC.TB_SUGGESTED_RESPONSE(TITLE, SUBTITLE, BODY, QUESTION_ID)
+VALUES(%(title)s, %(subtitle)s, %(body)s, %(question_id)s) RETURNING ID
+            """,
+            {
+                "title": suggested_response.title,
+                "subtitle": suggested_response.subtitle,
+                "body": suggested_response.body,
+                "question_id": suggested_response.question.id,
+            },
+        )
+        copy = suggested_response.model_copy()
+        copy.id = cur.fetchone()[0]
+        return copy
+
+    return create_cursor(process_save)
+
+
+def delete_suggested_response(id: int):
+    create_cursor(
+        lambda cur: cur.execute(
+            """
+                DELETE FROM TB_SUGGESTED_RESPONSE
+                where id = %(id)s;
+                """,
+            {"id": id},
+        )
+    )
 
 
 def delete_question(question: Question):
@@ -164,14 +204,21 @@ def save_questionnaire_status(
         if questionnaire_status.id is None:
             cur.execute(
                 """
-insert into public.tb_questionnaire_status(session_id, topic, question, answer, score, sentiment_id)
-select %(session_id)s, %(topic)s, %(question)s, %(answer)s, %(score)s, (select id from tb_sentiment_score where name = %(sentiment)s)
-where not exists(
-    select * from tb_questionnaire_status
-        where session_id = %(session_id)s
-        and topic = %(topic)s
-        and question = %(question)s
-) returning id
+INSERT INTO PUBLIC.TB_QUESTIONNAIRE_STATUS(SESSION_ID, TOPIC, QUESTION, ANSWER, SCORE, SENTIMENT_ID)
+SELECT %(session_id)s,
+	%(topic)s,
+	%(question)s,
+	%(answer)s,
+	%(score)s,
+	(SELECT ID
+		FROM TB_SENTIMENT_SCORE
+		WHERE NAME = %(sentiment)s)
+WHERE NOT EXISTS
+		(SELECT *
+			FROM TB_QUESTIONNAIRE_STATUS
+			WHERE SESSION_ID = %(session_id)s
+				AND TOPIC = %(topic)s
+				AND QUESTION = %(question)s ) RETURNING ID
                 """,
                 {
                     "session_id": questionnaire_status.session_id,
@@ -524,6 +571,9 @@ ORDER BY NAME
 
 if __name__ == "__main__":
     from data_assessment_agent.test.provider import topic_provider, question_provider
+    from data_assessment_agent.test.provider.suggestion_provider import (
+        create_suggestion_response,
+    )
 
     def write_question_and_delete():
         topic = topic_provider.create_dummy_topic()
@@ -539,6 +589,7 @@ if __name__ == "__main__":
         delete_topic(topic)
 
     questions = load_questions()
+    first_question = questions[0]
     assert questions is not None
     last_question = select_last_question("")
     assert last_question is None
@@ -581,3 +632,11 @@ if __name__ == "__main__":
     topics = select_topics()
     for topic in topics:
         print(topic)
+
+    print("=== Save suggested response ===")
+    suggestion = create_suggestion_response()
+    suggestion.question = first_question
+    saved_suggestion = save_suggested_response(suggestion)
+    assert saved_suggestion.id is not None
+
+    delete_suggested_response(saved_suggestion.id)

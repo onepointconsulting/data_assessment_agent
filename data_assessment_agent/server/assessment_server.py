@@ -16,7 +16,11 @@ from data_assessment_agent.service.persistence_service import (
     select_questionnaire_counts,
     select_topics,
 )
-from data_assessment_agent.model.assessment_framework import Question, SessionMessage
+from data_assessment_agent.model.assessment_framework import (
+    Question,
+    SessionMessage,
+    SuggestedResponse,
+)
 from data_assessment_agent.model.transport import ServerMessage
 from data_assessment_agent.model.db_model import (
     create_questionnaire_status,
@@ -144,7 +148,7 @@ async def handle_next_question(session_message: SessionMessage):
 
 
 async def send_question_to_client(sid: str, session_id: str, next_question: Question):
-    response = f"""Topic: {next_question.category} ({next_question.finished_topic_count} out of {next_question.topic_total} topics)
+    response = f"""Topic: {next_question.category} ({next_question.finished_topic_count} out of {next_question.topic_total} topics
 
 Question {next_question.question_count} out of {next_question.total_questions_in_topic} in this topic
 

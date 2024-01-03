@@ -17,6 +17,7 @@ CREATE DATABASE data_assessment_questionnaire
 
 
 DROP TABLE IF EXISTS public.tb_questionnaire_status;
+DROP TABLE IF EXISTS public.tb_suggested_response;
 DROP TABLE IF EXISTS public.tb_question;
 DROP TABLE IF EXISTS public.tb_topic;
 DROP TABLE IF EXISTS public.tb_sentiment_score;
@@ -32,6 +33,21 @@ CREATE TABLE public.tb_topic
 );
 
 ALTER TABLE tb_topic ADD CONSTRAINT topic_name_unique UNIQUE (name);
+
+CREATE TABLE public.tb_suggested_response
+(
+    id serial NOT NULL,
+    title character varying(256) NOT NULL,
+    subtitle character varying(256),
+    body character varying(1024) NOT NULL,
+    question_id integer NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT question_id FOREIGN KEY (question_id)
+        REFERENCES public.tb_question (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
 
 CREATE TABLE public.tb_question
 (
