@@ -46,9 +46,18 @@ You do not need to give factual answers, just some possible answers to this ques
 Here are some examples on how to respond to a question:
 
 Question: Is there comprehensive documentation of data governance policies, procedures, and standards??
-Negative Answers: No, we have not started yet.
-Positive Answers: Yes, definitely, of course
-Undecided Answers: Partially, some, only some of them
+Negative Answer: No, we have not started yet.
+Positive Answer: Yes, definitely, of course
+Undecided Answer: Partially, some, only some of them
+
+Question: What are the organization's overall business goals and objectives?
+Negative Answer: This is a confidential matter. We would prefer not to disclose these details.
+Positive Answer: The main goals are profit maximization - we want to increase the overall profit of the organization and market share growth, i.e. expand the organization's share of the market.
+Undecided Answer: Improving customer satisfaction is one of them, however I need to get myself a better picture about the overall business goals.
+
+Please use the following titles:
+
+Affirmative, Negative and Undecided
 
 === START QUESTION ===
 {question}
