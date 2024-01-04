@@ -53,4 +53,7 @@ Undecided Answers: Partially, some, only some of them
 === START QUESTION ===
 {question}
 === END QUESTION ===
+
+Please generate only 3 answers at most.
+
 """
