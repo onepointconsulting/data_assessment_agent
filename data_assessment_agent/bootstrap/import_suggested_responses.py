@@ -4,7 +4,7 @@ from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.service.persistence_service import (
     load_questions,
     save_suggested_response,
-    suggestion_exists_for
+    suggestion_exists_for,
 )
 from data_assessment_agent.service.suggestion_service import generate_suggestions
 from data_assessment_agent.model.db_model import create_db_suggested_response
@@ -22,7 +22,9 @@ if __name__ == "__main__":
                     generate_suggestions(question_obj.question, question_obj.topic.name)
                 )
                 for resp in suggested_response_list.suggested_responses:
-                    db_suggested_response = create_db_suggested_response(resp, question_obj)
+                    db_suggested_response = create_db_suggested_response(
+                        resp, question_obj
+                    )
                     saved_suggestion = save_suggested_response(db_suggested_response)
                     logger.info("Saved %s", saved_suggestion)
             except:

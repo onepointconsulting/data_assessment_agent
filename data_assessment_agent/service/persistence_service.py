@@ -16,9 +16,7 @@ from data_assessment_agent.model.assessment_framework import SuggestedResponse
 
 
 def connect_to_db() -> connection:
-    conn = psycopg2.connect(
-        f"dbname={db_cfg.db_name} user={db_cfg.db_user} password={db_cfg.db_password} host={db_cfg.db_host} port={db_cfg.db_port}"
-    )
+    conn = psycopg2.connect(db_cfg.db_conn_str)
     return conn
 
 
@@ -161,6 +159,7 @@ WHERE Q.QUESTION = %(question)s
             {"question": question_str, "topic": topic},
         )
         return list(cur.fetchall())
+
     counts = create_cursor(handle_select)
     return counts[0][0] > 0
 

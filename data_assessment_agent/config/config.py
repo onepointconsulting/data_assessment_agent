@@ -84,6 +84,8 @@ class DBConfig:
     db_password = os.getenv("DB_PASSWORD")
     assert db_password is not None
 
+    db_conn_str = f"dbname={db_name} user={db_user} password={db_password} host={db_host} port={db_port}"
+
 
 cfg = Config()
 

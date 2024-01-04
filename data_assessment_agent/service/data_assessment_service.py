@@ -2,13 +2,13 @@ from typing import Union
 from data_assessment_agent.model.assessment_framework import Question
 from data_assessment_agent.service.persistence_service import (
     load_questions,
-    select_last_question,
     select_remaining_questions,
     select_answered_questions_in_topic,
     select_answered_questions_in_session,
     select_remaining_topics,
     select_initial_question_from_topic,
 )
+from data_assessment_agent.service.persistence_service_async import select_last_question
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
 from data_assessment_agent.config.log_factory import logger
 
@@ -27,7 +27,7 @@ def initial_question() -> Question:
 
 
 async def select_next_question(session_id: str) -> Union[Question, None]:
-    first_question = select_last_question(session_id)
+    first_question = await select_last_question(session_id)
     if first_question is None:
         return initial_question()
     elif first_question.answer is None and first_question.previous_answer_count == 0:
