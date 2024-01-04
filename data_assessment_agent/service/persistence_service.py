@@ -12,6 +12,7 @@ from data_assessment_agent.model.db_model import (
     QuestionnaireCounts,
     SessionReport,
 )
+from data_assessment_agent.model.assessment_framework import SuggestedResponse
 
 
 def connect_to_db() -> connection:
@@ -530,7 +531,7 @@ LIMIT 1
         )
     
 
-def select_suggestions(question: str, topic: str) -> List[DbSuggestedResponse]:
+def select_suggestions(question: str, topic: str) -> List[SuggestedResponse]:
     query = """
 SELECT Q.ID, Q.QUESTION, Q.SCORE, T.ID, T.NAME, T.DESCRIPTION, S.ID, S.TITLE, S.SUBTITLE, S.BODY
 FROM TB_SUGGESTED_RESPONSE S
@@ -544,10 +545,8 @@ WHERE Q.QUESTION = %(question)s
     response_list: list = create_cursor(handle_select)
     res_list = []
     for r in response_list:
-        (question_id, question, score, topic_id, topic_name, topic_description, suggestion_id, suggestion_title, suggestion_subtitle, suggestion_body) = r
-        topic = Topic(id=topic_id, name=topic_name, description=topic_description)
-        db_question = Question(id=question_id, question=question, score=score, topic=topic)
-        suggestion = DbSuggestedResponse(id=suggestion_id, title=suggestion_title, subtitle=suggestion_subtitle, body=suggestion_body, question=db_question)
+        (_, _, _, _, _, _, _, suggestion_title, suggestion_subtitle, suggestion_body) = r
+        suggestion = SuggestedResponse(title=suggestion_title, subtitle=suggestion_subtitle, body=suggestion_body)
         res_list.append(suggestion)
     return res_list
 

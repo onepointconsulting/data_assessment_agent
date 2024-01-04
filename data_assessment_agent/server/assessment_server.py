@@ -15,11 +15,11 @@ from data_assessment_agent.service.persistence_service import (
     select_last_empty_question,
     select_questionnaire_counts,
     select_topics,
+    select_suggestions
 )
 from data_assessment_agent.model.assessment_framework import (
     Question,
-    SessionMessage,
-    SuggestedResponse,
+    SessionMessage
 )
 from data_assessment_agent.model.transport import ServerMessage
 from data_assessment_agent.model.db_model import (
@@ -144,6 +144,7 @@ async def handle_next_question(session_message: SessionMessage):
     next_question.total_questions_in_topic = questionnaire_counts.question_total
     next_question.finished_topic_count = questionnaire_counts.finished_topic_count + 1
     next_question.topic_total = questionnaire_counts.topic_total
+    next_question.suggestions = select_suggestions(session_message.next_question.question, session_message.next_question.category)
     await send_question_to_client(sid, session_id, next_question)
 
 
@@ -157,7 +158,7 @@ Question {next_question.question_count} out of {next_question.total_questions_in
     await sio.emit(
         Commands.SERVER_MESSAGE,
         ServerMessage(
-            response=response, sources=None, sessionId=session_id
+            response=response, sources=None, sessionId=session_id, suggestions=next_question.suggestions
         ).model_dump_json(),
         room=sid,
     )
