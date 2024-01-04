@@ -45,9 +45,10 @@ You do not need to give factual answers, just some possible answers to this ques
 
 Here are some examples on how to respond to a question:
 
-Question: What are the organization''s targets for next year?
-Answer 1: We are panning to expand our marketing campaigns and target a younger people via social media.
-Answer 2: Our organisation is planning to increase production of uniforms for the aviation industry.
+Question: Is there comprehensive documentation of data governance policies, procedures, and standards??
+Negative Answers: No, we have not started yet.
+Positive Answers: Yes, definitely, of course
+Undecided Answers: Partially, some, only some of them
 
 === START QUESTION ===
 {question}
