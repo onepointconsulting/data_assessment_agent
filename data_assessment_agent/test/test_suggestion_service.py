@@ -7,7 +7,7 @@ from data_assessment_agent.test.provider.sentiment_provider import create_sentim
 class TestPersistenceService(unittest.TestCase):
     def test_create_user_message(self):
         question, _ = create_sentiment_qa()
-        suggestion_user_message = create_user_message(question)
+        suggestion_user_message = create_user_message(question, "Data Analytics")
         assert question in suggestion_user_message
 
 

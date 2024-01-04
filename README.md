@@ -68,6 +68,12 @@ python -m unittest
 python ./data_assessment_agent/bootstrap/import_framework.py
 ```
 
+You can also generate all of the suggestions for responses using this command:
+
+```
+python ./data_assessment_agent/bootstrap/import_suggested_responses.py
+```
+
 ## Running the server
 
 Please run the server like this from the project's directory:

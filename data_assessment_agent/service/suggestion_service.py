@@ -16,14 +16,16 @@ from data_assessment_agent.service.openai_support import (
 PROMPT_KEY = "suggestion"
 
 
-def create_user_message(question: str) -> str:
+def create_user_message(question: str, topic: str) -> str:
     user_prompt = prompts[PROMPT_KEY]["user_message"]
-    return user_prompt.format(question=question)
+    return user_prompt.format(question=question, topic=topic)
 
 
-async def generate_suggestions(question: str) -> Union[SuggestedResponseList, None]:
+async def generate_suggestions(
+    question: str, topic: str
+) -> Union[SuggestedResponseList, None]:
     logger.info("Getting suggestions for %s", question)
-    user_message = create_user_message(question)
+    user_message = create_user_message(question, topic)
     system_message = prompts[PROMPT_KEY]["system_message"]
     completion = await create_completion(
         system_message, user_message, suggested_response_list_spec

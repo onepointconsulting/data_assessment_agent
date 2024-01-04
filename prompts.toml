@@ -40,8 +40,14 @@ The question can be found between === START QUESTION === and === END QUESTION ==
 
 [suggestion]
 system_message = "You are a helpful assistant who gives suggestions in British English"
-user_message = """Give a list of possible answers for the question that can be found between === START QUESTION === and === END QUESTION ===.
+user_message = """Give a list of possible answers for the question related to the topic "{topic}" that can be found between === START QUESTION === and === END QUESTION ===.
 You do not need to give factual answers, just some possible answers to this question. If the answer is affirmative use a simple "Yes" or negative a simple "No" as the text answer.
+
+Here are some examples on how to respond to a question:
+
+Question: What are the organization''s targets for next year?
+Answer 1: We are panning to expand our marketing campaigns and target a younger people via social media.
+Answer 2: Our organisation is planning to increase production of uniforms for the aviation industry.
 
 === START QUESTION ===
 {question}

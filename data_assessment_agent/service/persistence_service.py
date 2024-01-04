@@ -146,6 +146,25 @@ def delete_question(question: Question):
     )
 
 
+def suggestion_exists_for(question: Question):
+    question_str = question.question
+    topic = question.topic.name
+
+    def handle_select(cur: cursor):
+        cur.execute(
+            """
+SELECT COUNT(*) FROM TB_SUGGESTED_RESPONSE S
+INNER JOIN TB_QUESTION Q ON Q.ID = S.QUESTION_ID
+INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
+WHERE Q.QUESTION = %(question)s
+	AND T.NAME = %(topic)s""",
+            {"question": question_str, "topic": topic},
+        )
+        return list(cur.fetchall())
+    counts = create_cursor(handle_select)
+    return counts[0][0] > 0
+
+
 def delete_suggested_response(id: int):
     create_cursor(
         lambda cur: cur.execute(
@@ -529,7 +548,7 @@ LIMIT 1
             finished_topic_count=0,
             topic_total=0,
         )
-    
+
 
 def select_suggestions(question: str, topic: str) -> List[SuggestedResponse]:
     query = """
@@ -545,8 +564,21 @@ WHERE Q.QUESTION = %(question)s
     response_list: list = create_cursor(handle_select)
     res_list = []
     for r in response_list:
-        (_, _, _, _, _, _, _, suggestion_title, suggestion_subtitle, suggestion_body) = r
-        suggestion = SuggestedResponse(title=suggestion_title, subtitle=suggestion_subtitle, body=suggestion_body)
+        (
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            suggestion_title,
+            suggestion_subtitle,
+            suggestion_body,
+        ) = r
+        suggestion = SuggestedResponse(
+            title=suggestion_title, subtitle=suggestion_subtitle, body=suggestion_body
+        )
         res_list.append(suggestion)
     return res_list
 
@@ -674,6 +706,9 @@ if __name__ == "__main__":
     delete_suggested_response(saved_suggestion.id)
 
     print("=== Suggestions ===")
-    suggestions = select_suggestions("What are the organization's overall business goals and objectives?", "Business Alignment")
+    suggestions = select_suggestions(
+        "What are the organization's overall business goals and objectives?",
+        "Business Alignment",
+    )
     for s in suggestions:
         print(s)
