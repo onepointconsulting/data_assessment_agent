@@ -1,12 +1,15 @@
-from typing import Union, Any
+from typing import Union, Any, List
 
 import asyncio
+
 import sys
 from typing import Callable
 
+from psycopg import AsyncCursor
 from psycopg_pool import AsyncConnectionPool
 from data_assessment_agent.config.config import db_cfg
-from data_assessment_agent.model.db_model import QuestionnaireStatus
+from data_assessment_agent.model.db_model import QuestionnaireStatus, TopicScore
+from data_assessment_agent.config.log_factory import logger
 
 
 def create_pool():
@@ -24,9 +27,19 @@ asynch_pool = create_pool()
 async def open_pool():
     await asynch_pool.open()
     await asynch_pool.wait()
-    print("Connection Pool Opened")
+    logger.info("Asynch connection pool Opened")
+
 
 asyncio.run(open_pool())
+
+
+async def close_pool(_):
+    logger.info("Trying to close asynch pool")
+    try:
+        await asynch_pool.close()
+        logger.info("Closed asynch pool")
+    except:
+        logger.exception("Could not close pool")
 
 
 async def create_cursor(func: Callable) -> Any:
@@ -37,7 +50,7 @@ async def create_cursor(func: Callable) -> Any:
 
 
 async def select_last_question(session_id: str) -> Union[QuestionnaireStatus, None]:
-    async def handle_select(cur):
+    async def handle_select(cur: AsyncCursor):
         await cur.execute(
             """
 SELECT S.ID,
@@ -102,7 +115,7 @@ LIMIT 1""",
 
 
 async def select_random_session() -> Union[str, None]:
-    async def handle_select(cur):
+    async def handle_select(cur: AsyncCursor):
         await cur.execute(
             """
 select session_id from public.tb_questionnaire_status order by random() limit 1
@@ -116,6 +129,63 @@ select session_id from public.tb_questionnaire_status order by random() limit 1
     return None
 
 
+async def handle_select_func(query: str, query_params: dict):
+    async def func(cur: AsyncCursor):
+        await cur.execute(
+            query,
+            query_params,
+        )
+        return list(await cur.fetchall())
+
+    return func
+
+
+async def select_last_empty_question(
+    session_id: str,
+) -> Union[QuestionnaireStatus, None]:
+    query = """
+SELECT ID,
+	SESSION_ID,
+	TOPIC,
+	QUESTION,
+	CREATED_AT
+FROM TB_QUESTIONNAIRE_STATUS
+WHERE SESSION_ID = %(session_id)s
+	AND ANSWER IS NULL
+ORDER BY ID DESC
+LIMIT 1
+"""
+    parameter_map = {"session_id": session_id}
+    handle_select = await handle_select_func(query, parameter_map)
+    unanswered_questions: list = await create_cursor(handle_select)
+    if len(unanswered_questions) > 0:
+        (id, session_id, topic, question, _) = unanswered_questions[0]
+        return QuestionnaireStatus(
+            id=id, session_id=session_id, topic=topic, question=question
+        )
+    return None
+
+
+async def select_topic_scores(session_id: str) -> Union[List[TopicScore], None]:
+    query = """
+SELECT TOPIC_NAME,
+	SUM(MAX_SCORE) AS MAX_SCORE,
+	SUM(SCORE) AS SCORE
+FROM VW_QUESTION_SCORES
+WHERE SESSION_ID = %(session_id)s
+GROUP BY TOPIC_NAME;
+"""
+    parameter_map = {"session_id": session_id}
+    handle_select = await handle_select_func(query, parameter_map)
+    topic_scores_raw: list = await create_cursor(handle_select)
+    if len(topic_scores_raw) > 0:
+        return [
+            TopicScore(topic_name=topic_name, max_score=max_score, score=score)
+            for (topic_name, max_score, score) in topic_scores_raw
+        ]
+    return None
+
+
 if __name__ == "__main__":
 
     async def test_select_last_session():
@@ -123,9 +193,19 @@ if __name__ == "__main__":
         print(session_id)
         last_question = await select_last_question(session_id)
         print(last_question)
-    # if session_id is not None:
-    #     print(session_id)
-        
-    asyncio.run(test_select_last_session())
 
-    
+    async def test_select_last_empty_question():
+        session_id = await select_random_session()
+        print(session_id)
+        last_empty = await select_last_empty_question(session_id)
+        print(last_empty)
+
+    async def test_select_topic_scores():
+        session_id = await select_random_session()
+        print(session_id)
+        topic_scores = await select_topic_scores(session_id)
+        if topic_scores is not None:
+            for topic_score in topic_scores:
+                print(topic_score)
+
+    asyncio.run(test_select_topic_scores())

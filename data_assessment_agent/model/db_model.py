@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union, Optional, List
 from datetime import datetime
 
 from pydantic import BaseModel, Field
@@ -77,6 +77,17 @@ class QuestionnaireCounts(BaseModel):
         ..., description="The total number of finished topics"
     )
     topic_total: int = Field(..., description="The total count of topics")
+
+
+class TopicScore(BaseModel):
+    topic_name: str = Field(..., description="The name of the topic")
+    max_score: int = Field(..., description="The maximum score in this topic")
+    score: int = Field(..., description="The score for the specific topic")
+
+
+class SessionScores(BaseModel):
+    session_id: str = Field(..., description="The session id")
+    topic_scores: List[TopicScore] = Field(..., description="The topic scores")
 
 
 def create_questionnaire_status(

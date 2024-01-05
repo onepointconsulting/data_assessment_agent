@@ -1,4 +1,5 @@
 import socketio
+import asyncio
 import json
 from aiohttp import web
 from enum import StrEnum
@@ -12,7 +13,6 @@ from data_assessment_agent.service.data_assessment_service import (
 )
 from data_assessment_agent.service.persistence_service import (
     save_questionnaire_status,
-    select_last_empty_question,
     select_questionnaire_counts,
     select_topics,
     select_suggestions,
@@ -25,6 +25,10 @@ from data_assessment_agent.model.db_model import (
 )
 from data_assessment_agent.service.sentiment_service import get_answer_sentiment
 from data_assessment_agent.service.reporting_service import generate_session_report
+from data_assessment_agent.service.persistence_service_async import (
+    close_pool,
+    select_last_empty_question,
+)
 
 sio = socketio.AsyncServer(cors_allowed_origins=cfg.websocket_cors_allowed_origins)
 app = web.Application()
@@ -100,7 +104,7 @@ async def client_message(sid: str, message):
                 sid, "No session id. Please refresh the page and try again."
             )
             return
-        questionnaire_status = select_last_empty_question(session_id)
+        questionnaire_status = await select_last_empty_question(session_id)
         if questionnaire_status is None:
             await send_internal_error(sid)
             return
@@ -265,6 +269,15 @@ async def get_handler(_):
 
 
 if __name__ == "__main__":
+    import sys
+    from signal import SIGINT, SIGTERM
+
     app.add_routes(routes)
     app.router.add_static("/", path=cfg.ui_folder.as_posix(), name="ui")
-    web.run_app(app, host=cfg.websocket_server, port=cfg.websocket_port)
+    loop = asyncio.new_event_loop()
+
+    if sys.platform != "win32":
+        for signal in [SIGINT, SIGTERM]:
+            loop.add_signal_handler(signal, close_pool)
+
+    web.run_app(app, host=cfg.websocket_server, port=cfg.websocket_port, loop=loop)
