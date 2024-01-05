@@ -8,7 +8,11 @@ from typing import Callable
 from psycopg import AsyncCursor
 from psycopg_pool import AsyncConnectionPool
 from data_assessment_agent.config.config import db_cfg
-from data_assessment_agent.model.db_model import QuestionnaireStatus, TopicScore
+from data_assessment_agent.model.db_model import (
+    QuestionnaireStatus,
+    TopicScore,
+    QuestionScore,
+)
 from data_assessment_agent.config.log_factory import logger
 
 
@@ -47,6 +51,22 @@ async def create_cursor(func: Callable) -> Any:
         async with conn.cursor() as cur:
             print("Cursor type: ", type(cur))
             return await func(cur)
+
+
+async def handle_select_func(query: str, query_params: dict):
+    async def func(cur: AsyncCursor):
+        await cur.execute(
+            query,
+            query_params,
+        )
+        return list(await cur.fetchall())
+
+    return func
+
+
+async def select_from(query: str, parameter_map: dict) -> list:
+    handle_select = await handle_select_func(query, parameter_map)
+    return await create_cursor(handle_select)
 
 
 async def select_last_question(session_id: str) -> Union[QuestionnaireStatus, None]:
@@ -129,17 +149,6 @@ select session_id from public.tb_questionnaire_status order by random() limit 1
     return None
 
 
-async def handle_select_func(query: str, query_params: dict):
-    async def func(cur: AsyncCursor):
-        await cur.execute(
-            query,
-            query_params,
-        )
-        return list(await cur.fetchall())
-
-    return func
-
-
 async def select_last_empty_question(
     session_id: str,
 ) -> Union[QuestionnaireStatus, None]:
@@ -156,8 +165,7 @@ ORDER BY ID DESC
 LIMIT 1
 """
     parameter_map = {"session_id": session_id}
-    handle_select = await handle_select_func(query, parameter_map)
-    unanswered_questions: list = await create_cursor(handle_select)
+    unanswered_questions: list = await select_from(query, parameter_map)
     if len(unanswered_questions) > 0:
         (id, session_id, topic, question, _) = unanswered_questions[0]
         return QuestionnaireStatus(
@@ -176,14 +184,29 @@ WHERE SESSION_ID = %(session_id)s
 GROUP BY TOPIC_NAME;
 """
     parameter_map = {"session_id": session_id}
-    handle_select = await handle_select_func(query, parameter_map)
-    topic_scores_raw: list = await create_cursor(handle_select)
-    if len(topic_scores_raw) > 0:
-        return [
-            TopicScore(topic_name=topic_name, max_score=max_score, score=score)
-            for (topic_name, max_score, score) in topic_scores_raw
-        ]
-    return None
+    topic_scores_raw: list = await select_from(query, parameter_map)
+    return [
+        TopicScore(topic_name=topic_name, max_score=max_score, score=score)
+        for (topic_name, max_score, score) in topic_scores_raw
+    ]
+
+
+async def select_question_scores(session_id: str) -> Union[List[QuestionScore], None]:
+    query = """
+select score, max_score, sentiment_name, topic_name, session_id from vw_question_scores where session_id = %(session_id)s
+"""
+    parameter_map = {"session_id": session_id}
+    scores_raw: list = await select_from(query, parameter_map)
+    return [
+        QuestionScore(
+            score=score,
+            max_score=max_score,
+            sentiment_name=sentiment_name,
+            topic_name=topic_name,
+            session_id=session_id,
+        )
+        for (score, max_score, sentiment_name, topic_name, session_id) in scores_raw
+    ]
 
 
 if __name__ == "__main__":
@@ -204,8 +227,15 @@ if __name__ == "__main__":
         session_id = await select_random_session()
         print(session_id)
         topic_scores = await select_topic_scores(session_id)
-        if topic_scores is not None:
-            for topic_score in topic_scores:
-                print(topic_score)
+        for topic_score in topic_scores:
+            print(topic_score)
+
+    async def test_select_question_scores():
+        session_id = await select_random_session()
+        print(session_id)
+        topic_scores = await select_question_scores(session_id)
+        for topic_score in topic_scores:
+            print(topic_score)
 
     asyncio.run(test_select_topic_scores())
+    asyncio.run(test_select_question_scores())

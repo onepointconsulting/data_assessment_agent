@@ -25,7 +25,7 @@
       <bpmn:incoming>Flow_0n0tfha</bpmn:incoming>
       <bpmn:outgoing>Flow_18dyq7r</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_0xv8azp" name="Send question">
+    <bpmn:serviceTask id="Activity_0xv8azp" name="Send question to client">
       <bpmn:incoming>Flow_18blowk</bpmn:incoming>
       <bpmn:outgoing>Flow_1rjmohy</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -43,7 +43,7 @@
     <bpmn:endEvent id="Event_1smv4cr">
       <bpmn:incoming>Flow_0e1v8qs</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0e1v8qs" name="No response" sourceRef="Gateway_0mecyxg" targetRef="Event_1smv4cr" />
+    <bpmn:sequenceFlow id="Flow_0e1v8qs" name="No response / client resets session" sourceRef="Gateway_0mecyxg" targetRef="Event_1smv4cr" />
     <bpmn:sequenceFlow id="Flow_18dyq7r" sourceRef="Activity_0udhixp" targetRef="Activity_0a7huza" />
     <bpmn:sequenceFlow id="Flow_18blowk" sourceRef="Activity_0a7huza" targetRef="Activity_0xv8azp" />
     <bpmn:serviceTask id="Activity_0a7huza" name="Select question">
@@ -118,10 +118,6 @@
         <di:waypoint x="670" y="197" />
         <di:waypoint x="730" y="197" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_18dyq7r_di" bpmnElement="Flow_18dyq7r">
-        <di:waypoint x="830" y="197" />
-        <di:waypoint x="890" y="197" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1rjmohy_di" bpmnElement="Flow_1rjmohy">
         <di:waypoint x="1147" y="197" />
         <di:waypoint x="1212" y="197" />
@@ -138,8 +134,12 @@
         <di:waypoint x="1237" y="310" />
         <di:waypoint x="1377" y="310" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1247" y="291" width="63" height="14" />
+          <dc:Bounds x="1265" y="270" width="69" height="40" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18dyq7r_di" bpmnElement="Flow_18dyq7r">
+        <di:waypoint x="830" y="197" />
+        <di:waypoint x="890" y="197" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_18blowk_di" bpmnElement="Flow_18blowk">
         <di:waypoint x="990" y="197" />
