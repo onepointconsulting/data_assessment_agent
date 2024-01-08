@@ -26,10 +26,10 @@ def generate_spider_chart(
     ax = fig.add_subplot(polar=True)
     # Basic plot
     
-    ax.plot(angles, scores, "o--", color="g")
+    ax.plot(np.concatenate((angles, [angles[0]])), np.concatenate((scores, [scores[0]])), "o--", color="g")
 
     label_position=ax.get_rlabel_position()
-    ax.text(np.radians(label_position+10),ax.get_rmax()/2.,'Assessment scores',
+    ax.text(np.radians(label_position+10),ax.get_rmax()/2.,'Score points',
         rotation=label_position,ha='center',va='center')
     
     # fill plot
@@ -55,7 +55,6 @@ def generate_spider_chart(
 
     plt.grid(True)
     plt.tight_layout()
-    # plt.legend()
 
     chart_file = (
         cfg.chart_tmp_folder / f"{topic_score_result.session_id}.{output_format}"
