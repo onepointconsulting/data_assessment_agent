@@ -77,12 +77,14 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
                 return Question(question="", category="", score=0, final=True)
             ranking_topics_str = "\n".join(ranking_topics)
             # Ask ChatGPT to rank the topics
+            logger.info("ranking_topics_str: %s", ranking_topics_str)
             missing_topics = await rank_topics(question_answers, ranking_topics_str)
             if len(missing_topics) == 0:
                 return None
             selected_topic = missing_topics[0]
+            logger.info("selected topic: %s", selected_topic)
             # Start with a random question in this topic
-            selected_question = select_initial_question_from_topic(selected_topic)
+            selected_question = select_initial_question_from_topic(selected_topic, session_id)
             return create_question(
                 selected_question.topic.name, selected_question.question
             )

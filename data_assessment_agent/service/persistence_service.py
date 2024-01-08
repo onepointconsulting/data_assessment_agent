@@ -461,7 +461,8 @@ LIMIT 1
         return None
 
 
-def select_initial_question_from_topic(topic: str) -> Union[Question, None]:
+def select_initial_question_from_topic(topic: str, session_id) -> Union[Question, None]:
+    # This query makes sure the an hallucinated topic is replaced by a random topic.
     query = """
 SELECT Q.ID,
 	Q.QUESTION,
@@ -475,11 +476,26 @@ SELECT Q.ID,
 		WHERE TOPIC_ID = T.ID) TOPIC_COUNT
 FROM TB_QUESTION Q
 INNER JOIN TB_TOPIC T ON Q.TOPIC_ID = T.ID
-WHERE T.NAME = %(topic)s
+WHERE T.NAME = (
+    SELECT COALESCE(
+        (SELECT NAME
+            FROM TB_TOPIC
+            WHERE NAME = %(topic)s AND NAME NOT IN
+                    (SELECT TOPIC
+                        FROM TB_QUESTIONNAIRE_STATUS
+                        WHERE SESSION_ID = %(session_id)s)),
+        (SELECT NAME -- Go for the random topic
+            FROM TB_TOPIC
+            WHERE NAME NOT IN
+                    (SELECT TOPIC
+                        FROM TB_QUESTIONNAIRE_STATUS
+                        WHERE SESSION_ID = %(session_id)s)
+            ORDER BY RANDOM() LIMIT 1))
+)
 ORDER BY preferred_question_order
 LIMIT 1
 """
-    parameter_map = {"topic": topic}
+    parameter_map = {"topic": topic, "session_id": session_id}
     handle_select = handle_select_func(query, parameter_map)
     questions: list = create_cursor(handle_select)
     if len(questions) > 0:

@@ -47,10 +47,14 @@ async def close_pool(_):
 
 
 async def create_cursor(func: Callable) -> Any:
-    async with asynch_pool.connection() as conn:
-        async with conn.cursor() as cur:
-            print("Cursor type: ", type(cur))
-            return await func(cur)
+    try:
+        async with asynch_pool.connection() as conn:
+            async with conn.cursor() as cur:
+                return await func(cur)
+    except:
+        logger.exception("Cannot get a connection")
+        await close_pool()
+        await open_pool()
 
 
 async def handle_select_func(query: str, query_params: dict):
@@ -174,7 +178,7 @@ LIMIT 1
     return None
 
 
-async def select_topic_scores(session_id: str) -> Union[List[TopicScore], None]:
+async def select_topic_scores(session_id: str) -> List[TopicScore]:
     query = """
 SELECT TOPIC_NAME,
 	SUM(MAX_SCORE) AS MAX_SCORE,

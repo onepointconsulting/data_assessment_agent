@@ -29,6 +29,7 @@ from data_assessment_agent.service.persistence_service_async import (
     close_pool,
     select_last_empty_question,
 )
+from data_assessment_agent.service.spider_chart import generate_spider_chart_for
 
 sio = socketio.AsyncServer(cors_allowed_origins=cfg.websocket_cors_allowed_origins)
 app = web.Application()
@@ -90,7 +91,7 @@ async def start_session(sid: str, client_session):
             await handle_initial_question(session_message)
             await handle_next_question(session_message)
     except:
-        logger.error("Could not start session")
+        logger.exception("Could not start session")
         await send_internal_error(sid)
 
 
@@ -106,6 +107,7 @@ async def client_message(sid: str, message):
             return
         questionnaire_status = await select_last_empty_question(session_id)
         if questionnaire_status is None:
+            logger.warn("There is no empty question")
             await send_internal_error(sid)
             return
         answer = message_dict.get("message", None)
@@ -113,12 +115,15 @@ async def client_message(sid: str, message):
             await send_error(sid, "No message. Please refresh the page and try again.")
             return
         questionnaire_status.answer = answer
-        # TODO: Scoring will be defined later.
         questionnaire_status.score = 0
         await score_and_save_questionnaire_status(questionnaire_status)
         next_question = await select_next_question(session_id)
         if next_question.final:
-            await handle_final_question(session_message)
+            await handle_final_question(SessionMessage(
+                next_question=next_question,
+                sid=sid,
+                session_id=session_id
+            ))
         else:
             await handle_next_question(
                 SessionMessage(
@@ -126,7 +131,7 @@ async def client_message(sid: str, message):
                 )
             )
     except:
-        logger.error("Could not process user message")
+        logger.exception("Could not process user message")
         await send_internal_error(sid)
 
 
@@ -261,6 +266,16 @@ async def get_handler(request: web.Request) -> web.Response:
         report_path,
         headers={"CONTENT-DISPOSITION": f'attachment; filename="{report_path.name}"'},
     )
+
+
+# HTTP part
+@routes.get("/spider_chart/{session_id}")
+async def generate_spider_chart(request: web.Request) -> web.Response:
+    session_id = request.match_info.get("session_id", None)
+    if session_id is None:
+        raise web.HTTPNotFound(text="No session id specified")
+    chart_path = await generate_spider_chart_for(session_id, size=12, legend_size=20)
+    return web.FileResponse(chart_path)
 
 
 @routes.get("/")
