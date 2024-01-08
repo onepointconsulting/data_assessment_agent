@@ -85,6 +85,11 @@ class TopicScore(BaseModel):
     score: int = Field(..., description="The score for the specific topic")
 
 
+class TopicScoreResult(BaseModel):
+    session_id: str = Field(..., description="The session identifier")
+    topic_scores: List[TopicScore] = Field(..., description="The list of topic scores")
+
+
 class QuestionScore(BaseModel):
     score: int = Field(..., description="The score attained by the question")
     max_score: int = Field(..., description="The maximum possible score")

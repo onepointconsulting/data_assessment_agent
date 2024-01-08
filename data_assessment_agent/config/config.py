@@ -22,6 +22,14 @@ def create_if_not_exists(path: Path):
     assert path.exists(), f"Path {path} does not exist."
 
 
+def create_folder_property(key: str) -> Path:
+    prop_str = os.getenv(key)
+    assert prop_str is not None, f"Make sure you have defined the {key} property"
+    prop_folder = Path(prop_str)
+    create_if_not_exists(prop_folder)
+    return prop_folder
+
+
 class Config:
     """
     Class to store and manage configuration settings.
@@ -65,10 +73,10 @@ class Config:
     assert report_url_base is not None
 
     # UI
-    ui_folder_str = os.getenv("UI_FOLDER")
-    assert ui_folder_str is not None
-    ui_folder = Path(ui_folder_str)
-    create_if_not_exists(ui_folder)
+    ui_folder = create_folder_property("UI_FOLDER")
+
+    # Charts
+    chart_tmp_folder = create_folder_property("CHART_TMP_FOLDER")
 
 
 class DBConfig:

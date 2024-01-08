@@ -17,6 +17,7 @@ aiohttp = "^3.9.1"
 psycopg2 = "^2.9.9"
 asyncer = "^0.0.2"
 psycopg = {extras = ["binary", "pool"], version = "^3.1.16"}
+matplotlib = "^3.8.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.12.0"
