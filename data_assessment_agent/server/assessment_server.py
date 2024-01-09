@@ -300,8 +300,8 @@ if __name__ == "__main__":
     app.router.add_static("/", path=cfg.ui_folder.as_posix(), name="ui")
     loop = asyncio.new_event_loop()
 
-    if sys.platform != "win32":
-        for signal in [SIGINT, SIGTERM]:
-            loop.add_signal_handler(signal, close_pool)
+    # if sys.platform != "win32":
+    #     for signal in [SIGINT, SIGTERM]:
+    #         loop.add_signal_handler(signal, close_pool)
 
     web.run_app(app, host=cfg.websocket_server, port=cfg.websocket_port, loop=loop)
