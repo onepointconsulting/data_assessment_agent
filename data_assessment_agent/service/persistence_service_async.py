@@ -33,10 +33,12 @@ asynch_pool = create_pool()
 
 
 async def open_pool():
-    if not asynch_pool._opened:
+    try:
         await asynch_pool.open()
         await asynch_pool.wait()
         logger.info("Asynch connection pool Opened")
+    except:
+        logger.error("Could not open pool")
 
 
 asyncio.run(open_pool())
