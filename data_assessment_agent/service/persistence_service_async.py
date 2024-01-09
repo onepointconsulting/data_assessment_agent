@@ -199,6 +199,8 @@ LEFT JOIN
 """
     parameter_map = {"session_id": session_id}
     topic_scores_raw: list = await select_from(query, parameter_map)
+    if topic_scores_raw is None:
+        return []
     return [
         TopicScore(topic_name=topic_name, max_score=max_score, score=score)
         for (topic_name, max_score, score) in topic_scores_raw
