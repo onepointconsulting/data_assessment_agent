@@ -103,6 +103,14 @@ class SessionScores(BaseModel):
     topic_scores: List[TopicScore] = Field(..., description="The topic scores")
 
 
+class TotalScore(BaseModel):
+    total_score: int = Field(..., description="The sum of all question scores")
+    max_score: int = Field(..., description="The maximum possible score")
+    pct_score: float = Field(
+        ..., description="The percentage of the score relatively to the final score"
+    )
+
+
 def create_questionnaire_status(
     session_id: str, question: Union[Question, DomainQuestion, QuestionnaireStatus]
 ):

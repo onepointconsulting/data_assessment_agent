@@ -61,7 +61,9 @@ def generate_spider_chart(
     )
 
     ax.legend(
-        ["Assessment scores perimeter", "Assessment score area"], loc="lower left", bbox_to_anchor=(-0.1,-0.1)
+        ["Assessment scores perimeter", "Assessment score area"],
+        loc="lower left",
+        bbox_to_anchor=(-0.1, -0.1),
     )
 
     # Font size
@@ -85,11 +87,11 @@ async def generate_spider_chart_for(session_id: str, size=8, legend_size=16) -> 
 
 if __name__ == "__main__":
     import asyncio
-    from data_assessment_agent.service.persistence_service_async import select_random_session
+    from data_assessment_agent.service.persistence_service_async import (
+        select_random_session,
+    )
     from data_assessment_agent.config.log_factory import logger
 
     session_id = asyncio.run(select_random_session())
     graph_path = asyncio.run(generate_spider_chart_for(session_id, size=12))
     logger.info("graph path: %s", graph_path)
-
-

@@ -461,52 +461,6 @@ LIMIT 1
         return None
 
 
-def select_initial_question_from_topic(topic: str, session_id) -> Union[Question, None]:
-    # This query makes sure the an hallucinated topic is replaced by a random topic.
-    query = """
-SELECT Q.ID,
-	Q.QUESTION,
-	Q.SCORE,
-	Q.TOPIC_ID,
-	T.NAME TOPIC_NAME,
-	T.DESCRIPTION TOPIC_DESCRIPTION,
-
-	(SELECT COUNT(*)
-		FROM TB_QUESTION
-		WHERE TOPIC_ID = T.ID) TOPIC_COUNT
-FROM TB_QUESTION Q
-INNER JOIN TB_TOPIC T ON Q.TOPIC_ID = T.ID
-WHERE T.NAME = (
-    SELECT COALESCE(
-        (SELECT NAME
-            FROM TB_TOPIC
-            WHERE NAME = %(topic)s AND NAME NOT IN
-                    (SELECT TOPIC
-                        FROM TB_QUESTIONNAIRE_STATUS
-                        WHERE SESSION_ID = %(session_id)s)),
-        (SELECT NAME -- Go for the random topic
-            FROM TB_TOPIC
-            WHERE NAME NOT IN
-                    (SELECT TOPIC
-                        FROM TB_QUESTIONNAIRE_STATUS
-                        WHERE SESSION_ID = %(session_id)s)
-            ORDER BY RANDOM() LIMIT 1))
-)
-ORDER BY preferred_question_order
-LIMIT 1
-"""
-    parameter_map = {"topic": topic, "session_id": session_id}
-    handle_select = handle_select_func(query, parameter_map)
-    questions: list = create_cursor(handle_select)
-    if len(questions) > 0:
-        (id, question, score, topic_id, topic_name, topic_description, _) = questions[0]
-        topic = Topic(id=topic_id, name=topic_name, description=topic_description)
-        question = Question(id=id, question=question, score=score, topic=topic)
-        return question
-    else:
-        return None
-
-
 def select_questionnaire_counts(session_id: str) -> QuestionnaireCounts:
     query = """
 SELECT S.TOPIC,
@@ -697,10 +651,6 @@ if __name__ == "__main__":
     remaining_topics = select_remaining_topics("b8ce68f0-f754-4af8-8822-97dac817250d")
     for i, remaining_topic in enumerate(remaining_topics):
         print(remaining_topic)
-
-    print("== Random question from topic ==")
-    random_question = select_initial_question_from_topic("Advanced Analytics")
-    print(random_question)
 
     print("=== Session Report ===")
     report_entries = select_session_report("b8ce68f0-f754-4af8-8822-97dac817250d")

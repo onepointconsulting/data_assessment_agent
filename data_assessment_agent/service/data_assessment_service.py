@@ -1,4 +1,5 @@
-from typing import Union
+import random
+from typing import Union, List
 from data_assessment_agent.model.assessment_framework import Question
 from data_assessment_agent.service.persistence_service import (
     load_questions,
@@ -6,9 +7,11 @@ from data_assessment_agent.service.persistence_service import (
     select_answered_questions_in_topic,
     select_answered_questions_in_session,
     select_remaining_topics,
+)
+from data_assessment_agent.service.persistence_service_async import (
+    select_last_question,
     select_initial_question_from_topic,
 )
-from data_assessment_agent.service.persistence_service_async import select_last_question
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
 from data_assessment_agent.config.log_factory import logger
 
@@ -84,10 +87,33 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
             selected_topic = missing_topics[0]
             logger.info("selected topic: %s", selected_topic)
             # Start with a random question in this topic
-            selected_question = select_initial_question_from_topic(selected_topic, session_id)
+            selected_question = await select_initial_question_from_topic(
+                selected_topic, session_id
+            )
             return create_question(
                 selected_question.topic.name, selected_question.question
             )
+
+
+async def safe_question_rank(
+    topic: str, question_answers: str, ranking_questions: str, questions: List[str]
+) -> Question:
+    ranked_questions = await rank_questions(topic, question_answers, ranking_questions)
+    while len(ranked_questions) > 0:
+        candidate_question = ranked_questions[0]
+        if candidate_question in questions:
+            return create_question(topic, candidate_question)
+        ranked_questions = ranked_questions[1:]
+    if len(questions) > 0:
+        # ChatGPT must have failed to rank the questions
+        # Select random question
+        return selected_random_question(questions, topic)
+    return None
+
+
+def selected_random_question(questions: List[str], topic: str) -> Question:
+    selected_question = random.choice(questions)
+    return Question(category=topic, question=selected_question, score=0)
 
 
 def create_question(topic_name: str, question: str) -> Question:

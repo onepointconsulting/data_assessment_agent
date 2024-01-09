@@ -28,6 +28,7 @@ from data_assessment_agent.service.reporting_service import generate_session_rep
 from data_assessment_agent.service.persistence_service_async import (
     close_pool,
     select_last_empty_question,
+    calculate_simple_total_score,
 )
 from data_assessment_agent.service.spider_chart import generate_spider_chart_for
 
@@ -119,11 +120,11 @@ async def client_message(sid: str, message):
         await score_and_save_questionnaire_status(questionnaire_status)
         next_question = await select_next_question(session_id)
         if next_question.final:
-            await handle_final_question(SessionMessage(
-                next_question=next_question,
-                sid=sid,
-                session_id=session_id
-            ))
+            await handle_final_question(
+                SessionMessage(
+                    next_question=next_question, sid=sid, session_id=session_id
+                )
+            )
         else:
             await handle_next_question(
                 SessionMessage(
@@ -218,6 +219,8 @@ async def handle_final_question(session_message: SessionMessage):
     )
     if next_question.final:
         report_url = f"{cfg.report_url_base}/{session_id}"
+        # Get the final score
+        total_score = await calculate_simple_total_score(session_id)
         await sio.emit(
             Commands.SERVER_MESSAGE,
             ServerMessage(
@@ -226,8 +229,14 @@ async def handle_final_question(session_message: SessionMessage):
 
 You can download the report from [{report_url}]({report_url}).
 
-Your score will come soon!
-    """,
+
+| Result      | Score                         |
+|-------------|-------------------------------|
+| total score | {total_score.total_score}     |
+| max score   | {total_score.max_score}       |
+| percentage  | {total_score.pct_score:.2f} % |
+
+""",
                 sessionId=session_id,
             ).model_dump_json(),
             room=sid,

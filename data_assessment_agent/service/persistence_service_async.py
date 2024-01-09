@@ -12,6 +12,9 @@ from data_assessment_agent.model.db_model import (
     QuestionnaireStatus,
     TopicScore,
     QuestionScore,
+    Question,
+    Topic,
+    TotalScore,
 )
 from data_assessment_agent.config.log_factory import logger
 
@@ -37,7 +40,7 @@ async def open_pool():
 asyncio.run(open_pool())
 
 
-async def close_pool(_):
+async def close_pool():
     logger.info("Trying to close asynch pool")
     try:
         await asynch_pool.close()
@@ -180,12 +183,17 @@ LIMIT 1
 
 async def select_topic_scores(session_id: str) -> List[TopicScore]:
     query = """
-SELECT TOPIC_NAME,
-	SUM(MAX_SCORE) AS MAX_SCORE,
-	SUM(SCORE) AS SCORE
-FROM VW_QUESTION_SCORES
-WHERE SESSION_ID = %(session_id)s
-GROUP BY TOPIC_NAME;
+SELECT T.NAME AS TOPIC_NAME,
+	COALESCE(MAX_SCORE, 0),
+	COALESCE(SCORE,0) SCORE
+FROM TB_TOPIC T
+LEFT JOIN
+	(SELECT TOPIC_NAME,
+			SUM(MAX_SCORE) AS MAX_SCORE,
+			SUM(SCORE) AS SCORE
+		FROM VW_QUESTION_SCORES
+		WHERE SESSION_ID = %(session_id)s
+		GROUP BY TOPIC_NAME) TOPIC_COUNTS ON TOPIC_COUNTS.TOPIC_NAME = T.NAME;
 """
     parameter_map = {"session_id": session_id}
     topic_scores_raw: list = await select_from(query, parameter_map)
@@ -211,6 +219,71 @@ select score, max_score, sentiment_name, topic_name, session_id from vw_question
         )
         for (score, max_score, sentiment_name, topic_name, session_id) in scores_raw
     ]
+
+
+async def select_initial_question_from_topic(
+    topic: str, session_id
+) -> Union[Question, None]:
+    # This query makes sure the an hallucinated topic is replaced by a random topic.
+    query = """
+SELECT Q.ID,
+	Q.QUESTION,
+	Q.SCORE,
+	Q.TOPIC_ID,
+	T.NAME TOPIC_NAME,
+	T.DESCRIPTION TOPIC_DESCRIPTION,
+
+	(SELECT COUNT(*)
+		FROM TB_QUESTION
+		WHERE TOPIC_ID = T.ID) TOPIC_COUNT
+FROM TB_QUESTION Q
+INNER JOIN TB_TOPIC T ON Q.TOPIC_ID = T.ID
+WHERE T.NAME = (
+    SELECT COALESCE(
+        (SELECT NAME
+            FROM TB_TOPIC
+            WHERE NAME = %(topic)s AND NAME NOT IN
+                    (SELECT TOPIC
+                        FROM TB_QUESTIONNAIRE_STATUS
+                        WHERE SESSION_ID = %(session_id)s)),
+        (SELECT NAME -- Go for the random topic, if the topic here does not exist in the database
+            FROM TB_TOPIC
+            WHERE NAME NOT IN
+                    (SELECT TOPIC
+                        FROM TB_QUESTIONNAIRE_STATUS
+                        WHERE SESSION_ID = %(session_id)s)
+            ORDER BY RANDOM() LIMIT 1))
+)
+ORDER BY preferred_question_order
+LIMIT 1
+"""
+    parameter_map = {"topic": topic, "session_id": session_id}
+    questions: list = await select_from(query, parameter_map)
+    if len(questions) > 0:
+        (id, question, score, topic_id, topic_name, topic_description, _) = questions[0]
+        topic = Topic(id=topic_id, name=topic_name, description=topic_description)
+        question = Question(id=id, question=question, score=score, topic=topic)
+        return question
+    else:
+        return None
+
+
+async def calculate_simple_total_score(session_id: str) -> TotalScore:
+    query = """
+SELECT SUM(SCORE) TOTAL_SCORE,
+	SUM(MAX_SCORE) MAX_SCORE,
+	(SUM(SCORE * 1.0) / SUM(MAX_SCORE)) * 100 PCT_SCORE
+FROM VW_QUESTION_SCORES
+WHERE SESSION_ID = %(session_id)s
+"""
+    parameter_map = {"session_id": session_id}
+    scoring: list = await select_from(query, parameter_map)
+    if len(scoring) > 0:
+        (total_score, max_score, pct_score) = scoring[0]
+        return TotalScore(
+            total_score=total_score, max_score=max_score, pct_score=pct_score
+        )
+    return TotalScore(total_score=0, max_score=0, pct_score=0.0)
 
 
 if __name__ == "__main__":
