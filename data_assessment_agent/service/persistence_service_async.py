@@ -54,14 +54,9 @@ async def close_pool():
 
 
 async def create_cursor(func: Callable) -> Any:
-    try:
-        async with asynch_pool.connection() as conn:
-            async with conn.cursor() as cur:
-                return await func(cur)
-    except:
-        logger.exception("Cannot get a connection")
-        await close_pool()
-        await open_pool()
+    async with asynch_pool.connection() as conn:
+        async with conn.cursor() as cur:
+            return await func(cur)
 
 
 async def handle_select_func(query: str, query_params: dict):
