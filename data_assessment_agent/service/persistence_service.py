@@ -525,7 +525,7 @@ FROM TB_SUGGESTED_RESPONSE S
 INNER JOIN TB_QUESTION Q ON Q.ID = S.QUESTION_ID
 INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
 WHERE Q.QUESTION = %(question)s
-	AND T.NAME = %(topic)s
+	AND T.NAME = %(topic)s order by S.TITLE desc
 """
     parameter_map = {"question": question, "topic": topic}
     handle_select = handle_select_func(query, parameter_map)
