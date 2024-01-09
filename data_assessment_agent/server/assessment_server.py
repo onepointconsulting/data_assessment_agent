@@ -24,7 +24,7 @@ from data_assessment_agent.model.db_model import (
     QuestionnaireStatus,
 )
 from data_assessment_agent.service.sentiment_service import get_answer_sentiment
-from data_assessment_agent.service.reporting_service import generate_session_report
+from data_assessment_agent.service.reporting_service import generate_combined_report
 from data_assessment_agent.service.persistence_service_async import (
     close_pool,
     select_last_empty_question,
@@ -270,7 +270,7 @@ async def get_handler(request: web.Request) -> web.Response:
     session_id = request.match_info.get("session_id", None)
     if session_id is None:
         raise web.HTTPNotFound(text="No session id specified")
-    report_path = generate_session_report(session_id)
+    report_path = await generate_combined_report(session_id)
     return web.FileResponse(
         report_path,
         headers={"CONTENT-DISPOSITION": f'attachment; filename="{report_path.name}"'},

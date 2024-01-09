@@ -58,15 +58,9 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
                 logger.info(q)
             ranking_questions = "\n".join(questions)
             # Let ChatGPT sort the questions
-            ranked_questions = await rank_questions(
-                topic, question_answers, ranking_questions
+            return await safe_question_rank(
+                topic, question_answers, ranking_questions, questions
             )
-            while len(ranked_questions) > 0:
-                candidate_question = ranked_questions[0]
-                if candidate_question in questions:
-                    return create_question(topic, candidate_question)
-                ranked_questions = ranked_questions[1:]
-            return None
         else:
             logger.info("Selecting next topic")
             # There are no questions left. Select the next topic
@@ -108,6 +102,7 @@ async def safe_question_rank(
         # ChatGPT must have failed to rank the questions
         # Select random question
         return selected_random_question(questions, topic)
+    logger.error("Failed to rank question and select random question.")
     return None
 
 

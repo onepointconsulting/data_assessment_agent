@@ -12,7 +12,7 @@ plt.style.use("ggplot")
 
 
 def generate_spider_chart(
-    topic_score_result: TopicScoreResult, output_format="png", size=8, legend_size=16
+    topic_score_result: TopicScoreResult, output_format="png", size=8, legend_size=16, add_label_positions=False
 ) -> Path:
     topic_scores = topic_score_result.topic_scores
     topic_names = [score.topic_name for score in topic_scores]
@@ -34,22 +34,25 @@ def generate_spider_chart(
         color="g",
     )
 
-    label_position = ax.get_rlabel_position()
-    ax.text(
-        np.radians(label_position + 10),
-        ax.get_rmax() / 2.0,
-        "Score points",
-        rotation=label_position,
-        ha="center",
-        va="center",
-    )
+    if add_label_positions:
+        label_position = ax.get_rlabel_position()
+        ax.text(
+            np.radians(label_position + 10),
+            ax.get_rmax() / 2.0,
+            "Score points",
+            rotation=label_position,
+            ha="center",
+            va="center",
+        )
 
     # fill plot
     ax.fill(angles, scores, alpha=0.25, color="g")
+    
     # Add labels
     ax.set_thetagrids(angles * 180 / np.pi, topic_names)
 
     ax.tick_params(axis="both", which="major", pad=25, labelsize=legend_size - 3)
+    ax.set_yticklabels([])
 
     ax.set_title(
         "Topic Scores",

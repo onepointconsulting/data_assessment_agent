@@ -10,7 +10,6 @@ from data_assessment_agent.model.db_model import (
     Question,
     QuestionnaireStatus,
     QuestionnaireCounts,
-    SessionReport,
 )
 from data_assessment_agent.model.assessment_framework import SuggestedResponse
 
@@ -552,45 +551,6 @@ WHERE Q.QUESTION = %(question)s
     return res_list
 
 
-def select_session_report(session_id: str) -> List[SessionReport]:
-    query = """
-SELECT S.TOPIC,
-	S.QUESTION,
-	S.ANSWER,
-	S.SCORE,
-	SS.NAME SENTIMENT,
-    S.CREATED_AT,
-    S.UPDATED_AT
-FROM TB_QUESTIONNAIRE_STATUS S
-INNER JOIN TB_SENTIMENT_SCORE SS ON S.SENTIMENT_ID = SS.ID
-WHERE S.SESSION_ID = %(session_id)s
-	AND S.ANSWER IS NOT NULL
-"""
-    parameter_map = {"session_id": session_id}
-    handle_select = handle_select_func(query, parameter_map)
-    report_list: list = create_cursor(handle_select)
-    return [
-        SessionReport(
-            topic=topic,
-            question=question,
-            answer=answer,
-            score=score,
-            sentiment=sentiment,
-            created_at=created_at,
-            updated_at=updated_at,
-        )
-        for (
-            topic,
-            question,
-            answer,
-            score,
-            sentiment,
-            created_at,
-            updated_at,
-        ) in report_list
-    ]
-
-
 def select_topics() -> List[str]:
     query = """
 SELECT NAME
@@ -651,11 +611,6 @@ if __name__ == "__main__":
     remaining_topics = select_remaining_topics("b8ce68f0-f754-4af8-8822-97dac817250d")
     for i, remaining_topic in enumerate(remaining_topics):
         print(remaining_topic)
-
-    print("=== Session Report ===")
-    report_entries = select_session_report("b8ce68f0-f754-4af8-8822-97dac817250d")
-    for report in report_entries:
-        print(report)
 
     print("=== Topics ===")
     topics = select_topics()

@@ -117,6 +117,7 @@ INSERT INTO public.tb_sentiment_score(id, name) VALUES(4, 'positive');
 INSERT INTO public.tb_sentiment_score(id, name) VALUES(5, 'very positive');
 
 -- Initial scoring
+-- Run this after all questions were imported
 insert into tb_question_score(question_id, affirmative_score, undecided_score, negative_score) select id, 10, 5, 0 from tb_question;
 
 -- Scoring view
@@ -124,7 +125,8 @@ insert into tb_question_score(question_id, affirmative_score, undecided_score, n
 DROP VIEW vw_question_scores;
 
 CREATE VIEW vw_question_scores as
-SELECT CASE
+SELECT 
+	CASE
 		WHEN STRPOS('positive', SS.NAME) > 0 THEN
 			(SELECT AFFIRMATIVE_SCORE
 				FROM PUBLIC.TB_QUESTION_SCORE QS
@@ -145,11 +147,14 @@ SELECT CASE
 	SS.NAME SENTIMENT_NAME,
 	S.SENTIMENT_ID,
 	T.NAME TOPIC_NAME,
-	S.SESSION_ID
+	S.SESSION_ID,
+	Q.question,
+	S.answer,
+	S.created_at,
+	S.updated_at
 FROM TB_QUESTIONNAIRE_STATUS S
 INNER JOIN PUBLIC.TB_SENTIMENT_SCORE SS ON SS.ID = S.SENTIMENT_ID
 INNER JOIN PUBLIC.TB_QUESTION Q ON Q.QUESTION = S.QUESTION
-INNER JOIN PUBLIC.TB_TOPIC T ON T.ID = Q.TOPIC_ID
-WHERE T.NAME = S.TOPIC;
+FULL JOIN PUBLIC.TB_TOPIC T ON T.ID = Q.TOPIC_ID AND T.NAME = S.TOPIC;
 
 

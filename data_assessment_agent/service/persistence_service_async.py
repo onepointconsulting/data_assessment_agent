@@ -15,6 +15,7 @@ from data_assessment_agent.model.db_model import (
     Question,
     Topic,
     TotalScore,
+    SessionReport,
 )
 from data_assessment_agent.config.log_factory import logger
 
@@ -285,6 +286,42 @@ WHERE SESSION_ID = %(session_id)s
             total_score=total_score, max_score=max_score, pct_score=pct_score
         )
     return TotalScore(total_score=0, max_score=0, pct_score=0.0)
+
+
+async def select_session_report(session_id: str) -> List[SessionReport]:
+    query = """
+SELECT TOPIC_NAME,
+	QUESTION,
+	ANSWER,
+	SCORE,
+	SENTIMENT_NAME,
+	CREATED_AT,
+	UPDATED_AT
+FROM VW_QUESTION_SCORES
+WHERE SESSION_ID = %(session_id)s AND ANSWER IS NOT NULL and TOPIC_NAME IS NOT NULL
+"""
+    parameter_map = {"session_id": session_id}
+    report_list: list = await select_from(query, parameter_map)
+    return [
+        SessionReport(
+            topic=topic,
+            question=question,
+            answer=answer,
+            score=score,
+            sentiment=sentiment,
+            created_at=created_at,
+            updated_at=updated_at,
+        )
+        for (
+            topic,
+            question,
+            answer,
+            score,
+            sentiment,
+            created_at,
+            updated_at,
+        ) in report_list
+    ]
 
 
 if __name__ == "__main__":
