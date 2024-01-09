@@ -12,7 +12,11 @@ plt.style.use("ggplot")
 
 
 def generate_spider_chart(
-    topic_score_result: TopicScoreResult, output_format="png", size=8, legend_size=16, add_label_positions=False
+    topic_score_result: TopicScoreResult,
+    output_format="png",
+    size=8,
+    legend_size=16,
+    add_label_positions=False,
 ) -> Path:
     topic_scores = topic_score_result.topic_scores
     topic_names = [score.topic_name for score in topic_scores]
@@ -47,7 +51,7 @@ def generate_spider_chart(
 
     # fill plot
     ax.fill(angles, scores, alpha=0.25, color="g")
-    
+
     # Add labels
     ax.set_thetagrids(angles * 180 / np.pi, topic_names)
 

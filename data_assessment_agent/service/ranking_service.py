@@ -89,4 +89,4 @@ if __name__ == "__main__":
             print(i, topic)
 
     test_question_ranking()
-    test_topic_ranking()
+    # test_topic_ranking()

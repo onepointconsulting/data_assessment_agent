@@ -78,6 +78,10 @@ class Config:
     # Charts
     chart_tmp_folder = create_folder_property("CHART_TMP_FOLDER")
 
+    # Vector database
+    lance_db_folder = create_folder_property("LANCE_DB_FOLDER")
+    lance_db_questions = lance_db_folder / "questions_db"
+
 
 class DBConfig:
     db_name = os.getenv("DB_NAME")

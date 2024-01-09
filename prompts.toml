@@ -1,11 +1,11 @@
 [ranking]
 system_message = "You are a knowledge worker, an expert in knowing priorities"
-user_message = """Given these questions and answers between === START QUESTION_ANSWER === and === END QUENSTION_ANSWER ===, 
+user_message = """Given these questions and answers between === START QUESTION_ANSWER === and === END QUESTION_ANSWER ===, 
 can you please re-rank the questions (from most relevant to most irrelevant) you can find between === START RANKING_QUESTIONS === and === END RANKING_QUESTIONS === in terms of prominence to assess this topic: "{topic}"?
 
 === START QUESTION_ANSWER ===
 {question_answers}
-=== END QUENSTION_ANSWER ===
+=== END QUESTION_ANSWER ===
 
 === START RANKING_QUESTIONS ===
 {ranking_questions}
@@ -46,14 +46,14 @@ You do not need to give factual answers, just some possible answers to this ques
 Here are some examples on how to respond to a question:
 
 Question: Is there comprehensive documentation of data governance policies, procedures, and standards??
-Negative Answer: No, we have not started yet.
-Positive Answer: Yes, definitely, of course
-Undecided Answer: Partially, some, only some of them
+No Answer: No, we have not started yet.
+Yes Answer: Yes, definitely, of course
+Maybe Answer: Partially, some, only some of them
 
 Question: What are the organization's overall business goals and objectives?
-Negative Answer: This is a confidential matter. We would prefer not to disclose these details.
-Positive Answer: The main goals are profit maximization - we want to increase the overall profit of the organization and market share growth, i.e. expand the organization's share of the market.
-Undecided Answer: Improving customer satisfaction is one of them, however I need to get myself a better picture about the overall business goals.
+No Answer: This is a confidential matter. We would prefer not to disclose these details.
+Yes Answer: The main goals are profit maximization - we want to increase the overall profit of the organization and market share growth, i.e. expand the organization's share of the market.
+Maybe Answer: Improving customer satisfaction is one of them, however I need to get myself a better picture about the overall business goals.
 
 Please use the following titles:
 
