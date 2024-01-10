@@ -5,7 +5,7 @@ import asyncio
 import sys
 from typing import Callable
 
-from psycopg import AsyncCursor
+from psycopg import AsyncCursor, AsyncConnection
 from psycopg_pool import AsyncConnectionPool
 from data_assessment_agent.config.config import db_cfg
 from data_assessment_agent.model.db_model import (
@@ -22,7 +22,7 @@ from data_assessment_agent.config.log_factory import logger
 
 def create_pool():
     async_pool = AsyncConnectionPool(conninfo=db_cfg.db_conn_str, open=False)
-    print("Using", db_cfg.db_conn_str)
+    logger.info("Using", db_cfg.db_conn_str)
     return async_pool
 
 
@@ -54,10 +54,16 @@ async def close_pool():
 
 
 async def create_cursor(func: Callable) -> Any:
-    await asynch_pool.check()
-    async with asynch_pool.connection() as conn:
+    # await asynch_pool.check()
+    try:
+        conn = await AsyncConnection.connect(conninfo=db_cfg.db_conn_str)
+        # async with asynch_pool.connection() as conn:
         async with conn.cursor() as cur:
             return await func(cur)
+    except:
+        logger.exception("Could not create cursor.")
+    finally:
+        conn.close()
 
 
 async def handle_select_func(query: str, query_params: dict):
