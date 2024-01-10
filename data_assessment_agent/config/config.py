@@ -82,6 +82,16 @@ class Config:
     lance_db_folder = create_folder_property("LANCE_DB_FOLDER")
     lance_db_questions = lance_db_folder / "questions_db"
 
+    # Together AI
+    together_api_key = os.getenv("TOGETHER_API_KEY")
+    assert together_api_key is not None
+    together_model = os.getenv("TOGETHER_MODEL")
+    assert together_model is not None
+    together_max_tokens = int(os.getenv("TOGETHER_MAX_TOKENS"))
+    together_temperature = float(os.getenv("TOGETHER_TEMPERATURE"))
+    together_top_p = float(os.getenv("TOGETHER_TOP_P"))
+    together_top_k = int(os.getenv("TOGETHER_TOP_K"))
+
 
 class DBConfig:
     db_name = os.getenv("DB_NAME")

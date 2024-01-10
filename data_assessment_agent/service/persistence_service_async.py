@@ -22,7 +22,7 @@ from data_assessment_agent.config.log_factory import logger
 
 def create_pool():
     async_pool = AsyncConnectionPool(conninfo=db_cfg.db_conn_str, open=False)
-    logger.info("Using", db_cfg.db_conn_str)
+    logger.info("Using %s", db_cfg.db_conn_str)
     return async_pool
 
 
@@ -63,7 +63,7 @@ async def create_cursor(func: Callable) -> Any:
     except:
         logger.exception("Could not create cursor.")
     finally:
-        conn.close()
+        await conn.close()
 
 
 async def handle_select_func(query: str, query_params: dict):

@@ -13,6 +13,7 @@ from data_assessment_agent.service.persistence_service_async import (
     select_initial_question_from_topic,
 )
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
+from data_assessment_agent.service.ranking_service_together import rank_questions_together
 from data_assessment_agent.config.log_factory import logger
 
 questionnaire_questions = load_questions()
@@ -92,6 +93,9 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
 async def safe_question_rank(
     topic: str, question_answers: str, ranking_questions: str, questions: List[str]
 ) -> Question:
+    
+    # ranked_questions = await rank_questions_together(topic, question_answers, ranking_questions)
+    # if len(ranked_questions) == 0:
     ranked_questions = await rank_questions(topic, question_answers, ranking_questions)
     while len(ranked_questions) > 0:
         candidate_question = ranked_questions[0]

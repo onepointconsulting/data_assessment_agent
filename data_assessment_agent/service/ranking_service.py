@@ -3,7 +3,6 @@ from typing import Optional, List
 
 
 from openai.types.chat.chat_completion import ChatCompletion
-from openai.types.chat.chat_completion_message import FunctionCall
 
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.config.toml_support import prompts

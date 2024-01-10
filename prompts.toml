@@ -11,6 +11,27 @@ can you please re-rank the questions (from most relevant to most irrelevant) you
 {ranking_questions}
 === END RANKING_QUESTIONS ==="""
 
+[ranking.together]
+user_message = """Given these questions and answers between === START QUESTION_ANSWER === and === END QUENSTION_ANSWER ===, 
+can you please re-rank the questions (from most relevant to most irrelevant) you can find between === START RANKING_QUESTIONS === and === END RANKING_QUESTIONS === in terms of prominence to assess this topic: {topic}?
+
+=== START QUESTION_ANSWER ===
+{question_answers}
+=== END QUENSTION_ANSWER ===
+
+=== START RANKING_QUESTIONS ===
+{ranking_questions}
+=== END RANKING_QUESTIONS ===
+
+The model will then use the provided answers to the questions to generate a ranked list of questions that are most relevant to the topic of {topic}. The ranked list will be provided in the output of the model.
+Please respond using a JSON list with the topics like this one:
+```json
+[
+"Is there market demand for the type of data your organization possess?",
+"Is there a need or opportunity to simplify data sharing and collaboration amoungst internal teams?"
+]
+```
+"""
 
 [ranking.topics]
 system_message = "You are a knowledge worker, an expert in knowing priorities"

@@ -1,6 +1,10 @@
 from data_assessment_agent.model.db_model import Topic
 
 
+def create_topic_title():
+    return "Business Alignment"
+
+
 def create_analytics_topic():
     return Topic(name="Advanced Analytics", description="Advanced Analytics")
 

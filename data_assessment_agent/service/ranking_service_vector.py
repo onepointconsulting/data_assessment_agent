@@ -1,3 +1,5 @@
+## Abandoned approach by Sasha
+
 from typing import List
 
 import lancedb
@@ -28,8 +30,9 @@ async def rank_questions(
 
 
 if __name__ == "__main__":
-    from data_assessment_agent.test.provider.question_provider import create_question_answers
+    from data_assessment_agent.test.provider.question_provider import (
+        create_question_answers,
+    )
 
     question_answers = create_question_answers()
     assert isinstance(question_answers, str)
-    
