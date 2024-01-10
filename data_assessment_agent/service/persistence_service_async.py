@@ -54,6 +54,7 @@ async def close_pool():
 
 
 async def create_cursor(func: Callable) -> Any:
+    await asynch_pool.check()
     async with asynch_pool.connection() as conn:
         async with conn.cursor() as cur:
             return await func(cur)
