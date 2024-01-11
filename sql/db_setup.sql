@@ -22,6 +22,7 @@ DROP TABLE IF EXISTS public.tb_question;
 DROP TABLE IF EXISTS public.tb_topic;
 DROP TABLE IF EXISTS public.tb_sentiment_score;
 DROP TABLE IF EXISTS public.tb_question_score;
+DROP TABLE IF EXISTS public.tb_selected_topics;
 
 CREATE TABLE public.tb_topic
 (
@@ -115,6 +116,22 @@ INSERT INTO public.tb_sentiment_score(id, name) VALUES(2, 'negative');
 INSERT INTO public.tb_sentiment_score(id, name) VALUES(3, 'ambiguous');
 INSERT INTO public.tb_sentiment_score(id, name) VALUES(4, 'positive');
 INSERT INTO public.tb_sentiment_score(id, name) VALUES(5, 'very positive');
+
+
+CREATE TABLE public.tb_selected_topics
+(
+    id serial NOT NULL,
+    session_id character varying(36) NOT NULL,
+    topic_id int NOT NULL,
+    number_of_questions int NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+	CONSTRAINT tb_selected_topics_topic_id FOREIGN KEY (topic_id)
+        REFERENCES public.tb_topic (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
 
 -- Initial scoring
 -- Run this after all questions were imported

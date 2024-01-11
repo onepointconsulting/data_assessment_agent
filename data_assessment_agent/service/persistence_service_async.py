@@ -18,6 +18,7 @@ from data_assessment_agent.model.db_model import (
     SessionReport,
 )
 from data_assessment_agent.config.log_factory import logger
+from data_assessment_agent.model.assessment_framework import SuggestedResponse
 
 
 def create_pool():
@@ -330,6 +331,36 @@ WHERE SESSION_ID = %(session_id)s AND ANSWER IS NOT NULL and TOPIC_NAME IS NOT N
     ]
 
 
+async def select_suggestions(question: str, topic: str) -> List[SuggestedResponse]:
+    query = """
+SELECT Q.ID, Q.QUESTION, Q.SCORE, T.ID, T.NAME, T.DESCRIPTION, S.ID, S.TITLE, S.SUBTITLE, S.BODY
+FROM TB_SUGGESTED_RESPONSE S
+INNER JOIN TB_QUESTION Q ON Q.ID = S.QUESTION_ID
+INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
+WHERE Q.QUESTION = %(question)s
+	AND T.NAME = %(topic)s order by S.TITLE desc
+"""
+    parameter_map = {"question": question, "topic": topic}
+    response_list: list = await select_from(query, parameter_map)
+    return [
+        SuggestedResponse(
+            title=suggestion_title, subtitle=suggestion_subtitle, body=suggestion_body
+        )
+        for (
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            suggestion_title,
+            suggestion_subtitle,
+            suggestion_body,
+        ) in response_list
+    ]
+
+
 if __name__ == "__main__":
 
     async def test_select_last_session():
@@ -358,5 +389,15 @@ if __name__ == "__main__":
         for topic_score in topic_scores:
             print(topic_score)
 
-    asyncio.run(test_select_topic_scores())
-    asyncio.run(test_select_question_scores())
+    async def test_select_suggestions():
+        print("=== Suggestions ===")
+        suggestions = await select_suggestions(
+            "What are the organization's overall business goals and objectives?",
+            "Business Alignment",
+        )
+        for s in suggestions:
+            print(s)
+
+    # asyncio.run(test_select_topic_scores())
+    # asyncio.run(test_select_question_scores())
+    asyncio.run(test_select_suggestions())

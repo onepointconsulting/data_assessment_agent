@@ -95,10 +95,14 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
 async def safe_question_rank(
     topic: str, question_answers: str, ranking_questions: str, questions: List[str]
 ) -> Question:
-    ranked_questions = await rank_questions_together(topic, question_answers, ranking_questions)
+    ranked_questions = await rank_questions_together(
+        topic, question_answers, ranking_questions
+    )
     if len(ranked_questions) == 0:
         logger.warn("Using OpenAI for ranking")
-        ranked_questions = await rank_questions(topic, question_answers, ranking_questions)
+        ranked_questions = await rank_questions(
+            topic, question_answers, ranking_questions
+        )
     while len(ranked_questions) > 0:
         candidate_question = ranked_questions[0]
         if candidate_question in questions:

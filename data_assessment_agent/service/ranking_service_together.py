@@ -42,7 +42,7 @@ def generate_json(prompt: str) -> dict:
 def generate_headers() -> dict:
     return {
         "Authorization": f"Bearer {cfg.together_api_key}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
 
@@ -50,11 +50,15 @@ async def arank_questions_request(prompt: str) -> List[str]:
     async with aiohttp.ClientSession() as session:
         data = generate_json(prompt)
         logger.info(data)
-        async with session.post(endpoint, data=json.dumps(data), headers=generate_headers()) as res:
+        async with session.post(
+            endpoint, data=json.dumps(data), headers=generate_headers()
+        ) as res:
             if res.status >= 200 and res.status < 300:
                 text = await res.text()
                 return extract_ranking(text)
-            logger.error("Failed to rank with togetheer AI. Status code: %d", res.status)
+            logger.error(
+                "Failed to rank with togetheer AI. Status code: %d", res.status
+            )
             return []
 
 
@@ -109,6 +113,8 @@ if __name__ == "__main__":
     question_answers = create_question_answers()
     topic = create_topic_title()
     ranking_questions = create_ranking_questions()
-    ranked_questions = asyncio.run(rank_questions_together(topic, question_answers, ranking_questions))
+    ranked_questions = asyncio.run(
+        rank_questions_together(topic, question_answers, ranking_questions)
+    )
     for q in ranked_questions:
         print(q)

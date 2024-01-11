@@ -14,8 +14,7 @@ from data_assessment_agent.service.data_assessment_service import (
 from data_assessment_agent.service.persistence_service import (
     save_questionnaire_status,
     select_questionnaire_counts,
-    select_topics,
-    select_suggestions,
+    select_topics
 )
 from data_assessment_agent.model.assessment_framework import Question, SessionMessage
 from data_assessment_agent.model.transport import ServerMessage
@@ -26,9 +25,9 @@ from data_assessment_agent.model.db_model import (
 from data_assessment_agent.service.sentiment_service import get_answer_sentiment
 from data_assessment_agent.service.reporting_service import generate_combined_report
 from data_assessment_agent.service.persistence_service_async import (
-    close_pool,
     select_last_empty_question,
     calculate_simple_total_score,
+    select_suggestions,
 )
 from data_assessment_agent.service.spider_chart import generate_spider_chart_for
 
@@ -151,7 +150,7 @@ async def handle_next_question(session_message: SessionMessage):
     next_question.total_questions_in_topic = questionnaire_counts.question_total
     next_question.finished_topic_count = questionnaire_counts.finished_topic_count + 1
     next_question.topic_total = questionnaire_counts.topic_total
-    next_question.suggestions = select_suggestions(
+    next_question.suggestions = await select_suggestions(
         session_message.next_question.question, session_message.next_question.category
     )
     await send_question_to_client(sid, session_id, next_question)

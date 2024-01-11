@@ -518,39 +518,6 @@ LIMIT 1
         )
 
 
-def select_suggestions(question: str, topic: str) -> List[SuggestedResponse]:
-    query = """
-SELECT Q.ID, Q.QUESTION, Q.SCORE, T.ID, T.NAME, T.DESCRIPTION, S.ID, S.TITLE, S.SUBTITLE, S.BODY
-FROM TB_SUGGESTED_RESPONSE S
-INNER JOIN TB_QUESTION Q ON Q.ID = S.QUESTION_ID
-INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
-WHERE Q.QUESTION = %(question)s
-	AND T.NAME = %(topic)s order by S.TITLE desc
-"""
-    parameter_map = {"question": question, "topic": topic}
-    handle_select = handle_select_func(query, parameter_map)
-    response_list: list = create_cursor(handle_select)
-    res_list = []
-    for r in response_list:
-        (
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            suggestion_title,
-            suggestion_subtitle,
-            suggestion_body,
-        ) = r
-        suggestion = SuggestedResponse(
-            title=suggestion_title, subtitle=suggestion_subtitle, body=suggestion_body
-        )
-        res_list.append(suggestion)
-    return res_list
-
-
 def select_topics() -> List[str]:
     query = """
 SELECT NAME
@@ -624,11 +591,3 @@ if __name__ == "__main__":
     assert saved_suggestion.id is not None
 
     delete_suggested_response(saved_suggestion.id)
-
-    print("=== Suggestions ===")
-    suggestions = select_suggestions(
-        "What are the organization's overall business goals and objectives?",
-        "Business Alignment",
-    )
-    for s in suggestions:
-        print(s)
