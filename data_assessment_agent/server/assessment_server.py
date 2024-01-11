@@ -1,5 +1,4 @@
 import socketio
-import asyncio
 import json
 from aiohttp import web
 from enum import StrEnum
@@ -14,7 +13,6 @@ from data_assessment_agent.service.data_assessment_service import (
 from data_assessment_agent.service.persistence_service import (
     save_questionnaire_status,
     select_questionnaire_counts,
-    select_topics
 )
 from data_assessment_agent.model.assessment_framework import Question, SessionMessage
 from data_assessment_agent.model.transport import ServerMessage
@@ -28,6 +26,7 @@ from data_assessment_agent.service.persistence_service_async import (
     select_last_empty_question,
     calculate_simple_total_score,
     select_suggestions,
+    select_topics,
 )
 from data_assessment_agent.service.spider_chart import generate_spider_chart_for
 
@@ -192,7 +191,7 @@ async def handle_initial_question(session_message: SessionMessage):
         session_message.sid,
         session_message.session_id,
     )
-    topics = select_topics()
+    topics = await select_topics()
     topics_str = ", ".join(topics)
     if next_question.initial:
         await sio.emit(
@@ -276,7 +275,6 @@ async def get_handler(request: web.Request) -> web.Response:
     )
 
 
-# HTTP part
 @routes.get("/spider_chart/{session_id}")
 async def generate_spider_chart(request: web.Request) -> web.Response:
     session_id = request.match_info.get("session_id", None)
@@ -286,21 +284,12 @@ async def generate_spider_chart(request: web.Request) -> web.Response:
     return web.FileResponse(chart_path)
 
 
+@routes.get("/topics/all")
+async def topics_all(_):
+    topics = await select_topics()
+    return web.json_response(topics)
+
+
 @routes.get("/")
 async def get_handler(_):
     raise web.HTTPFound("/index.html")
-
-
-if __name__ == "__main__":
-    import sys
-    from signal import SIGINT, SIGTERM
-
-    app.add_routes(routes)
-    app.router.add_static("/", path=cfg.ui_folder.as_posix(), name="ui")
-    loop = asyncio.new_event_loop()
-
-    # if sys.platform != "win32":
-    #     for signal in [SIGINT, SIGTERM]:
-    #         loop.add_signal_handler(signal, close_pool)
-
-    web.run_app(app, host=cfg.websocket_server, port=cfg.websocket_port, loop=loop)

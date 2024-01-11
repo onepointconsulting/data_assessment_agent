@@ -1,2 +1,2 @@
 conda activate data_assessment_agent
-python .\data_assessment_agent\server\assessment_server.py
+python .\data_assessment_agent\server\assessment_server_main.py

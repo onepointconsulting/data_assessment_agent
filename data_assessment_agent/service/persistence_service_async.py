@@ -331,6 +331,16 @@ WHERE SESSION_ID = %(session_id)s AND ANSWER IS NOT NULL and TOPIC_NAME IS NOT N
     ]
 
 
+async def select_topics() -> List[str]:
+    query = """
+SELECT NAME
+FROM TB_TOPIC
+ORDER BY NAME
+"""
+    topics: list = await select_from(query, {})
+    return [t[0] for t in topics]
+
+
 async def select_suggestions(question: str, topic: str) -> List[SuggestedResponse]:
     query = """
 SELECT Q.ID, Q.QUESTION, Q.SCORE, T.ID, T.NAME, T.DESCRIPTION, S.ID, S.TITLE, S.SUBTITLE, S.BODY
@@ -365,32 +375,32 @@ if __name__ == "__main__":
 
     async def test_select_last_session():
         session_id = await select_random_session()
-        print(session_id)
+        logger.info(session_id)
         last_question = await select_last_question(session_id)
-        print(last_question)
+        logger.info(last_question)
 
     async def test_select_last_empty_question():
         session_id = await select_random_session()
-        print(session_id)
+        logger.info(session_id)
         last_empty = await select_last_empty_question(session_id)
-        print(last_empty)
+        logger.info(last_empty)
 
     async def test_select_topic_scores():
         session_id = await select_random_session()
-        print(session_id)
+        logger.info(session_id)
         topic_scores = await select_topic_scores(session_id)
         for topic_score in topic_scores:
-            print(topic_score)
+            logger.info(topic_score)
 
     async def test_select_question_scores():
         session_id = await select_random_session()
-        print(session_id)
+        logger.info(session_id)
         topic_scores = await select_question_scores(session_id)
         for topic_score in topic_scores:
-            print(topic_score)
+            logger.info(topic_score)
 
     async def test_select_suggestions():
-        print("=== Suggestions ===")
+        logger.info("=== Suggestions ===")
         suggestions = await select_suggestions(
             "What are the organization's overall business goals and objectives?",
             "Business Alignment",
@@ -398,6 +408,13 @@ if __name__ == "__main__":
         for s in suggestions:
             print(s)
 
+    async def test_select_topics():
+        print("=== Topics ===")
+        topics = await select_topics()
+        for s in topics:
+            print(s)
+
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
-    asyncio.run(test_select_suggestions())
+    # asyncio.run(test_select_suggestions())
+    asyncio.run(test_select_topics())

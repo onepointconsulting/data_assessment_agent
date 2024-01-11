@@ -518,17 +518,6 @@ LIMIT 1
         )
 
 
-def select_topics() -> List[str]:
-    query = """
-SELECT NAME
-FROM TB_TOPIC
-ORDER BY NAME
-"""
-    handle_select = handle_select_func(query, {})
-    topics: list = create_cursor(handle_select)
-    return [t[0] for t in topics]
-
-
 if __name__ == "__main__":
     from data_assessment_agent.test.provider import topic_provider, question_provider
     from data_assessment_agent.test.provider.suggestion_provider import (
@@ -578,11 +567,6 @@ if __name__ == "__main__":
     remaining_topics = select_remaining_topics("b8ce68f0-f754-4af8-8822-97dac817250d")
     for i, remaining_topic in enumerate(remaining_topics):
         print(remaining_topic)
-
-    print("=== Topics ===")
-    topics = select_topics()
-    for topic in topics:
-        print(topic)
 
     print("=== Save suggested response ===")
     suggestion = create_suggestion_response()
