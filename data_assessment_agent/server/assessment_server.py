@@ -11,7 +11,6 @@ from data_assessment_agent.service.data_assessment_service import (
     select_next_question,
 )
 from data_assessment_agent.service.persistence_service import (
-    save_questionnaire_status,
     select_questionnaire_counts,
 )
 from data_assessment_agent.model.assessment_framework import Question, SessionMessage
@@ -19,7 +18,7 @@ from data_assessment_agent.model.transport import ServerMessage, ConfigMessage
 from data_assessment_agent.model.db_model import (
     create_questionnaire_status,
     QuestionnaireStatus,
-    SelectedConfiguration
+    SelectedConfiguration,
 )
 from data_assessment_agent.service.sentiment_service import get_answer_sentiment
 from data_assessment_agent.service.reporting_service import generate_combined_report
@@ -30,7 +29,8 @@ from data_assessment_agent.service.persistence_service_async import (
     select_topics,
     has_selected_topics,
     select_quiz_modes,
-    insert_selected_configuration
+    insert_selected_configuration,
+    save_questionnaire_status,
 )
 from data_assessment_agent.service.spider_chart import generate_spider_chart_for
 
@@ -46,6 +46,7 @@ class Commands(StrEnum):
     SERVER_MESSAGE = "server_message"
     QUIZ_CONFIGURATION = "quiz_configuration"
     QUIZ_CONFIGURATION_SAVE_OK = "quiz_configuration_save_ok"
+    QUIZ_CONFIGURATION_SAVE_ERROR = "quiz_configuration_save_error"
 
 
 @sio.event
@@ -147,22 +148,50 @@ async def client_message(sid: str, message: str):
 
 @sio.event
 async def save_configuration(sid: str, config_message: str):
+    async def send_error_message(session_id: str, msg: str):
+        await sio.emit(
+            Commands.QUIZ_CONFIGURATION_SAVE_ERROR,
+            ServerMessage(
+                response=f"Error: {msg}", sessionId=session_id
+            ).model_dump_json(),
+            room=sid,
+        )
+
     try:
         message_dict = json.loads(config_message)
         session_id = message_dict.get("session_id")
-        # TODO: send message in case there is no session id
+        if session_id is None:
+            await send_error_message("", "No session id available")
+            return
         topic_list = message_dict.get("topic_list")
-        # TODO: send message in case there is no topic_list
+        if session_id is None or len(topic_list) == 0:
+            await send_error_message(
+                session_id, "No topics selected. Please select at least one."
+            )
+            return
         quiz_mode_name = message_dict.get("quiz_mode_name")
-        # TODO: send message in case there is no quiz_mode_name
-        await insert_selected_configuration(SelectedConfiguration(session_id=session_id, topic_list=topic_list, quiz_mode_name=quiz_mode_name))
+        if quiz_mode_name is None:
+            await send_error_message(
+                session_id, "No quiz mode selected. Please select one."
+            )
+            return
+        await insert_selected_configuration(
+            SelectedConfiguration(
+                session_id=session_id,
+                topic_list=topic_list,
+                quiz_mode_name=quiz_mode_name,
+            )
+        )
         await sio.emit(
             Commands.QUIZ_CONFIGURATION_SAVE_OK,
-            ServerMessage(response="OK", sources=None, sessionId=session_id).model_dump_json(),
+            ServerMessage(response="OK", sessionId=session_id).model_dump_json(),
             room=sid,
         )
     except:
         logger.exception("Could not save configuration")
+        await send_error_message(
+            "An internal error has occured. Please try again later."
+        )
 
 
 async def handle_next_question(session_message: SessionMessage):
@@ -279,7 +308,7 @@ async def score_and_save_questionnaire_status(
     answer = questionnaire_status.answer
     if answer is not None and len(answer) > 0:
         questionnaire_status.sentiment = await get_answer_sentiment(question, answer)
-        save_questionnaire_status(questionnaire_status)
+        await save_questionnaire_status(questionnaire_status)
 
 
 async def init_config(sid: str):

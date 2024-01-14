@@ -17,7 +17,7 @@ from data_assessment_agent.model.db_model import (
     TotalScore,
     SessionReport,
     QuizzMode,
-    SelectedConfiguration
+    SelectedConfiguration,
 )
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.model.assessment_framework import SuggestedResponse
@@ -56,7 +56,7 @@ async def close_pool():
         logger.exception("Could not close pool")
 
 
-async def create_cursor(func: Callable) -> Any:
+async def create_cursor(func: Callable, commit=False) -> Any:
     # await asynch_pool.check()
     try:
         conn = await AsyncConnection.connect(conninfo=db_cfg.db_conn_str)
@@ -67,6 +67,8 @@ async def create_cursor(func: Callable) -> Any:
         logger.exception("Could not create cursor.")
     finally:
         if conn is not None:
+            if commit:
+                await conn.commit()
             await conn.close()
 
 
@@ -292,6 +294,74 @@ LIMIT 1
         return None
 
 
+async def save_questionnaire_status(
+    questionnaire_status: QuestionnaireStatus,
+) -> Union[QuestionnaireStatus, None]:
+    async def process_save(cur: AsyncCursor):
+        if questionnaire_status.id is None:
+            await cur.execute(
+                """
+INSERT INTO PUBLIC.TB_QUESTIONNAIRE_STATUS(SESSION_ID, TOPIC, QUESTION, ANSWER, SCORE, SENTIMENT_ID)
+SELECT CAST(%(session_id)s AS VARCHAR),
+	CAST(%(topic)s AS VARCHAR),
+	CAST(%(question)s AS VARCHAR),
+	%(answer)s,
+	%(score)s,
+	(SELECT ID
+		FROM TB_SENTIMENT_SCORE
+		WHERE NAME = %(sentiment)s)
+WHERE NOT EXISTS
+		(SELECT *
+			FROM TB_QUESTIONNAIRE_STATUS
+			WHERE SESSION_ID = %(session_id)s
+				AND TOPIC = %(topic)s
+				AND QUESTION = %(question)s ) RETURNING ID
+                """,
+                {
+                    "session_id": questionnaire_status.session_id,
+                    "topic": questionnaire_status.topic,
+                    "question": questionnaire_status.question,
+                    "answer": questionnaire_status.answer,
+                    "score": questionnaire_status.score,
+                    "sentiment": questionnaire_status.sentiment,
+                },
+            )
+        else:
+            await cur.execute(
+                """
+    update public.tb_questionnaire_status set session_id = %(session_id)s, topic = %(topic)s, 
+        question = %(question)s, answer = %(answer)s, score = %(score)s, sentiment_id = (select id from tb_sentiment_score where name = %(sentiment)s),
+        updated_at = NOW()
+    where id = %(id)s returning id
+                """,
+                {
+                    "session_id": questionnaire_status.session_id,
+                    "topic": questionnaire_status.topic,
+                    "question": questionnaire_status.question,
+                    "answer": questionnaire_status.answer,
+                    "score": questionnaire_status.score,
+                    "id": questionnaire_status.id,
+                    "sentiment": questionnaire_status.sentiment,
+                },
+            )
+        result = await cur.fetchone()
+        if result is not None and len(result) > 0:
+            created_id = result[0]
+            return QuestionnaireStatus(
+                id=created_id,
+                question=questionnaire_status.question,
+                answer=questionnaire_status.answer,
+                topic=questionnaire_status.topic,
+                score=questionnaire_status.score,
+                session_id=questionnaire_status.session_id,
+                topic_count=questionnaire_status.topic_count,
+            )
+        else:
+            return None
+
+    return await create_cursor(process_save, True)
+
+
 async def calculate_simple_total_score(session_id: str) -> TotalScore:
     query = """
 SELECT SUM(SCORE) TOTAL_SCORE,
@@ -389,15 +459,14 @@ async def has_selected_topics(session_id: str) -> bool:
     return response[0][0] > 0
 
 
-async def insert_selected_configuration(
-    configuration: SelectedConfiguration
-):
+async def insert_selected_configuration(configuration: SelectedConfiguration):
     session_id = configuration.session_id
     topic_list = configuration.topic_list
     quiz_mode_name = configuration.quiz_mode_name
     logger.info("session_id: %s", session_id)
     logger.info("topic_list: %s", topic_list)
     logger.info("quiz_mode_name: %s", quiz_mode_name)
+
     async def process_selected_topics(conn: AsyncConnection):
         query1 = """
 insert into public.tb_selected_topics(session_id, topic_id, created_at)
@@ -410,7 +479,10 @@ values(%(session_id)s, (select id from tb_quiz_mode where name = %(quiz_mode_nam
         data = [(session_id, t) for t in topic_list]
         async with conn.cursor() as cur:
             await cur.executemany(query1, data)
-            await cur.execute(query_quiz_mode, {"session_id": session_id, "quiz_mode_name": quiz_mode_name})
+            await cur.execute(
+                query_quiz_mode,
+                {"session_id": session_id, "quiz_mode_name": quiz_mode_name},
+            )
             await conn.commit()
 
     await execute_on_connection(process_selected_topics)
@@ -474,7 +546,11 @@ if __name__ == "__main__":
         topics = topics[:2]
         dummy_session_id = "dummy"
         quiz_mode_name = "Medium"
-        selected_configuration = SelectedConfiguration(session_id=dummy_session_id, quiz_mode_name=quiz_mode_name, topic_list=topics)
+        selected_configuration = SelectedConfiguration(
+            session_id=dummy_session_id,
+            quiz_mode_name=quiz_mode_name,
+            topic_list=topics,
+        )
         await insert_selected_configuration(selected_configuration)
 
     async def test_quizz_modes():
@@ -482,12 +558,21 @@ if __name__ == "__main__":
         assert quizz_modes is not None
         for quizz_mode in quizz_modes:
             print(quizz_mode.model_dump_json())
-    
-    
+
+
+    async def test_save_questionnaire_status():
+        from data_assessment_agent.test.provider.questionnaire_status_provider import create_questionnaire_status
+        questionnaire_status = create_questionnaire_status()
+        new_questionnaire_status = await save_questionnaire_status(questionnaire_status)
+        assert new_questionnaire_status is not None
+        print(new_questionnaire_status.id)
+
+
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
     # asyncio.run(test_select_suggestions())
     # asyncio.run(test_select_topics())
     # asyncio.run(test_has_selected_topics())
-    asyncio.run(test_insert_into_selected_topics())
+    # asyncio.run(test_insert_into_selected_topics())
     # asyncio.run(test_quizz_modes())
+    asyncio.run(test_save_questionnaire_status())
