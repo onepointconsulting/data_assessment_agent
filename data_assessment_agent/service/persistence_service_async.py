@@ -156,20 +156,27 @@ SELECT S.ID,
 			AND QS1.TOPIC = S.TOPIC
 			AND ANSWER IS NOT NULL) TOPIC_COUNT,
 
-	(SELECT T.QUESTION_AMOUNT - COUNT(DISTINCT(QS1.QUESTION))
+	(SELECT
+			(SELECT QM.QUESTION_COUNT
+				FROM PUBLIC.TB_QUIZ_MODE QM
+				INNER JOIN PUBLIC.TB_SELECTED_QUIZ_MODE SQM ON QM.ID = SQM.quiz_mode_id
+				WHERE SQM.SESSION_ID = %(session_id)s) - COUNT(DISTINCT(QS1.QUESTION))
 		FROM PUBLIC.TB_QUESTIONNAIRE_STATUS QS1
 		WHERE QS1.SESSION_ID = %(session_id)s
 			AND QS1.TOPIC = S.TOPIC
 			AND QS1.ANSWER IS NOT NULL) TOPIC_MISSING,
 
-    (SELECT COUNT(*) FROM PUBLIC.TB_QUESTIONNAIRE_STATUS QS2
-		WHERE QS2.QUESTION = S.QUESTION AND QS2.SESSION_ID = S.SESSION_ID 
-	 		AND QS2.ANSWER IS NOT NULL) PREVIOUS_ANSWER_COUNT
+	(SELECT COUNT(*)
+		FROM PUBLIC.TB_QUESTIONNAIRE_STATUS QS2
+		WHERE QS2.QUESTION = S.QUESTION
+			AND QS2.SESSION_ID = S.SESSION_ID
+			AND QS2.ANSWER IS NOT NULL) PREVIOUS_ANSWER_COUNT
 FROM PUBLIC.TB_QUESTIONNAIRE_STATUS S
 INNER JOIN TB_TOPIC T ON T.NAME = S.TOPIC
 WHERE SESSION_ID = %(session_id)s
 ORDER BY ID DESC
-LIMIT 1""",
+LIMIT 1
+""",
             {"session_id": session_id},
         )
         return list(await cur.fetchall())
@@ -247,15 +254,17 @@ async def select_topic_scores(session_id: str) -> List[TopicScore]:
     query = """
 SELECT T.NAME AS TOPIC_NAME,
 	COALESCE(MAX_SCORE, 0),
-	COALESCE(SCORE,0) SCORE
+	COALESCE(SCORE, 0) SCORE
 FROM TB_TOPIC T
+INNER JOIN PUBLIC.TB_SELECTED_TOPICS ST ON ST.TOPIC_ID = T.ID
 LEFT JOIN
 	(SELECT TOPIC_NAME,
 			SUM(MAX_SCORE) AS MAX_SCORE,
 			SUM(SCORE) AS SCORE
 		FROM VW_QUESTION_SCORES
 		WHERE SESSION_ID = %(session_id)s
-		GROUP BY TOPIC_NAME) TOPIC_COUNTS ON TOPIC_COUNTS.TOPIC_NAME = T.NAME;
+		GROUP BY TOPIC_NAME) TOPIC_COUNTS ON TOPIC_COUNTS.TOPIC_NAME = T.NAME
+WHERE ST.SESSION_ID = %(session_id)s;
 """
     parameter_map = {"session_id": session_id}
     topic_scores_raw: list = await select_from(query, parameter_map)
@@ -459,6 +468,28 @@ LIMIT 1
             finished_topic_count=0,
             topic_total=0,
         )
+    
+
+async def select_remaining_topics(session_id: str) -> Union[List[str], None]:
+    query = """
+SELECT T.NAME
+FROM TB_TOPIC T
+INNER JOIN public.tb_selected_topics ST on ST.topic_id = T.id
+WHERE NOT EXISTS
+    (SELECT S.TOPIC
+        FROM TB_QUESTIONNAIRE_STATUS S
+        WHERE SESSION_ID = %(session_id)s
+            AND S.ANSWER IS NOT NULL
+            AND T.NAME = S.TOPIC
+        GROUP BY S.TOPIC)
+	AND ST.SESSION_ID = %(session_id)s"""
+    parameter_map = {"session_id": session_id}
+    return await handle_select_remaining(query, parameter_map)
+
+
+async def handle_select_remaining(query: str, parameter_map: dict) -> Union[List[str], None]:
+    remaining_questions: list = await select_from(query, parameter_map)
+    return [t[0] for t in remaining_questions]
 
 
 async def calculate_simple_total_score(session_id: str) -> TotalScore:
@@ -676,6 +707,11 @@ if __name__ == "__main__":
         questionnaire_counts = await select_questionnaire_counts('dcbfafc8-2741-46ec-ac40-34d72b491747')
         print(questionnaire_counts)
 
+
+    async def test_select_remaining_topics():
+        remaining_topics = await select_remaining_topics('dcbfafc8-2741-46ec-ac40-34d72b491747')
+        print(remaining_topics)
+
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
     # asyncio.run(test_select_suggestions())
@@ -685,4 +721,5 @@ if __name__ == "__main__":
     # asyncio.run(test_quizz_modes())
     # asyncio.run(test_save_questionnaire_status())
     # asyncio.run(test_select_initial_question())
-    asyncio.run(test_select_questionnaire_counts())
+    # asyncio.run(test_select_questionnaire_counts())
+    asyncio.run(test_select_remaining_topics())

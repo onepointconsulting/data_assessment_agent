@@ -6,13 +6,13 @@ from data_assessment_agent.service.persistence_service import (
     select_remaining_questions,
     select_answered_questions_in_topic,
     select_answered_questions_in_session,
-    select_remaining_topics,
 )
 from data_assessment_agent.model.db_model import Question as DbQuestion
 from data_assessment_agent.service.persistence_service_async import (
     select_last_question,
     select_initial_question_from_topic,
     select_initial_question,
+    select_remaining_topics
 )
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
 from data_assessment_agent.service.ranking_service_together import (
@@ -74,7 +74,7 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
             # Get all topics covered in this session
             question_answers_list = select_answered_questions_in_session(session_id)
             question_answers = "\n".join(question_answers_list)
-            ranking_topics = select_remaining_topics(session_id)
+            ranking_topics = await select_remaining_topics(session_id)
             if len(ranking_topics) == 0:
                 # We reached probably the end of the questionnaire
                 return Question(question="", category="", score=0, final=True)

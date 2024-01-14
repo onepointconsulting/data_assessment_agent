@@ -308,21 +308,6 @@ WHERE T.NAME = %(topic)s
     return handle_select_remaining(query, parameter_map)
 
 
-def select_remaining_topics(session_id: str) -> Union[List[str], None]:
-    query = """
-SELECT T.NAME
-FROM TB_TOPIC T
-WHERE NOT EXISTS
-    (SELECT S.TOPIC
-        FROM TB_QUESTIONNAIRE_STATUS S
-        WHERE SESSION_ID = %(session_id)s
-            AND S.ANSWER IS NOT NULL
-            AND T.NAME = S.TOPIC
-        GROUP BY S.TOPIC)"""
-    parameter_map = {"session_id": session_id}
-    return handle_select_remaining(query, parameter_map)
-
-
 def handle_select_remaining(query: str, parameter_map: dict) -> Union[List[str], None]:
     handle_select = handle_select_func(query, parameter_map)
     remaining_questions: list = create_cursor(handle_select)
@@ -435,11 +420,6 @@ if __name__ == "__main__":
     )
     for i, answered_question in enumerate(answered_questions):
         print(answered_question)
-
-    print("== Remaining topics ==")
-    remaining_topics = select_remaining_topics("b8ce68f0-f754-4af8-8822-97dac817250d")
-    for i, remaining_topic in enumerate(remaining_topics):
-        print(remaining_topic)
 
     print("=== Save suggested response ===")
     suggestion = create_suggestion_response()
