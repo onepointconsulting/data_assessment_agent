@@ -18,6 +18,7 @@ from data_assessment_agent.model.db_model import (
     SessionReport,
     QuizzMode,
     SelectedConfiguration,
+    QuestionnaireCounts
 )
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.model.assessment_framework import SuggestedResponse
@@ -399,6 +400,67 @@ WHERE NOT EXISTS
     return await create_cursor(process_save, True)
 
 
+async def select_questionnaire_counts(session_id: str) -> QuestionnaireCounts:
+    query = """
+SELECT S.TOPIC,
+
+	(SELECT COUNT(DISTINCT(S1.QUESTION))
+		FROM PUBLIC.TB_QUESTIONNAIRE_STATUS S1
+		WHERE S1.TOPIC = S.TOPIC
+            AND SESSION_ID = %(session_id)s) QUESTION_COUNT,
+	(SELECT QM.QUESTION_COUNT
+		FROM PUBLIC.TB_QUIZ_MODE QM
+		INNER JOIN PUBLIC.TB_SELECTED_QUIZ_MODE SQM ON QM.ID = SQM.QUIZ_MODE_ID
+		WHERE SQM.SESSION_ID = %(session_id)s) QUESTION_TOTAL,
+
+	(SELECT COUNT(*)
+		FROM TB_TOPIC TF
+		WHERE TF.NAME IN
+				(SELECT SF.TOPIC
+					FROM PUBLIC.TB_QUESTIONNAIRE_STATUS SF
+					INNER JOIN TB_TOPIC TF1 ON TF1.NAME = SF.TOPIC
+					WHERE SF.ANSWER IS NOT NULL
+						AND SESSION_ID = %(session_id)s
+					GROUP BY SF.TOPIC,
+						TF1.QUESTION_AMOUNT
+					HAVING COUNT(*) = TF1.QUESTION_AMOUNT)) FINISHED_TOPIC_COUNT,
+
+	(SELECT COUNT(*)
+		FROM PUBLIC.TB_SELECTED_TOPICS
+		WHERE SESSION_ID = %(session_id)s) TOPIC_COUNT
+FROM PUBLIC.TB_QUESTIONNAIRE_STATUS S
+INNER JOIN PUBLIC.TB_TOPIC T ON S.TOPIC = T.NAME
+WHERE SESSION_ID = %(session_id)s
+ORDER BY S.ID DESC
+LIMIT 1
+"""
+    parameter_map = {"session_id": session_id}
+    counts: list = await select_from(query, parameter_map)
+    if len(counts) > 0:
+        (
+            topic,
+            question_count,
+            question_total,
+            finished_topic_count,
+            topic_total,
+        ) = counts[0]
+        return QuestionnaireCounts(
+            topic=topic,
+            question_count=question_count,
+            question_total=question_total,
+            finished_topic_count=finished_topic_count,
+            topic_total=topic_total,
+        )
+    else:
+        return QuestionnaireCounts(
+            topic="",
+            question_count=0,
+            question_total=0,
+            finished_topic_count=0,
+            topic_total=0,
+        )
+
+
 async def calculate_simple_total_score(session_id: str) -> TotalScore:
     query = """
 SELECT SUM(SCORE) TOTAL_SCORE,
@@ -610,6 +672,10 @@ if __name__ == "__main__":
         initial_question = await select_initial_question("dummy")
         assert initial_question is None
 
+    async def test_select_questionnaire_counts():
+        questionnaire_counts = await select_questionnaire_counts('dcbfafc8-2741-46ec-ac40-34d72b491747')
+        print(questionnaire_counts)
+
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
     # asyncio.run(test_select_suggestions())
@@ -618,4 +684,5 @@ if __name__ == "__main__":
     # asyncio.run(test_insert_into_selected_topics())
     # asyncio.run(test_quizz_modes())
     # asyncio.run(test_save_questionnaire_status())
-    asyncio.run(test_select_initial_question())
+    # asyncio.run(test_select_initial_question())
+    asyncio.run(test_select_questionnaire_counts())

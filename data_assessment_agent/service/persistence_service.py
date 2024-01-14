@@ -9,7 +9,6 @@ from data_assessment_agent.model.db_model import (
     Topic,
     Question,
     QuestionnaireStatus,
-    QuestionnaireCounts,
 )
 from data_assessment_agent.model.assessment_framework import SuggestedResponse
 
@@ -390,64 +389,6 @@ LIMIT 1
         )
     else:
         return None
-
-
-def select_questionnaire_counts(session_id: str) -> QuestionnaireCounts:
-    query = """
-SELECT S.TOPIC,
-
-	(SELECT COUNT(DISTINCT(S1.QUESTION))
-		FROM PUBLIC.TB_QUESTIONNAIRE_STATUS S1
-		WHERE S1.TOPIC = S.TOPIC
-            AND SESSION_ID = %(session_id)s) QUESTION_COUNT,
-	T.QUESTION_AMOUNT QUESTION_TOTAL,
-
-	(SELECT COUNT(*)
-		FROM TB_TOPIC TF
-		WHERE TF.NAME IN
-				(SELECT SF.TOPIC
-					FROM PUBLIC.TB_QUESTIONNAIRE_STATUS SF
-					INNER JOIN TB_TOPIC TF1 ON TF1.NAME = SF.TOPIC
-					WHERE SF.ANSWER IS NOT NULL
-						AND SESSION_ID = %(session_id)s
-					GROUP BY SF.TOPIC,
-						TF1.QUESTION_AMOUNT
-					HAVING COUNT(*) = TF1.QUESTION_AMOUNT)) FINISHED_TOPIC_COUNT,
-
-	(SELECT COUNT(*)
-		FROM TB_TOPIC) TOPIC_COUNT
-FROM PUBLIC.TB_QUESTIONNAIRE_STATUS S
-INNER JOIN PUBLIC.TB_TOPIC T ON S.TOPIC = T.NAME
-WHERE SESSION_ID = %(session_id)s
-ORDER BY S.ID DESC
-LIMIT 1
-"""
-    parameter_map = {"session_id": session_id}
-    handle_select = handle_select_func(query, parameter_map)
-    counts: list = create_cursor(handle_select)
-    if len(counts) > 0:
-        (
-            topic,
-            question_count,
-            question_total,
-            finished_topic_count,
-            topic_total,
-        ) = counts[0]
-        return QuestionnaireCounts(
-            topic=topic,
-            question_count=question_count,
-            question_total=question_total,
-            finished_topic_count=finished_topic_count,
-            topic_total=topic_total,
-        )
-    else:
-        return QuestionnaireCounts(
-            topic="",
-            question_count=0,
-            question_total=0,
-            finished_topic_count=0,
-            topic_total=0,
-        )
 
 
 if __name__ == "__main__":

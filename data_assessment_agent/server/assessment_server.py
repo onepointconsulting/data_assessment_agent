@@ -9,9 +9,6 @@ from data_assessment_agent.config.config import cfg
 from data_assessment_agent.service.data_assessment_service import (
     select_next_question,
 )
-from data_assessment_agent.service.persistence_service import (
-    select_questionnaire_counts,
-)
 from data_assessment_agent.model.assessment_framework import Question, SessionMessage
 from data_assessment_agent.model.transport import ServerMessage, ConfigMessage
 from data_assessment_agent.model.db_model import (
@@ -30,6 +27,7 @@ from data_assessment_agent.service.persistence_service_async import (
     select_quiz_modes,
     insert_selected_configuration,
     save_questionnaire_status,
+    select_questionnaire_counts
 )
 from data_assessment_agent.service.spider_chart import generate_spider_chart_for
 
@@ -205,7 +203,7 @@ async def handle_next_question(session_message: SessionMessage):
         await handle_missing_question(sid, session_id)
         return
     await save_incomplete_answer(session_id, next_question)
-    questionnaire_counts = select_questionnaire_counts(session_id)
+    questionnaire_counts = await select_questionnaire_counts(session_id)
     next_question.question_count = questionnaire_counts.question_count
     next_question.total_questions_in_topic = questionnaire_counts.question_total
     next_question.finished_topic_count = questionnaire_counts.finished_topic_count + 1
