@@ -7,7 +7,6 @@ from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.server.agent_session import AgentSession
 from data_assessment_agent.config.config import cfg
 from data_assessment_agent.service.data_assessment_service import (
-    initial_question,
     select_next_question,
 )
 from data_assessment_agent.service.persistence_service import (
@@ -88,11 +87,10 @@ async def start_session(sid: str, client_session):
         await init_config(sid)
     else:
         try:
-            no_session_available = client_session is None or client_session == ""
-            if no_session_available:
-                next_question = initial_question()
-            else:
-                next_question = await select_next_question(session_id)
+            next_question = await select_next_question(session_id)
+            if next_question is None:
+                await send_internal_error(sid)
+                return
             session_message = SessionMessage(
                 next_question=next_question, sid=sid, session_id=session_id
             )
@@ -129,7 +127,10 @@ async def client_message(sid: str, message: str):
         questionnaire_status.score = 0
         await score_and_save_questionnaire_status(questionnaire_status)
         next_question = await select_next_question(session_id)
-        if next_question.final:
+        if next_question is None:
+            await send_internal_error(sid)
+            return
+        elif next_question.final:
             await handle_final_question(
                 SessionMessage(
                     next_question=next_question, sid=sid, session_id=session_id
@@ -203,7 +204,7 @@ async def handle_next_question(session_message: SessionMessage):
     if next_question is None:
         await handle_missing_question(sid, session_id)
         return
-    save_incomplete_answer(session_id, next_question)
+    await save_incomplete_answer(session_id, next_question)
     questionnaire_counts = select_questionnaire_counts(session_id)
     next_question.question_count = questionnaire_counts.question_count
     next_question.total_questions_in_topic = questionnaire_counts.question_total
@@ -216,7 +217,7 @@ async def handle_next_question(session_message: SessionMessage):
 
 
 async def send_question_to_client(sid: str, session_id: str, next_question: Question):
-    response = f"""Topic: {next_question.category} ({next_question.finished_topic_count} out of {next_question.topic_total} topics
+    response = f"""Topic: {next_question.category} ({next_question.finished_topic_count} out of {next_question.topic_total} topics)
 
 Question {next_question.question_count} out of {next_question.total_questions_in_topic} in this topic
 
@@ -322,10 +323,10 @@ async def init_config(sid: str):
     )
 
 
-def save_incomplete_answer(session_id, next_question):
+async def save_incomplete_answer(session_id, next_question):
     """Before you emit, store the next question without the answer and score in tb_questionnaire_status"""
     questionnaire_status = create_questionnaire_status(session_id, next_question)
-    save_questionnaire_status(questionnaire_status=questionnaire_status)
+    await save_questionnaire_status(questionnaire_status=questionnaire_status)
 
 
 @sio.event

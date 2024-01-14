@@ -100,6 +100,43 @@ async def select_from(query: str, parameter_map: dict) -> list:
     return await create_cursor(handle_select)
 
 
+async def select_initial_question(session_id: str) -> Union[Question, None]:
+    query = """
+SELECT Q.ID,
+	Q.QUESTION,
+	Q.SCORE,
+	T.ID TOPIC_ID,
+	T.NAME TOPIC_NAME,
+	T.DESCRIPTION TOPIC_DESCRIPTION,
+	T.QUESTION_AMOUNT
+FROM TB_QUESTION Q
+INNER JOIN PUBLIC.TB_TOPIC T ON T.ID = Q.TOPIC_ID
+INNER JOIN PUBLIC.TB_SELECTED_TOPICS ST ON ST.TOPIC_ID = T.ID
+WHERE ST.SESSION_ID = %(session_id)s
+ORDER BY Q.ID LIMIT 1
+"""
+    parameter_map = {"session_id": session_id}
+    questions: list = await select_from(query, parameter_map)
+    if len(questions) > 0:
+        (
+            question_id,
+            question_question,
+            question_score,
+            topic_id,
+            topic_name,
+            topic_description,
+            question_amount,
+        ) = questions[0]
+        topic = Topic(id=topic_id, name=topic_name, topic_description=topic_description)
+        return Question(
+            id=question_id,
+            question=question_question,
+            score=question_score,
+            topic=topic,
+        )
+    return None
+
+
 async def select_last_question(session_id: str) -> Union[QuestionnaireStatus, None]:
     async def handle_select(cur: AsyncCursor):
         await cur.execute(
@@ -559,14 +596,19 @@ if __name__ == "__main__":
         for quizz_mode in quizz_modes:
             print(quizz_mode.model_dump_json())
 
-
     async def test_save_questionnaire_status():
-        from data_assessment_agent.test.provider.questionnaire_status_provider import create_questionnaire_status
+        from data_assessment_agent.test.provider.questionnaire_status_provider import (
+            create_questionnaire_status,
+        )
+
         questionnaire_status = create_questionnaire_status()
         new_questionnaire_status = await save_questionnaire_status(questionnaire_status)
         assert new_questionnaire_status is not None
         print(new_questionnaire_status.id)
 
+    async def test_select_initial_question():
+        initial_question = await select_initial_question("dummy")
+        assert initial_question is None
 
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
@@ -575,4 +617,5 @@ if __name__ == "__main__":
     # asyncio.run(test_has_selected_topics())
     # asyncio.run(test_insert_into_selected_topics())
     # asyncio.run(test_quizz_modes())
-    asyncio.run(test_save_questionnaire_status())
+    # asyncio.run(test_save_questionnaire_status())
+    asyncio.run(test_select_initial_question())

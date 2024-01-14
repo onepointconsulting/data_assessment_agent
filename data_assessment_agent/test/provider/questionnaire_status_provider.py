@@ -6,6 +6,6 @@ def create_questionnaire_status() -> QuestionnaireStatus:
         session_id="dummy",
         topic="Business Alignment",
         question="What are the organization's short-term and long-term business goals?",
-        answer='',
+        answer="",
         score=0,
     )

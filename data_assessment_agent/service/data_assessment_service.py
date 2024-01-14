@@ -8,9 +8,11 @@ from data_assessment_agent.service.persistence_service import (
     select_answered_questions_in_session,
     select_remaining_topics,
 )
+from data_assessment_agent.model.db_model import Question as DbQuestion
 from data_assessment_agent.service.persistence_service_async import (
     select_last_question,
     select_initial_question_from_topic,
+    select_initial_question,
 )
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
 from data_assessment_agent.service.ranking_service_together import (
@@ -21,9 +23,10 @@ from data_assessment_agent.config.log_factory import logger
 questionnaire_questions = load_questions()
 
 
-def initial_question() -> Question:
-    assert len(questionnaire_questions) > 0
-    db_question = questionnaire_questions[0]
+async def initial_question(session_id: str) -> Union[Question, None]:
+    db_question: Union[DbQuestion, None] = await select_initial_question(session_id)
+    if db_question is None:
+        return None
     return Question(
         question=db_question.question,
         category=db_question.topic.name,
@@ -35,7 +38,7 @@ def initial_question() -> Question:
 async def select_next_question(session_id: str) -> Union[Question, None]:
     first_question = await select_last_question(session_id)
     if first_question is None:
-        return initial_question()
+        return await initial_question(session_id)
     elif first_question.answer is None and first_question.previous_answer_count == 0:
         # This means that the question has not been answered yet
         return create_question(first_question.topic, first_question.question)
