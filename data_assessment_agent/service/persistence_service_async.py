@@ -395,6 +395,9 @@ async def insert_selected_configuration(
     session_id = configuration.session_id
     topic_list = configuration.topic_list
     quiz_mode_name = configuration.quiz_mode_name
+    logger.info("session_id: %s", session_id)
+    logger.info("topic_list: %s", topic_list)
+    logger.info("quiz_mode_name: %s", quiz_mode_name)
     async def process_selected_topics(conn: AsyncConnection):
         query1 = """
 insert into public.tb_selected_topics(session_id, topic_id, created_at)

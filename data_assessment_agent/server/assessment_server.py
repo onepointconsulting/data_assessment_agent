@@ -155,7 +155,7 @@ async def save_configuration(sid: str, config_message: str):
         # TODO: send message in case there is no topic_list
         quiz_mode_name = message_dict.get("quiz_mode_name")
         # TODO: send message in case there is no quiz_mode_name
-        insert_selected_configuration(SelectedConfiguration(session_id=session_id, topic_list=topic_list, quiz_mode_name=quiz_mode_name))
+        await insert_selected_configuration(SelectedConfiguration(session_id=session_id, topic_list=topic_list, quiz_mode_name=quiz_mode_name))
         await sio.emit(
             Commands.QUIZ_CONFIGURATION_SAVE_OK,
             ServerMessage(response="OK", sources=None, sessionId=session_id).model_dump_json(),
