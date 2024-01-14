@@ -111,6 +111,20 @@ class TotalScore(BaseModel):
     )
 
 
+class QuizzMode(BaseModel):
+    id: Union[int, None] = Field(default=None, description="The mode identifier")
+    name: str = Field(..., description="The name of the quizz mode")
+    question_count: int = Field(..., description="The number of questions in this mode")
+
+
+class SelectedConfiguration(BaseModel):
+    session_id: str = Field(..., description="The session identifier")
+    topic_list: List[str] = Field(
+        ..., description="The list of topics which the user selected"
+    )
+    quiz_mode_name: str = Field(..., description="The name of the quiz mode")
+
+
 def create_questionnaire_status(
     session_id: str, question: Union[Question, DomainQuestion, QuestionnaireStatus]
 ):

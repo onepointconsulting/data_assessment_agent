@@ -23,6 +23,8 @@ DROP TABLE IF EXISTS public.tb_topic;
 DROP TABLE IF EXISTS public.tb_sentiment_score;
 DROP TABLE IF EXISTS public.tb_question_score;
 DROP TABLE IF EXISTS public.tb_selected_topics;
+DROP TABLE IF EXISTS public.tb_quiz_mode;
+DROP TABLE IF EXISTS public.tb_selected_quiz_mode;
 
 CREATE TABLE public.tb_topic
 (
@@ -132,10 +134,52 @@ CREATE TABLE public.tb_selected_topics
         NOT VALID
 );
 
+ALTER TABLE tb_selected_topics ADD CONSTRAINT session_id_topic_id_unique 
+UNIQUE (session_id, topic_id);
+
 
 -- Initial scoring
 -- Run this after all questions were imported
 insert into tb_question_score(question_id, affirmative_score, undecided_score, negative_score) select id, 10, 5, 0 from tb_question;
+
+CREATE TABLE public.tb_quiz_mode
+(
+	id serial NOT NULL,
+	name character varying(30) NOT NULL,
+	question_count int NOT NULL,
+	PRIMARY KEY (id)
+);
+
+ALTER TABLE tb_quiz_mode ADD CONSTRAINT quiz_mode_name_unique UNIQUE (name);
+
+insert into public.tb_quiz_mode(name, question_count) values('Easy', 3);
+insert into public.tb_quiz_mode(name, question_count) values('Medium', 5);
+insert into public.tb_quiz_mode(name, question_count) values('Professional', 7);
+insert into public.tb_quiz_mode(name, question_count) values('Expert', 8);
+
+CREATE TABLE public.tb_quiz_mode
+(
+	id serial NOT NULL,
+	name character varying(30) NOT NULL,
+	question_count int NOT NULL,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE public.tb_selected_quiz_mode
+(
+	id serial NOT NULL,
+	session_id character varying(36) NOT NULL,
+	quiz_mode_id int NOT NULL,
+	PRIMARY KEY (id),
+	CONSTRAINT tb_quiz_mode_id FOREIGN KEY (quiz_mode_id)
+        REFERENCES public.tb_quiz_mode (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
+ALTER TABLE tb_selected_quiz_mode ADD CONSTRAINT session_id_quiz_mode_id_unique 
+UNIQUE (session_id, quiz_mode_id);
 
 -- Scoring view
 

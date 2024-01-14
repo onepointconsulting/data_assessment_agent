@@ -16,6 +16,8 @@ from data_assessment_agent.model.db_model import (
     Topic,
     TotalScore,
     SessionReport,
+    QuizzMode,
+    SelectedConfiguration
 )
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.model.assessment_framework import SuggestedResponse
@@ -64,7 +66,20 @@ async def create_cursor(func: Callable) -> Any:
     except:
         logger.exception("Could not create cursor.")
     finally:
-        await conn.close()
+        if conn is not None:
+            await conn.close()
+
+
+async def execute_on_connection(func: Callable) -> Any:
+    # await asynch_pool.check()
+    try:
+        conn = await AsyncConnection.connect(conninfo=db_cfg.db_conn_str)
+        await func(conn)
+    except:
+        logger.exception("Could not open connection.")
+    finally:
+        if conn is not None:
+            await conn.close()
 
 
 async def handle_select_func(query: str, query_params: dict):
@@ -332,11 +347,7 @@ WHERE SESSION_ID = %(session_id)s AND ANSWER IS NOT NULL and TOPIC_NAME IS NOT N
 
 
 async def select_topics() -> List[str]:
-    query = """
-SELECT NAME
-FROM TB_TOPIC
-ORDER BY NAME
-"""
+    query = """SELECT NAME FROM TB_TOPIC ORDER BY NAME"""
     topics: list = await select_from(query, {})
     return [t[0] for t in topics]
 
@@ -369,6 +380,43 @@ WHERE Q.QUESTION = %(question)s
             suggestion_body,
         ) in response_list
     ]
+
+
+async def has_selected_topics(session_id: str) -> bool:
+    query = """SELECT COUNT(*) FROM PUBLIC.TB_SELECTED_TOPICS WHERE SESSION_ID = %(session_id)s"""
+    parameter_map = {"session_id": session_id}
+    response = await select_from(query, parameter_map)
+    return response[0][0] > 0
+
+
+async def insert_selected_configuration(
+    configuration: SelectedConfiguration
+):
+    session_id = configuration.session_id
+    topic_list = configuration.topic_list
+    quiz_mode_name = configuration.quiz_mode_name
+    async def process_selected_topics(conn: AsyncConnection):
+        query1 = """
+insert into public.tb_selected_topics(session_id, topic_id, created_at)
+values(%s, (select id from public.tb_topic where name=%s), now())
+"""
+        query_quiz_mode = """
+insert into tb_selected_quiz_mode(session_id, quiz_mode_id)
+values(%(session_id)s, (select id from tb_quiz_mode where name = %(quiz_mode_name)s))
+"""
+        data = [(session_id, t) for t in topic_list]
+        async with conn.cursor() as cur:
+            await cur.executemany(query1, data)
+            await cur.execute(query_quiz_mode, {"session_id": session_id, "quiz_mode_name": quiz_mode_name})
+            await conn.commit()
+
+    await execute_on_connection(process_selected_topics)
+
+
+async def select_quiz_modes() -> List[QuizzMode]:
+    query = """select id, name, question_count from tb_quiz_mode"""
+    response = await select_from(query, {})
+    return [QuizzMode(id=r[0], name=r[1], question_count=r[2]) for r in response]
 
 
 if __name__ == "__main__":
@@ -414,7 +462,29 @@ if __name__ == "__main__":
         for s in topics:
             print(s)
 
+    async def test_has_selected_topics():
+        res = await has_selected_topics("dummy")
+        assert res is False
+
+    async def test_insert_into_selected_topics():
+        topics = await select_topics()
+        topics = topics[:2]
+        dummy_session_id = "dummy"
+        quiz_mode_name = "Medium"
+        selected_configuration = SelectedConfiguration(session_id=dummy_session_id, quiz_mode_name=quiz_mode_name, topic_list=topics)
+        await insert_selected_configuration(selected_configuration)
+
+    async def test_quizz_modes():
+        quizz_modes = await select_quiz_modes()
+        assert quizz_modes is not None
+        for quizz_mode in quizz_modes:
+            print(quizz_mode.model_dump_json())
+    
+    
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
     # asyncio.run(test_select_suggestions())
-    asyncio.run(test_select_topics())
+    # asyncio.run(test_select_topics())
+    # asyncio.run(test_has_selected_topics())
+    asyncio.run(test_insert_into_selected_topics())
+    # asyncio.run(test_quizz_modes())
