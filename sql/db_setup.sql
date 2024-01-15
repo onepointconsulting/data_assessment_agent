@@ -16,12 +16,13 @@ CREATE DATABASE data_assessment_questionnaire
     IS_TEMPLATE = False;
 
 
+DROP VIEW vw_question_scores;
 DROP TABLE IF EXISTS public.tb_questionnaire_status;
 DROP TABLE IF EXISTS public.tb_suggested_response;
+DROP TABLE IF EXISTS public.tb_question_score;
 DROP TABLE IF EXISTS public.tb_question;
 DROP TABLE IF EXISTS public.tb_topic;
 DROP TABLE IF EXISTS public.tb_sentiment_score;
-DROP TABLE IF EXISTS public.tb_question_score;
 DROP TABLE IF EXISTS public.tb_selected_topics;
 DROP TABLE IF EXISTS public.tb_quiz_mode;
 DROP TABLE IF EXISTS public.tb_selected_quiz_mode;
@@ -157,14 +158,6 @@ insert into public.tb_quiz_mode(name, question_count) values('Medium', 5);
 insert into public.tb_quiz_mode(name, question_count) values('Professional', 7);
 insert into public.tb_quiz_mode(name, question_count) values('Expert', 8);
 
-CREATE TABLE public.tb_quiz_mode
-(
-	id serial NOT NULL,
-	name character varying(30) NOT NULL,
-	question_count int NOT NULL,
-	PRIMARY KEY (id)
-);
-
 CREATE TABLE public.tb_selected_quiz_mode
 (
 	id serial NOT NULL,
@@ -182,8 +175,6 @@ ALTER TABLE tb_selected_quiz_mode ADD CONSTRAINT session_id_quiz_mode_id_unique
 UNIQUE (session_id, quiz_mode_id);
 
 -- Scoring view
-
-DROP VIEW vw_question_scores;
 
 CREATE VIEW vw_question_scores as
 SELECT 
