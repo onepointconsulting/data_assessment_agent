@@ -138,11 +138,6 @@ CREATE TABLE public.tb_selected_topics
 ALTER TABLE tb_selected_topics ADD CONSTRAINT session_id_topic_id_unique 
 UNIQUE (session_id, topic_id);
 
-
--- Initial scoring
--- Run this after all questions were imported
-insert into tb_question_score(question_id, affirmative_score, undecided_score, negative_score) select id, 10, 5, 0 from tb_question;
-
 CREATE TABLE public.tb_quiz_mode
 (
 	id serial NOT NULL,
@@ -209,4 +204,6 @@ INNER JOIN PUBLIC.TB_SENTIMENT_SCORE SS ON SS.ID = S.SENTIMENT_ID
 INNER JOIN PUBLIC.TB_QUESTION Q ON Q.QUESTION = S.QUESTION
 FULL JOIN PUBLIC.TB_TOPIC T ON T.ID = Q.TOPIC_ID AND T.NAME = S.TOPIC;
 
-
+-- Initial scoring
+-- Run this after all questions were imported
+insert into tb_question_score(question_id, affirmative_score, undecided_score, negative_score) select id, 10, 5, 0 from tb_question;

@@ -64,6 +64,8 @@ python -m unittest
 
 ## Bootstraping the database
 
+Before you can start the application you should run the scripts, below, otherwise the database will be empty, i.e. questions and suggestions will be missing.
+
 ```
 python ./data_assessment_agent/bootstrap/import_framework.py
 ```
@@ -75,6 +77,22 @@ python ./data_assessment_agent/bootstrap/import_suggested_responses.py
 ```
 
 This last command requires ChatGPT, so it will also cost some money.
+
+Then you should also populate the table tb_question_score 
+
+You should look at each of the questions and assign them points (score) that makes sense according to three categories:
+
+- affirmative
+- undecided
+- negative
+
+You can do a rough job be executing this query in the database, but note that this might not be good in all cases:
+
+```
+-- Initial scoring
+-- Run this after all questions were imported
+insert into tb_question_score(question_id, affirmative_score, undecided_score, negative_score) select id, 10, 5, 0 from tb_question;
+```
 
 ## Running the server
 
