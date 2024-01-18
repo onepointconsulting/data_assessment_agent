@@ -214,7 +214,10 @@ async def select_random_session() -> Union[str, None]:
     async def handle_select(cur: AsyncCursor):
         await cur.execute(
             """
-select session_id from public.tb_questionnaire_status order by random() limit 1
+select session_id from public.tb_questionnaire_status qs
+INNER JOIN PUBLIC.TB_TPICS T ON QS.TOPIC = T.NAME
+INNER JOIN PUBLIC.TB_SELECTED_TOPICS ST ON ST.TOPIC_ID = T.ID
+where answer is not null order by random() limit 1
 """
         )
         return list(await cur.fetchall())
@@ -253,7 +256,7 @@ LIMIT 1
 async def select_topic_scores(session_id: str) -> List[TopicScore]:
     query = """
 SELECT T.NAME AS TOPIC_NAME,
-	COALESCE(MAX_SCORE, 0),
+	COALESCE(MAX_SCORE, 0) MAX_SCORE,
 	COALESCE(SCORE, 0) SCORE
 FROM TB_TOPIC T
 INNER JOIN PUBLIC.TB_SELECTED_TOPICS ST ON ST.TOPIC_ID = T.ID
@@ -629,7 +632,7 @@ async def select_quiz_modes() -> List[QuizzMode]:
 async def select_config_parameters() -> List[dict]:
     query = "select config_key, config_value from tb_configuration"
     config_rows = await select_from(query, {})
-    return {r[0]: r[1] for r in config_rows} 
+    return {r[0]: r[1] for r in config_rows}
 
 
 if __name__ == "__main__":

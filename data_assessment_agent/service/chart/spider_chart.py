@@ -1,8 +1,9 @@
-from typing import List
 from pathlib import Path
 from data_assessment_agent.model.db_model import TopicScoreResult
 from data_assessment_agent.config.config import cfg
-from data_assessment_agent.service.persistence_service_async import select_topic_scores
+from data_assessment_agent.service.chart.common import generate_topic_scores_result
+from data_assessment_agent.config.log_factory import logger
+from data_assessment_agent.service.chart.common import save_figure
 
 import numpy as np
 import matplotlib
@@ -23,7 +24,11 @@ def generate_spider_chart(
     scores = [score.score for score in topic_scores]
     max_scores = [score.max_score for score in topic_scores]
     # Obtain Angles
-    angles = np.linspace(0, 2 * np.pi, len(topic_names), endpoint=False)
+    topic_names_length = len(topic_names)
+    if topic_names_length == 0:
+        logger.info(f"No data available for {topic_score_result.session_id}")
+        return None
+    angles = np.linspace(0, 2 * np.pi, topic_names_length, endpoint=False)
     # angles = np.concatenate((angles, [angles[0]]))
 
     # Draw the Chart
@@ -79,26 +84,20 @@ def generate_spider_chart(
     plt.grid(True)
     plt.tight_layout()
 
-    chart_file = (
-        cfg.chart_tmp_folder / f"{topic_score_result.session_id}.{output_format}"
-    )
-    plt.savefig(chart_file)
-    return chart_file
+    return save_figure(topic_score_result.session_id, output_format, "radar")
 
 
 async def generate_spider_chart_for(session_id: str, size=8, legend_size=16) -> Path:
-    topic_scores = await select_topic_scores(session_id)
-    scores_result = TopicScoreResult(topic_scores=topic_scores, session_id=session_id)
+    scores_result = await generate_topic_scores_result(session_id)
     return generate_spider_chart(scores_result, size=size, legend_size=legend_size)
 
 
 if __name__ == "__main__":
     import asyncio
-    from data_assessment_agent.service.persistence_service_async import (
-        select_random_session,
+    from data_assessment_agent.test.provider.session_id_provider import (
+        session_id_provider,
     )
-    from data_assessment_agent.config.log_factory import logger
 
-    session_id = asyncio.run(select_random_session())
+    session_id = asyncio.run(session_id_provider())
     graph_path = asyncio.run(generate_spider_chart_for(session_id, size=12))
     logger.info("graph path: %s", graph_path)

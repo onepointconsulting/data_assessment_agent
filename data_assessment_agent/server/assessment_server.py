@@ -2,6 +2,7 @@ import socketio
 import json
 from aiohttp import web
 from enum import StrEnum
+from typing import Callable
 
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.server.agent_session import AgentSession
@@ -30,7 +31,8 @@ from data_assessment_agent.service.persistence_service_async import (
     save_questionnaire_status,
     select_questionnaire_counts,
 )
-from data_assessment_agent.service.spider_chart import generate_spider_chart_for
+from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
+from data_assessment_agent.service.chart.barchart import generate_bar_chart_for
 
 sio = socketio.AsyncServer(cors_allowed_origins=cfg.websocket_cors_allowed_origins)
 app = web.Application()
@@ -164,10 +166,11 @@ async def save_configuration(sid: str, config_message: str):
             await send_error_message("", "No session id available")
             return
         topic_list = message_dict.get("topic_list")
-        minimum_topics = config_parameters.get(DBConfigKeys.MINIMUM_TOPICS, '2')
+        minimum_topics = config_parameters.get(DBConfigKeys.MINIMUM_TOPICS, "2")
         if session_id is None or len(topic_list) < int(minimum_topics):
             await send_error_message(
-                session_id, f"At least {minimum_topics} topics are required. Please select a minimum of {minimum_topics} topics"
+                session_id,
+                f"At least {minimum_topics} topics are required. Please select a minimum of {minimum_topics} topics",
             )
             return
         quiz_mode_name = message_dict.get("quiz_mode_name")
@@ -259,7 +262,7 @@ async def handle_initial_question(session_message: SessionMessage):
             Commands.SERVER_MESSAGE,
             ServerMessage(
                 response=f"""
-### Welcome to the {cfg.product_name} quizz
+### Welcome to the {cfg.product_name}
 The data assessment framework chatbot will now guide you through a set of questions about the following topics:
 
 {topics_str}
@@ -349,10 +352,25 @@ async def get_handler(request: web.Request) -> web.Response:
 
 @routes.get("/spider_chart/{session_id}")
 async def generate_spider_chart(request: web.Request) -> web.Response:
+    async def chart_func(session_id: str):
+        return await generate_spider_chart_for(session_id, size=12, legend_size=20)
+
+    return await generate_chart(request, chart_func)
+
+
+@routes.get("/barchart/{session_id}")
+async def generate_spider_chart(request: web.Request) -> web.Response:
+    async def chart_func(session_id: str):
+        return await generate_bar_chart_for(session_id, size=12, width=0.6)
+
+    return await generate_chart(request, chart_func)
+
+
+async def generate_chart(request: web.Request, chart_func: Callable) -> web.Response:
     session_id = request.match_info.get("session_id", None)
     if session_id is None:
         raise web.HTTPNotFound(text="No session id specified")
-    chart_path = await generate_spider_chart_for(session_id, size=12, legend_size=20)
+    chart_path = await chart_func(session_id)
     return web.FileResponse(chart_path)
 
 

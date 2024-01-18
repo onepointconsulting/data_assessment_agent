@@ -177,6 +177,12 @@ CREATE TABLE public.tb_configuration
 	PRIMARY KEY (id)
 );
 
+INSERT INTO public.tb_configuration(config_key, config_value)
+VALUES('minimum topics', 3);
+
+ALTER TABLE tb_configuration ADD CONSTRAINT config_key_unique 
+UNIQUE (config_key);
+
 -- Scoring view
 
 CREATE VIEW vw_question_scores as

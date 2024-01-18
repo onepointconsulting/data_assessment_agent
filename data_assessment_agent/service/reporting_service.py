@@ -6,7 +6,7 @@ from pathlib import Path
 from data_assessment_agent.service.persistence_service_async import (
     select_session_report,
 )
-from data_assessment_agent.service.spider_chart import generate_spider_chart_for
+from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
 from data_assessment_agent.config.config import cfg
 
 
