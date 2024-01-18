@@ -12,7 +12,7 @@ from data_assessment_agent.service.persistence_service_async import (
     select_last_question,
     select_initial_question_from_topic,
     select_initial_question,
-    select_remaining_topics
+    select_remaining_topics,
 )
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
 from data_assessment_agent.service.ranking_service_together import (

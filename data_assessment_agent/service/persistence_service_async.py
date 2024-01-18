@@ -18,7 +18,7 @@ from data_assessment_agent.model.db_model import (
     SessionReport,
     QuizzMode,
     SelectedConfiguration,
-    QuestionnaireCounts
+    QuestionnaireCounts,
 )
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.model.assessment_framework import SuggestedResponse
@@ -468,7 +468,7 @@ LIMIT 1
             finished_topic_count=0,
             topic_total=0,
         )
-    
+
 
 async def select_remaining_topics(session_id: str) -> Union[List[str], None]:
     query = """
@@ -487,7 +487,9 @@ WHERE NOT EXISTS
     return await handle_select_remaining(query, parameter_map)
 
 
-async def handle_select_remaining(query: str, parameter_map: dict) -> Union[List[str], None]:
+async def handle_select_remaining(
+    query: str, parameter_map: dict
+) -> Union[List[str], None]:
     remaining_questions: list = await select_from(query, parameter_map)
     return [t[0] for t in remaining_questions]
 
@@ -624,6 +626,12 @@ async def select_quiz_modes() -> List[QuizzMode]:
     return [QuizzMode(id=r[0], name=r[1], question_count=r[2]) for r in response]
 
 
+async def select_config_parameters() -> List[dict]:
+    query = "select config_key, config_value from tb_configuration"
+    config_rows = await select_from(query, {})
+    return {r[0]: r[1] for r in config_rows} 
+
+
 if __name__ == "__main__":
 
     async def test_select_last_session():
@@ -704,12 +712,15 @@ if __name__ == "__main__":
         assert initial_question is None
 
     async def test_select_questionnaire_counts():
-        questionnaire_counts = await select_questionnaire_counts('dcbfafc8-2741-46ec-ac40-34d72b491747')
+        questionnaire_counts = await select_questionnaire_counts(
+            "dcbfafc8-2741-46ec-ac40-34d72b491747"
+        )
         print(questionnaire_counts)
 
-
     async def test_select_remaining_topics():
-        remaining_topics = await select_remaining_topics('dcbfafc8-2741-46ec-ac40-34d72b491747')
+        remaining_topics = await select_remaining_topics(
+            "dcbfafc8-2741-46ec-ac40-34d72b491747"
+        )
         print(remaining_topics)
 
     # asyncio.run(test_select_topic_scores())

@@ -6,6 +6,7 @@ from enum import StrEnum
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.server.agent_session import AgentSession
 from data_assessment_agent.config.config import cfg
+from data_assessment_agent.config.db_config import config_parameters, DBConfigKeys
 from data_assessment_agent.service.data_assessment_service import (
     select_next_question,
 )
@@ -27,7 +28,7 @@ from data_assessment_agent.service.persistence_service_async import (
     select_quiz_modes,
     insert_selected_configuration,
     save_questionnaire_status,
-    select_questionnaire_counts
+    select_questionnaire_counts,
 )
 from data_assessment_agent.service.spider_chart import generate_spider_chart_for
 
@@ -163,9 +164,10 @@ async def save_configuration(sid: str, config_message: str):
             await send_error_message("", "No session id available")
             return
         topic_list = message_dict.get("topic_list")
-        if session_id is None or len(topic_list) == 0:
+        minimum_topics = config_parameters.get(DBConfigKeys.MINIMUM_TOPICS, '2')
+        if session_id is None or len(topic_list) < int(minimum_topics):
             await send_error_message(
-                session_id, "No topics selected. Please select at least one."
+                session_id, f"At least {minimum_topics} topics are required. Please select a minimum of {minimum_topics} topics"
             )
             return
         quiz_mode_name = message_dict.get("quiz_mode_name")

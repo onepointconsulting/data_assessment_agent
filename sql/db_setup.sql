@@ -26,6 +26,7 @@ DROP TABLE IF EXISTS public.tb_sentiment_score;
 DROP TABLE IF EXISTS public.tb_selected_topics;
 DROP TABLE IF EXISTS public.tb_quiz_mode;
 DROP TABLE IF EXISTS public.tb_selected_quiz_mode;
+DROP TABLE IF EXISTS public.tb_configuration;
 
 CREATE TABLE public.tb_topic
 (
@@ -167,6 +168,14 @@ CREATE TABLE public.tb_selected_quiz_mode
 
 ALTER TABLE tb_selected_quiz_mode ADD CONSTRAINT session_id_quiz_mode_id_unique 
 UNIQUE (session_id, quiz_mode_id);
+
+CREATE TABLE public.tb_configuration
+(
+	id serial NOT NULL,
+	config_key character varying(36) NOT NULL,
+	config_value character varying(256) NOT NULL,
+	PRIMARY KEY (id)
+);
 
 -- Scoring view
 
