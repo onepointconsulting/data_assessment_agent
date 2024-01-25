@@ -15,8 +15,11 @@ if __name__ == "__main__":
     # clear_suggested_responses()
     logger.info("Getting all questions")
     questions = load_questions()
+    question_counter = 0
+    counter = 0
     for question_obj in questions:
-        if not suggestion_exists_for(question_obj):
+        if question_obj.yes_no_question and not suggestion_exists_for(question_obj):
+            question_counter += 1
             try:
                 suggested_response_list = asyncio.run(
                     generate_suggestions(question_obj.question, question_obj.topic.name)
@@ -27,5 +30,8 @@ if __name__ == "__main__":
                     )
                     saved_suggestion = save_suggested_response(db_suggested_response)
                     logger.info("Saved %s", saved_suggestion)
+                    counter += 1
+                logger.info("Generated %d suggestions for %d questions", counter, question_counter)
+
             except:
                 logger.exception("Could not save suggestions for %s", question_obj)

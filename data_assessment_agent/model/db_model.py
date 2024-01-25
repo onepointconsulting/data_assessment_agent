@@ -31,6 +31,13 @@ class Question(BaseModel):
     score: int = Field(..., description="What kind of score is asked from the user")
     topic: Topic = Field(..., description="The topic ttp which the question belongs")
     preferred_order: Union[int, None] = Field(default=0, description="The question id")
+    yes_no_question: bool = Field(
+        default=False,
+        description="Whether the question can be answered with a you, no or maybe answer",
+    )
+    scored: bool = Field(
+        default=True, description="Tells us whether a question is scored or not"
+    )
 
 
 class DbSuggestedResponse(SuggestedResponse):

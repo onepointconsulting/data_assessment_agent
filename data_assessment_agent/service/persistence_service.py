@@ -78,31 +78,6 @@ VALUES (%(name)s, %(description)s, 5, %(preferred_topic_order)s) RETURNING ID;
     return create_cursor(process_save)
 
 
-def save_question(question: Question) -> Question:
-    def process_save(cur: cursor):
-        cur.execute(
-            """
-INSERT INTO TB_QUESTION (QUESTION, SCORE, TOPIC_ID, PREFERRED_QUESTION_ORDER)
-VALUES (%(question)s, %(score)s, (SELECT ID FROM TB_TOPIC WHERE NAME = %(topic_name)s), %(preferred_question_order)s) RETURNING ID;
-            """,
-            {
-                "question": question.question,
-                "score": question.score,
-                "topic_name": question.topic.name,
-                "preferred_question_order": question.preferred_order,
-            },
-        )
-        created_id = cur.fetchone()[0]
-        return Question(
-            id=created_id,
-            question=question.question,
-            topic=question.topic,
-            score=question.score,
-        )
-
-    return create_cursor(process_save)
-
-
 def save_suggested_response(
     suggested_response: DbSuggestedResponse,
 ) -> DbSuggestedResponse:
@@ -195,7 +170,8 @@ SELECT Q.ID,
 	T.ID TOPIC_ID,
 	T.NAME TOPIC_NAME,
 	T.DESCRIPTION TOPIC_DESCRIPTION,
-    T.QUESTION_AMOUNT
+    T.QUESTION_AMOUNT,
+    Q.YES_NO_QUESTION
 FROM TB_QUESTION Q
 INNER JOIN TB_TOPIC T ON Q.TOPIC_ID = T.ID
 ORDER BY T.PREFERRED_TOPIC_ORDER, Q.ID"""
@@ -212,6 +188,7 @@ ORDER BY T.PREFERRED_TOPIC_ORDER, Q.ID"""
         topic_name,
         topic_description,
         question_amount,
+        yes_no_question
     ) in questions:
         topic = Topic(
             id=topic_id,
@@ -220,7 +197,7 @@ ORDER BY T.PREFERRED_TOPIC_ORDER, Q.ID"""
             question_amount=question_amount,
         )
         final_questions.append(
-            Question(id=id, question=question, score=score, topic=topic)
+            Question(id=id, question=question, score=score, topic=topic, yes_no_question=yes_no_question)
         )
     return final_questions
 

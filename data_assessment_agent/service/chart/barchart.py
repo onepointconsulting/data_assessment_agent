@@ -24,7 +24,10 @@ def generate_bar_chart(
             [topic_score.score for topic_score in scores_result.topic_scores]
         ),
         "Max score": np.array(
-            [topic_score.max_score - topic_score.score for topic_score in scores_result.topic_scores]
+            [
+                topic_score.max_score - topic_score.score
+                for topic_score in scores_result.topic_scores
+            ]
         ),
     }
 
@@ -43,7 +46,9 @@ def generate_bar_chart(
     )
 
 
-async def generate_bar_chart_for(session_id: str, width: float = 0.6, size: int = 8) -> Path:
+async def generate_bar_chart_for(
+    session_id: str, width: float = 0.6, size: int = 8
+) -> Path:
     scores_result = await generate_topic_scores_result(session_id)
     return generate_bar_chart(scores_result, width=width, size=size)
 

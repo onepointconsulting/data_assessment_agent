@@ -1,6 +1,9 @@
+import asyncio
+
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.config.framework_loader import import_framework_objects
-from data_assessment_agent.service.persistence_service import save_topic, save_question
+from data_assessment_agent.service.persistence_service import save_topic
+from data_assessment_agent.service.persistence_service_async import save_question
 from data_assessment_agent.model.db_model import Topic, Question
 
 if __name__ == "__main__":
@@ -24,7 +27,7 @@ if __name__ == "__main__":
                         topic=saved_topic,
                         preferred_order=i,
                     )
-                    save_question(db_question)
+                    asyncio.run(save_question(db_question))
                 except:
                     logger.exception("Failed to insert question")
         except:

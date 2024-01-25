@@ -72,6 +72,10 @@ class Config:
     report_url_base = os.getenv("REPORT_URL_BASE")
     assert report_url_base is not None
 
+    # Exports
+    exports_tmp_folder = Path(os.getenv("EXPORTS_TMP_FOLDER"))
+    create_if_not_exists(exports_tmp_folder)
+
     # UI
     ui_folder = create_folder_property("UI_FOLDER")
 
@@ -91,6 +95,14 @@ class Config:
     together_temperature = float(os.getenv("TOGETHER_TEMPERATURE"))
     together_top_p = float(os.getenv("TOGETHER_TOP_P"))
     together_top_k = int(os.getenv("TOGETHER_TOP_K"))
+
+    together_model_alt = os.getenv("TOGETHER_MODEL_ALT")
+    assert together_model_alt is not None
+    together_model_alt_prompt_template = os.getenv("TOGETHER_MODEL_ALT_PROMPT_TEMPLATE")
+    assert together_model_alt_prompt_template is not None
+    together_model_alt_stop = os.getenv("TOGETHER_MODEL_ALT_STOP")
+    assert together_model_alt_stop is not None
+    together_model_alt_stop = together_model_alt_stop.split(",")
 
 
 class DBConfig:

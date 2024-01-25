@@ -87,3 +87,36 @@ Affirmative, Negative and Undecided
 Please generate only 3 answers at most.
 
 """
+
+[unanswerable]
+user_message = """Can you let us now whether the following question in this topic `{topic}` can be answered with an "Yes" or "No" response:
+
+```
+{question}
+```
+
+Please reply with only a Yes or No and no other text.
+
+Here are some examples:
+
+```
+Topic: Advanced Analytics
+Question: Do you use AutoML to automate model selection and hyperparameter tuning?
+```
+
+Response:
+
+```
+Yes
+```
+
+```
+Topic: Advanced Analytics
+Question: What machine learning model evaluation frameworks and libraries do you use for assessing the performance of ML models?
+```
+
+Response:
+
+```
+No
+```"""

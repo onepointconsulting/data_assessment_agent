@@ -109,7 +109,8 @@ SELECT Q.ID,
 	T.ID TOPIC_ID,
 	T.NAME TOPIC_NAME,
 	T.DESCRIPTION TOPIC_DESCRIPTION,
-	T.QUESTION_AMOUNT
+	T.QUESTION_AMOUNT,
+    Q.YES_NO_QUESTION
 FROM TB_QUESTION Q
 INNER JOIN PUBLIC.TB_TOPIC T ON T.ID = Q.TOPIC_ID
 INNER JOIN PUBLIC.TB_SELECTED_TOPICS ST ON ST.TOPIC_ID = T.ID
@@ -127,6 +128,7 @@ ORDER BY Q.ID LIMIT 1
             topic_name,
             topic_description,
             question_amount,
+            yes_no_question,
         ) = questions[0]
         topic = Topic(id=topic_id, name=topic_name, topic_description=topic_description)
         return Question(
@@ -134,6 +136,7 @@ ORDER BY Q.ID LIMIT 1
             question=question_question,
             score=question_score,
             topic=topic,
+            yes_no_question=yes_no_question,
         )
     return None
 
@@ -342,6 +345,45 @@ LIMIT 1
         return question
     else:
         return None
+
+
+async def save_question(question: Question) -> Question:
+    async def process_save(cur: AsyncCursor):
+        await cur.execute(
+            """
+INSERT INTO TB_QUESTION (QUESTION, SCORE, TOPIC_ID, PREFERRED_QUESTION_ORDER, YES_NO_QUESTION, SCORED)
+VALUES (%(question)s, %(score)s, (SELECT ID FROM TB_TOPIC WHERE NAME = %(topic_name)s), %(preferred_question_order)s, false, true) RETURNING ID;
+            """,
+            {
+                "question": question.question,
+                "score": question.score,
+                "topic_name": question.topic.name,
+                "preferred_question_order": question.preferred_order,
+            },
+        )
+        created_id = (await cur.fetchone())[0]
+        return Question(
+            id=created_id,
+            question=question.question,
+            topic=question.topic,
+            score=question.score,
+        )
+
+    return await create_cursor(process_save, True)
+
+
+async def update_yes_no_question(question: Question):
+    async def process_save(cur: AsyncCursor):
+        await cur.execute(
+            """
+UPDATE TB_QUESTION
+SET YES_NO_QUESTION = %(yes_no_question)s
+WHERE ID = %(id)s
+            """,
+            {"yes_no_question": question.yes_no_question, "id": question.id},
+        )
+
+    await create_cursor(process_save, True)
 
 
 async def save_questionnaire_status(
@@ -563,8 +605,7 @@ SELECT Q.ID, Q.QUESTION, Q.SCORE, T.ID, T.NAME, T.DESCRIPTION, S.ID, S.TITLE, S.
 FROM TB_SUGGESTED_RESPONSE S
 INNER JOIN TB_QUESTION Q ON Q.ID = S.QUESTION_ID
 INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
-WHERE Q.QUESTION = %(question)s
-	AND T.NAME = %(topic)s order by S.TITLE desc
+WHERE Q.QUESTION = %(question)s AND T.NAME = %(topic)s AND Q.YES_NO_QUESTION = true order by S.TITLE desc
 """
     parameter_map = {"question": question, "topic": topic}
     response_list: list = await select_from(query, parameter_map)
@@ -585,6 +626,41 @@ WHERE Q.QUESTION = %(question)s
             suggestion_body,
         ) in response_list
     ]
+
+
+async def find_question(question: str, topic: str) -> Union[Question, None]:
+    query = """
+SELECT Q.ID, Q.QUESTION, Q.SCORE, Q.TOPIC_ID, Q.PREFERRED_QUESTION_ORDER, Q.YES_NO_QUESTION, Q.SCORED, T.NAME topic_name, T.DESCRIPTION topic_description
+FROM TB_QUESTION Q
+INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
+WHERE T.NAME = %(topic)s
+	AND QUESTION = %(question)s;
+"""
+    parameter_map = {"question": question, "topic": topic}
+    response_list: list = await select_from(query, parameter_map)
+    if len(response_list) == 0:
+        return None
+    (
+        id,
+        question,
+        score,
+        topic_id,
+        preferred_question_order,
+        yes_no_question,
+        scored,
+        topic_name,
+        topic_description,
+    ) = response_list[0]
+    topic = Topic(id=topic_id, name=topic_name, description=topic_description)
+    return Question(
+        id=id,
+        question=question,
+        score=score,
+        topic=topic,
+        preferred_order=preferred_question_order,
+        yes_no_question=yes_no_question,
+        scored=scored,
+    )
 
 
 async def has_selected_topics(session_id: str) -> bool:
@@ -712,6 +788,7 @@ if __name__ == "__main__":
 
     async def test_select_initial_question():
         initial_question = await select_initial_question("dummy")
+        print(initial_question)
         assert initial_question is None
 
     async def test_select_questionnaire_counts():
@@ -726,6 +803,13 @@ if __name__ == "__main__":
         )
         print(remaining_topics)
 
+    async def test_find_question():
+        yes_no_question = await find_question(
+            "What are the organization's short-term and long-term business goals?",
+            "Business Alignment",
+        )
+        print(yes_no_question)
+
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
     # asyncio.run(test_select_suggestions())
@@ -736,4 +820,5 @@ if __name__ == "__main__":
     # asyncio.run(test_save_questionnaire_status())
     # asyncio.run(test_select_initial_question())
     # asyncio.run(test_select_questionnaire_counts())
-    asyncio.run(test_select_remaining_topics())
+    # asyncio.run(test_select_remaining_topics())
+    asyncio.run(test_find_question())

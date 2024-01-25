@@ -20,6 +20,7 @@ psycopg = {extras = ["binary", "pool"], version = "^3.1.16"}
 matplotlib = "^3.8.2"
 lancedb = "^0.4.3"
 pytz = "^2023.3.post1"
+pandas = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.12.0"

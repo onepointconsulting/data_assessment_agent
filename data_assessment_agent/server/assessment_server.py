@@ -30,6 +30,7 @@ from data_assessment_agent.service.persistence_service_async import (
     insert_selected_configuration,
     save_questionnaire_status,
     select_questionnaire_counts,
+    find_question,
 )
 from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
 from data_assessment_agent.service.chart.barchart import generate_bar_chart_for
@@ -311,8 +312,18 @@ async def score_and_save_questionnaire_status(
     question = questionnaire_status.question
     answer = questionnaire_status.answer
     if answer is not None and len(answer) > 0:
-        questionnaire_status.sentiment = await get_answer_sentiment(question, answer)
-        await save_questionnaire_status(questionnaire_status)
+        question = await find_question(
+            questionnaire_status.question, questionnaire_status.topic
+        )
+        if question.yes_no_question:
+            questionnaire_status.sentiment = await get_answer_sentiment(
+                question, answer
+            )
+            await save_questionnaire_status(questionnaire_status)
+        else:
+            # Different scoring method
+            answer = question.answer
+            pass
 
 
 async def init_config(sid: str):

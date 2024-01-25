@@ -21,11 +21,11 @@ DROP TABLE IF EXISTS public.tb_questionnaire_status;
 DROP TABLE IF EXISTS public.tb_suggested_response;
 DROP TABLE IF EXISTS public.tb_question_score;
 DROP TABLE IF EXISTS public.tb_question;
+DROP TABLE IF EXISTS public.tb_selected_topics;
 DROP TABLE IF EXISTS public.tb_topic;
 DROP TABLE IF EXISTS public.tb_sentiment_score;
-DROP TABLE IF EXISTS public.tb_selected_topics;
-DROP TABLE IF EXISTS public.tb_quiz_mode;
 DROP TABLE IF EXISTS public.tb_selected_quiz_mode;
+DROP TABLE IF EXISTS public.tb_quiz_mode;
 DROP TABLE IF EXISTS public.tb_configuration;
 
 CREATE TABLE public.tb_topic
@@ -47,6 +47,8 @@ CREATE TABLE public.tb_question
     score integer NOT NULL,
     topic_id integer NOT NULL,
     preferred_question_order int NULL,
+    yes_no_question boolean,
+    scored boolean,
     PRIMARY KEY (id),
     CONSTRAINT topic_id FOREIGN KEY (topic_id)
         REFERENCES public.tb_topic (id) MATCH SIMPLE
@@ -62,6 +64,7 @@ CREATE TABLE public.tb_suggested_response
     subtitle character varying(256),
     body character varying(1024) NOT NULL,
     question_id integer NOT NULL,
+    score integer NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT question_id FOREIGN KEY (question_id)
         REFERENCES public.tb_question (id) MATCH SIMPLE
@@ -69,6 +72,8 @@ CREATE TABLE public.tb_suggested_response
         ON DELETE NO ACTION
         NOT VALID
 );
+
+ALTER TABLE public.tb_suggested_response ALTER COLUMN score SET DEFAULT 0;
 
 CREATE TABLE public.tb_sentiment_score
 (
@@ -177,11 +182,11 @@ CREATE TABLE public.tb_configuration
 	PRIMARY KEY (id)
 );
 
-INSERT INTO public.tb_configuration(config_key, config_value)
-VALUES('minimum topics', 3);
-
 ALTER TABLE tb_configuration ADD CONSTRAINT config_key_unique 
 UNIQUE (config_key);
+
+INSERT INTO public.tb_configuration(config_key, config_value)
+VALUES('minimum topics', 3);
 
 -- Scoring view
 
@@ -216,8 +221,9 @@ SELECT
 FROM TB_QUESTIONNAIRE_STATUS S
 INNER JOIN PUBLIC.TB_SENTIMENT_SCORE SS ON SS.ID = S.SENTIMENT_ID
 INNER JOIN PUBLIC.TB_QUESTION Q ON Q.QUESTION = S.QUESTION
-FULL JOIN PUBLIC.TB_TOPIC T ON T.ID = Q.TOPIC_ID AND T.NAME = S.TOPIC;
+FULL JOIN PUBLIC.TB_TOPIC T ON T.ID = Q.TOPIC_ID AND T.NAME = S.TOPIC
+WHERE Q.SCORED = true;
 
 -- Initial scoring
--- Run this after all questions were imported
+-- Run this after all questions have been imported. Do not run after creating the tables.
 insert into tb_question_score(question_id, affirmative_score, undecided_score, negative_score) select id, 10, 5, 0 from tb_question;

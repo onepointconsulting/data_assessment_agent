@@ -4,9 +4,13 @@ from typing import List
 import aiohttp
 
 from data_assessment_agent.config.toml_support import prompts
-from data_assessment_agent.config.config import cfg
 from data_assessment_agent.config.log_factory import logger
-from data_assessment_agent.utils.date_utils import generate_ISO_8601_timestamp
+from data_assessment_agent.utils.together_support import (
+    endpoint,
+    generate_json,
+    generate_headers,
+    execute_together_request,
+)
 
 
 def create_user_message(
@@ -18,48 +22,6 @@ def create_user_message(
         question_answers=question_answers,
         ranking_questions=ranking_questions,
     )
-
-
-endpoint = "https://api.together.xyz/inference"
-
-
-def generate_json(prompt: str) -> dict:
-    return {
-        "model": cfg.together_model,
-        "max_tokens": cfg.together_max_tokens,
-        "prompt": f"[INST]{prompt}[/INST]",
-        "request_type": "language-model-inference",
-        "temperature": cfg.together_temperature,
-        "top_p": cfg.together_top_p,
-        "top_k": cfg.together_top_k,
-        "stop": ["[/INST]", "</s>"],
-        "negative_prompt": "",
-        "repetitive_penalty": 1,
-        "update_at": generate_ISO_8601_timestamp(),
-    }
-
-
-def generate_headers() -> dict:
-    return {
-        "Authorization": f"Bearer {cfg.together_api_key}",
-        "Content-Type": "application/json",
-    }
-
-
-async def arank_questions_request(prompt: str) -> List[str]:
-    async with aiohttp.ClientSession() as session:
-        data = generate_json(prompt)
-        logger.info(data)
-        async with session.post(
-            endpoint, data=json.dumps(data), headers=generate_headers()
-        ) as res:
-            if res.status >= 200 and res.status < 300:
-                text = await res.text()
-                return extract_ranking(text)
-            logger.error(
-                "Failed to rank with togetheer AI. Status code: %d", res.status
-            )
-            return []
 
 
 def rank_questions_request(prompt: str) -> List[str]:
@@ -99,7 +61,7 @@ async def rank_questions_together(
     topic: str, question_answers: str, ranking_questions: str
 ) -> List[str]:
     prompt = create_user_message(topic, question_answers, ranking_questions)
-    return await arank_questions_request(prompt)
+    return await execute_together_request(prompt, extract_ranking)
 
 
 if __name__ == "__main__":

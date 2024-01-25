@@ -70,6 +70,10 @@ Before you can start the application you should run the scripts, below, otherwis
 python ./data_assessment_agent/bootstrap/import_framework.py
 ```
 
+```
+python .\data_assessment_agent\bootstrap\setup_unanswerable_questions.py
+```
+
 You can also generate all of the suggestions for responses using this command:
 
 ```

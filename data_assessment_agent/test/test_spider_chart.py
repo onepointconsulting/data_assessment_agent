@@ -1,6 +1,6 @@
 import unittest
 
-from data_assessment_agent.data_assessment_agent.service.chart.spider_chart import (
+from data_assessment_agent.service.chart.spider_chart import (
     generate_spider_chart,
 )
 from data_assessment_agent.test.provider.topic_score_provider import create_topic_scores
