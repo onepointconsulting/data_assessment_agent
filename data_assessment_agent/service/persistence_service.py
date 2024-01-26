@@ -188,7 +188,7 @@ ORDER BY T.PREFERRED_TOPIC_ORDER, Q.ID"""
         topic_name,
         topic_description,
         question_amount,
-        yes_no_question
+        yes_no_question,
     ) in questions:
         topic = Topic(
             id=topic_id,
@@ -197,7 +197,13 @@ ORDER BY T.PREFERRED_TOPIC_ORDER, Q.ID"""
             question_amount=question_amount,
         )
         final_questions.append(
-            Question(id=id, question=question, score=score, topic=topic, yes_no_question=yes_no_question)
+            Question(
+                id=id,
+                question=question,
+                score=score,
+                topic=topic,
+                yes_no_question=yes_no_question,
+            )
         )
     return final_questions
 

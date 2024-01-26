@@ -1,6 +1,8 @@
 import unittest
 
-from data_assessment_agent.service.adequate_service import create_user_message
+from data_assessment_agent.service.suggestion_proximity_service import (
+    create_user_message,
+)
 from data_assessment_agent.test.provider.question_provider import (
     create_question_answer_topic,
 )

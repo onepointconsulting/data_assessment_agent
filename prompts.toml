@@ -59,7 +59,18 @@ The question can be found between === START QUESTION === and === END QUESTION ==
 {answer}
 === END ANSWER ==="""
 
-[suggestion]
+[answer-quality]
+system_message = "You are a helpful assistant"
+user_message = """Determine whether the answer to the question in topic `{topic}` mentioned below is adequate or not. The question and topic are mentioned below.
+
+```
+Question: {question}
+Answer: {answer}
+```
+"""
+
+
+[suggestion.yes_no]
 system_message = "You are a helpful assistant who gives suggestions in British English"
 user_message = """Give a list of possible answers for the question related to the topic "{topic}" that can be found between === START QUESTION === and === END QUESTION ===.
 You do not need to give factual answers, just some possible answers to this question. If the answer is affirmative use a simple "Yes" or negative a simple "No" as the text answer.
@@ -88,35 +99,37 @@ Please generate only 3 answers at most.
 
 """
 
-[unanswerable]
-user_message = """Can you let us now whether the following question in this topic `{topic}` can be answered with an "Yes" or "No" response:
+[suggestion.open_ended]
+system_message = "You are a helpful assistant who gives suggestions in British English"
+user_message = """Give a list of possible answers for the question related to the topic "{topic}" that can be found between === START QUESTION === and === END QUESTION ===.
+You do not need to give factual answers, just some possible answers to this question.
 
-```
+Here are some examples on how to respond to a question:
+
+Question: What are the organization's overall business goals and objectives?
+Answer 1: Increase revenue and turn-over
+Answer 2: Improve our working culture and promote life style balance
+Answer 3: Modernize our company, moving away from traditional manufacturing methods to new methods with improved automation
+
+Please use appropriate titles for each response.
+
+=== START QUESTION ===
 {question}
-```
+=== END QUESTION ===
 
-Please reply with only a Yes or No and no other text.
+Please generate only 3 answers at most.
 
-Here are some examples:
+"""
 
-```
-Topic: Advanced Analytics
-Question: Do you use AutoML to automate model selection and hyperparameter tuning?
-```
+[suggestion_proximity]
+system_message = "You are a helpful assistant"
+user_message = """Given the following answer between === START ANSWER === and === END ANSWER ===, can you please find the most related suggestion which you can find between === START SUGGESTIONS === and === END SUGGESTIONS === ?
 
-Response:
+=== START ANSWER ===
+{answer}
+=== END ANSWER ===
 
-```
-Yes
-```
-
-```
-Topic: Advanced Analytics
-Question: What machine learning model evaluation frameworks and libraries do you use for assessing the performance of ML models?
-```
-
-Response:
-
-```
-No
-```"""
+=== START SUGGESTIONS ===
+{suggestions}
+=== END SUGGESTIONS ===
+"""

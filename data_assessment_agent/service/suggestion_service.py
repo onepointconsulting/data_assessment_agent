@@ -14,19 +14,23 @@ from data_assessment_agent.service.openai_support import (
 )
 
 PROMPT_KEY = "suggestion"
+PROMPT_CATEGORY_YES_NO = "yes_no"
+PROMPT_CATEGORY_OPEN_ENDED = "open_ended"
 
 
-def create_user_message(question: str, topic: str) -> str:
-    user_prompt = prompts[PROMPT_KEY]["user_message"]
+def create_user_message(
+    question: str, topic: str, prompt_category=PROMPT_CATEGORY_YES_NO
+) -> str:
+    user_prompt = prompts[PROMPT_KEY][prompt_category]["user_message"]
     return user_prompt.format(question=question, topic=topic)
 
 
 async def generate_suggestions(
-    question: str, topic: str
+    question: str, topic: str, prompt_category=PROMPT_CATEGORY_YES_NO
 ) -> Union[SuggestedResponseList, None]:
     logger.info("Getting suggestions for %s", question)
-    user_message = create_user_message(question, topic)
-    system_message = prompts[PROMPT_KEY]["system_message"]
+    user_message = create_user_message(question, topic, prompt_category)
+    system_message = prompts[PROMPT_KEY][prompt_category]["system_message"]
     completion = await create_completion(
         system_message, user_message, suggested_response_list_spec
     )
