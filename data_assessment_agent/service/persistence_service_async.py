@@ -1,4 +1,4 @@
-from typing import Union, Any, List
+from typing import Union, Any, List, Optional
 
 import asyncio
 
@@ -557,6 +557,31 @@ WHERE SESSION_ID = %(session_id)s
     return TotalScore(total_score=0, max_score=0, pct_score=0.0)
 
 
+async def score_on_suggested_response(question_id: int, answer: str) -> Optional[int]:
+    query = """
+SELECT SCORE
+FROM TB_SUGGESTED_RESPONSE
+WHERE QUESTION_ID = %(question_id)s
+	AND BODY = %(answer)s
+"""
+    parameter_map = {"question_id": question_id, "answer": answer}
+    scoring: list = await select_from(query, parameter_map)
+    if scoring is not None and len(scoring) > 0:
+        return scoring[0][0]
+    return None
+
+
+async def fetch_all_suggestions(question_id: int) -> List[str]:
+    query = """
+SELECT BODY
+FROM TB_SUGGESTED_RESPONSE
+WHERE QUESTION_ID = %(question_id)s
+"""
+    parameter_map = {"question_id": question_id}
+    suggestions: list = await select_from(query, parameter_map)
+    return [s[0] for s in suggestions]
+
+
 async def select_session_report(session_id: str) -> List[SessionReport]:
     query = """
 SELECT TOPIC_NAME,
@@ -810,6 +835,17 @@ if __name__ == "__main__":
         )
         print(yes_no_question)
 
+    async def test_score_on_suggested_response():
+        score = await score_on_suggested_response(458, 
+                                                  "The data transformations and computations are relatively straightforward, involving basic operations such as sorting, filtering, and simple arithmetic calculations. This level of complexity is suitable for tasks that require minimal data manipulation.")
+        print(score)
+
+
+    async def test_fetch_all_suggestions():
+        suggestions = await fetch_all_suggestions(458)
+        for s in suggestions:
+            print(s)
+
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
     # asyncio.run(test_select_suggestions())
@@ -821,4 +857,5 @@ if __name__ == "__main__":
     # asyncio.run(test_select_initial_question())
     # asyncio.run(test_select_questionnaire_counts())
     # asyncio.run(test_select_remaining_topics())
-    asyncio.run(test_find_question())
+    # asyncio.run(test_find_question())
+    asyncio.run(test_fetch_all_suggestions())

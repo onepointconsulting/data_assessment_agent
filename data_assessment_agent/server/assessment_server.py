@@ -31,6 +31,7 @@ from data_assessment_agent.service.persistence_service_async import (
     save_questionnaire_status,
     select_questionnaire_counts,
     find_question,
+    score_on_suggested_response
 )
 from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
 from data_assessment_agent.service.chart.barchart import generate_bar_chart_for
@@ -322,8 +323,10 @@ async def score_and_save_questionnaire_status(
             await save_questionnaire_status(questionnaire_status)
         else:
             # Different scoring method
-            answer = question.answer
-            pass
+            score = await score_on_suggested_response(question.id, answer)
+            if score is None:
+                # Ask ChatGPT to get theh most appropriate answer for scoring.
+                pass
 
 
 async def init_config(sid: str):
