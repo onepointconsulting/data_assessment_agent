@@ -231,6 +231,40 @@ where answer is not null order by random() limit 1
     return None
 
 
+async def select_random_question() -> Union[Question, None]:
+    query = """
+select q.id, question, score, topic_id, preferred_question_order, yes_no_question, scored, t.name
+from tb_question q inner join tb_topic t
+on q.topic_id = t.id
+order by random() limit 1
+"""
+    parameter_map = {}
+    questions = await select_from(query, parameter_map)
+    if len(questions) > 0:
+        (
+            id,
+            question,
+            score,
+            topic_id,
+            preferred_question_order,
+            yes_no_question,
+            scored,
+            topic_name,
+        ) = questions[0]
+        topic = Topic(id=topic_id, name=topic_name)
+        question = Question(
+            id=id,
+            question=question,
+            score=score,
+            topic=topic,
+            preferred_order=preferred_question_order,
+            yes_no_question=yes_no_question,
+            scored=scored,
+        )
+        return question
+    return None
+
+
 async def select_last_empty_question(
     session_id: str,
 ) -> Union[QuestionnaireStatus, None]:
@@ -557,6 +591,21 @@ WHERE SESSION_ID = %(session_id)s
     return TotalScore(total_score=0, max_score=0, pct_score=0.0)
 
 
+async def update_questionnaire_status_score(id: int, score: int):
+    async def process_save(cur: AsyncCursor):
+        await cur.execute(
+            """
+UPDATE PUBLIC.TB_QUESTIONNAIRE_STATUS
+SET SCORE = %(score)s
+WHERE ID = %(id)s
+""",
+            {"id": id, "score": score},
+        )
+        return None
+
+    await create_cursor(process_save, True)
+
+
 async def score_on_suggested_response(question_id: int, answer: str) -> Optional[int]:
     query = """
 SELECT SCORE
@@ -836,15 +885,29 @@ if __name__ == "__main__":
         print(yes_no_question)
 
     async def test_score_on_suggested_response():
-        score = await score_on_suggested_response(458, 
-                                                  "The data transformations and computations are relatively straightforward, involving basic operations such as sorting, filtering, and simple arithmetic calculations. This level of complexity is suitable for tasks that require minimal data manipulation.")
+        score = await score_on_suggested_response(
+            458,
+            "The data transformations and computations are relatively straightforward, involving basic operations such as sorting, filtering, and simple arithmetic calculations. This level of complexity is suitable for tasks that require minimal data manipulation.",
+        )
         print(score)
-
 
     async def test_fetch_all_suggestions():
         suggestions = await fetch_all_suggestions(458)
         for s in suggestions:
             print(s)
+
+    async def test_update_questionnaire_status_score():
+        question = await select_random_question()
+        assert question is not None
+        questionnaire_status = QuestionnaireStatus(
+            session_id="dummy",
+            topic=question.topic.name,
+            question=question.question,
+            answer="Dummy answer",
+        )
+        questionnaire_status_saved = await save_questionnaire_status(questionnaire_status)
+        assert questionnaire_status_saved.id is not None
+        await update_questionnaire_status_score(questionnaire_status_saved.id, 5)
 
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
@@ -858,4 +921,5 @@ if __name__ == "__main__":
     # asyncio.run(test_select_questionnaire_counts())
     # asyncio.run(test_select_remaining_topics())
     # asyncio.run(test_find_question())
-    asyncio.run(test_fetch_all_suggestions())
+    # asyncio.run(test_fetch_all_suggestions())
+    asyncio.run(test_update_questionnaire_status_score())

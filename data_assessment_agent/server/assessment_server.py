@@ -31,10 +31,15 @@ from data_assessment_agent.service.persistence_service_async import (
     save_questionnaire_status,
     select_questionnaire_counts,
     find_question,
-    score_on_suggested_response
+    score_on_suggested_response,
+    fetch_all_suggestions,
+    update_questionnaire_status_score,
 )
 from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
 from data_assessment_agent.service.chart.barchart import generate_bar_chart_for
+from data_assessment_agent.service.suggestion_proximity_service import (
+    closest_suggestion,
+)
 
 sio = socketio.AsyncServer(cors_allowed_origins=cfg.websocket_cors_allowed_origins)
 app = web.Application()
@@ -325,8 +330,12 @@ async def score_and_save_questionnaire_status(
             # Different scoring method
             score = await score_on_suggested_response(question.id, answer)
             if score is None:
-                # Ask ChatGPT to get theh most appropriate answer for scoring.
-                pass
+                suggestions = await fetch_all_suggestions(question.id)
+                # Ask ChatGPT to get the most appropriate answer for scoring.
+                closest = closest_suggestion(answer, suggestions)
+                score = await score_on_suggested_response(question.id, closest)
+            # Save the score into the questionnaire status
+            update_questionnaire_status_score(questionnaire_status.id, score)
 
 
 async def init_config(sid: str):
