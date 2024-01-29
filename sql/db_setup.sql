@@ -1,3 +1,5 @@
+DROP DATABASE data_assessment_questionnaire;
+
 -- For newer versions of Postgres
 CREATE DATABASE data_assessment_questionnaire
     WITH
