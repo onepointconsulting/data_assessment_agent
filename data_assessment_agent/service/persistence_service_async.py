@@ -298,13 +298,16 @@ SELECT T.NAME AS TOPIC_NAME,
 FROM TB_TOPIC T
 INNER JOIN PUBLIC.TB_SELECTED_TOPICS ST ON ST.TOPIC_ID = T.ID
 LEFT JOIN
-	(SELECT TOPIC_NAME,
-			SUM(MAX_SCORE) AS MAX_SCORE,
-			SUM(SCORE) AS SCORE
-		FROM VW_QUESTION_SCORES
-		WHERE SESSION_ID = %(session_id)s
-		GROUP BY TOPIC_NAME) TOPIC_COUNTS ON TOPIC_COUNTS.TOPIC_NAME = T.NAME
-WHERE ST.SESSION_ID = %(session_id)s;
+(SELECT TOPIC TOPIC_NAME,
+	SUM(QS.SCORE) SCORE,
+	SUM(CASE WHEN Q.SCORED = TRUE and QS.ANSWER IS NOT NULL THEN 1 ELSE 0 END) * 10 MAX_SCORE
+FROM TB_QUESTIONNAIRE_STATUS QS
+INNER JOIN PUBLIC.TB_TOPIC T ON T.NAME = QS.TOPIC
+INNER JOIN PUBLIC.TB_QUESTION Q ON Q.QUESTION = QS.QUESTION
+AND Q.TOPIC_ID = T.ID
+WHERE SESSION_ID = %(session_id)s
+GROUP BY QS.TOPIC) TOPIC_COUNTS ON TOPIC_COUNTS.TOPIC_NAME = T.NAME
+WHERE ST.SESSION_ID = %(session_id)s
 """
     parameter_map = {"session_id": session_id}
     topic_scores_raw: list = await select_from(query, parameter_map)
@@ -455,17 +458,36 @@ WHERE NOT EXISTS
         else:
             await cur.execute(
                 """
-    update public.tb_questionnaire_status set session_id = %(session_id)s, topic = %(topic)s, 
-        question = %(question)s, answer = %(answer)s, score = %(score)s, sentiment_id = (select id from tb_sentiment_score where name = %(sentiment)s),
-        updated_at = NOW()
-    where id = %(id)s returning id
+UPDATE PUBLIC.TB_QUESTIONNAIRE_STATUS
+SET SESSION_ID = %(session_id)s,
+	TOPIC = CAST(%(topic)s AS VARCHAR),
+	QUESTION = CAST(%(question)s AS VARCHAR),
+	ANSWER = %(answer)s,
+	SCORE = (
+        SELECT SCORE from (SELECT CASE
+                WHEN STRPOS(%(sentiment)s, 'positive') > 0 THEN SCORE.AFFIRMATIVE_SCORE
+                WHEN STRPOS(%(sentiment)s, 'negative') > 0 THEN SCORE.NEGATIVE_SCORE
+                WHEN STRPOS(%(sentiment)s, 'undecided') > 0 THEN SCORE.UNDECIDED_SCORE
+                ELSE 0
+            END SCORE
+        FROM PUBLIC.TB_QUESTION_SCORE SCORE
+        INNER JOIN TB_QUESTION Q ON Q.ID = SCORE.QUESTION_ID
+        INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
+        WHERE Q.QUESTION = CAST(%(question)s AS VARCHAR) AND T.NAME = CAST(%(topic)s AS VARCHAR))
+        UNION ALL (SELECT 0) OFFSET 0 LIMIT 1
+    ),
+	SENTIMENT_ID =
+	(SELECT ID
+		FROM TB_SENTIMENT_SCORE
+		WHERE NAME = %(sentiment)s),
+	UPDATED_AT = NOW()
+WHERE ID = %(id)s RETURNING ID
                 """,
                 {
                     "session_id": questionnaire_status.session_id,
                     "topic": questionnaire_status.topic,
                     "question": questionnaire_status.question,
                     "answer": questionnaire_status.answer,
-                    "score": questionnaire_status.score,
                     "id": questionnaire_status.id,
                     "sentiment": questionnaire_status.sentiment,
                 },
@@ -591,15 +613,15 @@ WHERE SESSION_ID = %(session_id)s
     return TotalScore(total_score=0, max_score=0, pct_score=0.0)
 
 
-async def update_questionnaire_status_score(id: int, score: int):
+async def update_questionnaire_status_score(questionnaire_status: QuestionnaireStatus):
     async def process_save(cur: AsyncCursor):
         await cur.execute(
             """
 UPDATE PUBLIC.TB_QUESTIONNAIRE_STATUS
-SET SCORE = %(score)s
+SET SCORE = %(score)s, ANSWER = %(answer)s, UPDATED_AT = NOW()
 WHERE ID = %(id)s
 """,
-            {"id": id, "score": score},
+            {"id": questionnaire_status.id, "score": questionnaire_status.score, "answer": questionnaire_status.answer},
         )
         return None
 
@@ -679,7 +701,7 @@ SELECT Q.ID, Q.QUESTION, Q.SCORE, T.ID, T.NAME, T.DESCRIPTION, S.ID, S.TITLE, S.
 FROM TB_SUGGESTED_RESPONSE S
 INNER JOIN TB_QUESTION Q ON Q.ID = S.QUESTION_ID
 INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
-WHERE Q.QUESTION = %(question)s AND T.NAME = %(topic)s AND Q.YES_NO_QUESTION = true order by S.TITLE desc
+WHERE Q.QUESTION = %(question)s AND T.NAME = %(topic)s order by S.TITLE desc
 """
     parameter_map = {"question": question, "topic": topic}
     response_list: list = await select_from(query, parameter_map)

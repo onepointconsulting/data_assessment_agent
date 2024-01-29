@@ -18,7 +18,7 @@ def create_user_message(answer: str, suggestions: List[str]) -> str:
     return user_prompt.format(answer=answer, suggestions="\n".join(suggestions))
 
 
-async def rank_suggestions(answer: str, suggestions: List[str]) -> Optional[str]:
+async def closest_suggestion(answer: str, suggestions: List[str]) -> Optional[str]:
     logger.info("Ranking questions")
     user_message = create_user_message(answer, suggestions)
     system_message = prompts[PROMPT_KEY]["system_message"]
@@ -44,6 +44,6 @@ if __name__ == "__main__":
     )
 
     answer, suggestions = create_multiple_suggestions()
-    res = asyncio.run(rank_suggestions(answer, suggestions))
+    res = asyncio.run(closest_suggestion(answer, suggestions))
     assert res is not None
     print(res)

@@ -328,14 +328,14 @@ async def score_and_save_questionnaire_status(
             await save_questionnaire_status(questionnaire_status)
         else:
             # Different scoring method
-            score = await score_on_suggested_response(question.id, answer)
-            if score is None:
+            questionnaire_status.score = await score_on_suggested_response(question.id, answer)
+            if questionnaire_status.score is None:
                 suggestions = await fetch_all_suggestions(question.id)
                 # Ask ChatGPT to get the most appropriate answer for scoring.
                 closest = closest_suggestion(answer, suggestions)
-                score = await score_on_suggested_response(question.id, closest)
+                questionnaire_status.score = await score_on_suggested_response(question.id, closest)
             # Save the score into the questionnaire status
-            update_questionnaire_status_score(questionnaire_status.id, score)
+            await update_questionnaire_status_score(questionnaire_status)
 
 
 async def init_config(sid: str):

@@ -98,9 +98,13 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
 async def safe_question_rank(
     topic: str, question_answers: str, ranking_questions: str, questions: List[str]
 ) -> Question:
-    ranked_questions = await rank_questions_together(
-        topic, question_answers, ranking_questions
-    )
+    ranked_questions = []
+    try:
+        ranked_questions = await rank_questions_together(
+            topic, question_answers, ranking_questions
+        )
+    except:
+        logger.exception("Failed to rank via together ai")
     if len(ranked_questions) == 0:
         logger.warn("Using OpenAI for ranking")
         ranked_questions = await rank_questions(
