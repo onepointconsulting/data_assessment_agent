@@ -168,3 +168,12 @@ class SessionReport(BaseModel):
     )
     created_at: datetime = Field(..., description="The creation timestamp")
     updated_at: datetime = Field(..., description="The update timestamp")
+
+
+class QAScored(BaseModel):
+    topic: str = Field(..., description="The topic of the QA")
+    question: str = Field(..., description="The single question")
+    answer: str = Field(..., description="The single answer")
+    score: int = Field(
+        ..., description="The score to this answer related to this question"
+    )

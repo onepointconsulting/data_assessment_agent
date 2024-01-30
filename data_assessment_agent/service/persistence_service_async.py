@@ -19,6 +19,7 @@ from data_assessment_agent.model.db_model import (
     QuizzMode,
     SelectedConfiguration,
     QuestionnaireCounts,
+    QAScored,
 )
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.model.assessment_framework import SuggestedResponse
@@ -621,7 +622,11 @@ UPDATE PUBLIC.TB_QUESTIONNAIRE_STATUS
 SET SCORE = %(score)s, ANSWER = %(answer)s, UPDATED_AT = NOW()
 WHERE ID = %(id)s
 """,
-            {"id": questionnaire_status.id, "score": questionnaire_status.score, "answer": questionnaire_status.answer},
+            {
+                "id": questionnaire_status.id,
+                "score": questionnaire_status.score,
+                "answer": questionnaire_status.answer,
+            },
         )
         return None
 
@@ -663,7 +668,7 @@ SELECT TOPIC_NAME,
 	CREATED_AT,
 	UPDATED_AT
 FROM VW_QUESTION_SCORES
-WHERE SESSION_ID = %(session_id)s AND ANSWER IS NOT NULL and TOPIC_NAME IS NOT NULL
+WHERE SESSION_ID = %(session_id)s AND ANSWER IS NOT NULL and TOPIC_NAME IS NOT NULL ORDER BY UPDATED_AT
 """
     parameter_map = {"session_id": session_id}
     report_list: list = await select_from(query, parameter_map)
@@ -686,6 +691,19 @@ WHERE SESSION_ID = %(session_id)s AND ANSWER IS NOT NULL and TOPIC_NAME IS NOT N
             created_at,
             updated_at,
         ) in report_list
+    ]
+
+
+async def select_session_qa(session_id: str) -> List[QAScored]:
+    query = """
+select topic, question, answer, score from public.tb_questionnaire_status 
+where SESSION_ID = %(session_id)s order by created_at
+"""
+    parameter_map = {"session_id": session_id}
+    report_list: list = await select_from(query, parameter_map)
+    return [
+        QAScored(topic=topic, question=question, answer=answer, score=score)
+        for (topic, question, answer, score) in report_list
     ]
 
 
@@ -927,7 +945,9 @@ if __name__ == "__main__":
             question=question.question,
             answer="Dummy answer",
         )
-        questionnaire_status_saved = await save_questionnaire_status(questionnaire_status)
+        questionnaire_status_saved = await save_questionnaire_status(
+            questionnaire_status
+        )
         assert questionnaire_status_saved.id is not None
         await update_questionnaire_status_score(questionnaire_status_saved.id, 5)
 

@@ -104,6 +104,10 @@ class Config:
     assert together_model_alt_stop is not None
     together_model_alt_stop = together_model_alt_stop.split(",")
 
+    # Templates
+    templates_folder = Path(os.getenv("TEMPLATES_FOLDER"))
+    assert templates_folder.exists()
+
 
 class DBConfig:
     db_name = os.getenv("DB_NAME")

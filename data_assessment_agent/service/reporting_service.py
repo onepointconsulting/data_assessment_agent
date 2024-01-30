@@ -2,11 +2,16 @@ from typing import List
 import csv
 import zipfile
 from pathlib import Path
+import datetime
+from collections import defaultdict
 
 from data_assessment_agent.service.persistence_service_async import (
     select_session_report,
+    select_session_qa
 )
+from data_assessment_agent.model.db_model import QAScored
 from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
+from data_assessment_agent.service.chart.barchart import generate_bar_chart_for
 from data_assessment_agent.config.config import cfg
 
 
@@ -58,8 +63,77 @@ def compress_zip_file(zip_file: Path, files_to_zip: List[Path]):
                 zf.write(file, file.name, compress_type=compression)
 
 
+async def generate_html_report(session_id: str) -> Path:
+    spider_chart = await generate_spider_chart_for(session_id)
+    bar_chart = await generate_bar_chart_for(session_id)
+    qa_scored = await select_session_qa(session_id)
+    results_template = cfg.templates_folder / "results-template.html"
+    questionnaire_html = generate_qa_scored(qa_scored)
+    report_date = datetime.datetime.now()
+    report_date_str = report_date.strftime("%a, %d %b %Y")
+    results_template = (
+        results_template.read_text()
+        .replace("{{spider_chart}}", spider_chart.as_posix())
+        .replace("{{bar_chart}}", bar_chart.as_posix())
+        .replace("{{questionnaire}}", questionnaire_html)
+        .replace("{{timestamp}}", report_date_str)
+    )
+    report_path: Path = cfg.report_tmp_path / f"{session_id}.html"
+    report_path.write_text(results_template)
+    return report_path
+
+
+def generate_qa_scored(qa_scored: List[QAScored]) -> str:
+    html = ""
+    previous_topic = ""
+    topic_scores = defaultdict(int)
+    def print_score_func(topic_score):
+        return f"""
+<tr>
+    <td>
+        Total:
+    </td>
+    <td>
+        <b>{topic_score}</b>
+    </td>
+</tr>
+"""
+
+    for i, record in enumerate(qa_scored):
+        new_topic = previous_topic != record.topic
+        topic = ""
+        topic_scores[record.topic] += record.score
+        print_score = ""
+        if new_topic:
+            topic_score = topic_scores[previous_topic]
+            previous_topic = record.topic
+            topic = f"""<h3>{record.topic}</h3>"""
+            if i > 0:
+                print_score = print_score_func(topic_score)
+            
+        html += f"""
+{print_score}
+<tr>
+    <td>
+        {topic}
+        <p>Q: {record.question}</p>
+        <p>A: {record.answer}</p>
+    </td>
+    <td>
+        {record.score}
+    </td>
+</tr>
+"""
+    html += print_score_func(topic_scores[previous_topic])
+    return html
+
+
 if __name__ == "__main__":
     import asyncio
 
-    path = asyncio.run(generate_session_report("b8ce68f0-f754-4af8-8822-97dac817250d"))
-    print(f"Check path {path}")
+    # path = asyncio.run(generate_session_report("b8ce68f0-f754-4af8-8822-97dac817250d"))
+    # print(f"Check path {path}")
+    report_path = asyncio.run(
+        generate_html_report("cf19c46c-5011-432f-bdf6-8e979ed47d23")
+    )
+    print(report_path)
