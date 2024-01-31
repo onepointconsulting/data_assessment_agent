@@ -104,9 +104,13 @@ class Config:
     assert together_model_alt_stop is not None
     together_model_alt_stop = together_model_alt_stop.split(",")
 
-    # Templates
+    # Related to reporting
     templates_folder = Path(os.getenv("TEMPLATES_FOLDER"))
     assert templates_folder.exists()
+    pdf_generation_folder = Path(os.getenv("PDF_GENERATION_FOLDER"))
+    create_if_not_exists(pdf_generation_folder)
+    wkhtmltopdf_binary = Path(os.getenv("WKHTMLTOPDF_BINARY"))
+    assert wkhtmltopdf_binary.exists()
 
 
 class DBConfig:

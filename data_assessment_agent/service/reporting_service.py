@@ -5,9 +5,12 @@ from pathlib import Path
 import datetime
 from collections import defaultdict
 
+from jinja2 import FileSystemLoader, Environment
+import pdfkit
+
 from data_assessment_agent.service.persistence_service_async import (
     select_session_report,
-    select_session_qa
+    select_session_qa,
 )
 from data_assessment_agent.model.db_model import QAScored
 from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
@@ -71,27 +74,44 @@ async def generate_html_report(session_id: str) -> Path:
     questionnaire_html = generate_qa_scored(qa_scored)
     report_date = datetime.datetime.now()
     report_date_str = report_date.strftime("%a, %d %b %Y")
-    results_template = (
-        results_template.read_text()
-        .replace("{{spider_chart}}", spider_chart.as_posix())
-        .replace("{{bar_chart}}", bar_chart.as_posix())
-        .replace("{{questionnaire}}", questionnaire_html)
-        .replace("{{timestamp}}", report_date_str)
-    )
+    context = {
+        "spider_chart": spider_chart.as_posix(),
+        "bar_chart": bar_chart.as_posix(),
+        "questionnaire": questionnaire_html,
+        "timestamp": report_date_str,
+    }
+    template_loader = FileSystemLoader(cfg.templates_folder)
+    template_env = Environment(loader=template_loader, enable_async=True)
+    template = template_env.get_template("results-template.html")
+    results_template = await template.render_async(context)
     report_path: Path = cfg.report_tmp_path / f"{session_id}.html"
-    report_path.write_text(results_template)
+    report_path.write_text(results_template, encoding="utf-8")
     return report_path
+
+
+async def generate_pdf_report(session_id: str) -> Path:
+    report_path: Path = await generate_html_report(session_id)
+    pdf_file: Path = cfg.pdf_generation_folder / f"{session_id}.pdf"
+    config = pdfkit.configuration(wkhtmltopdf=cfg.wkhtmltopdf_binary.as_posix())
+    pdfkit.from_string(
+        report_path.read_text(encoding="utf-8"),
+        pdf_file,
+        configuration=config,
+        options={"enable-local-file-access": ""},
+    )
+    return pdf_file
 
 
 def generate_qa_scored(qa_scored: List[QAScored]) -> str:
     html = ""
     previous_topic = ""
     topic_scores = defaultdict(int)
+
     def print_score_func(topic_score):
         return f"""
 <tr>
     <td>
-        Total:
+        <b>Total:</b>
     </td>
     <td>
         <b>{topic_score}</b>
@@ -110,7 +130,7 @@ def generate_qa_scored(qa_scored: List[QAScored]) -> str:
             topic = f"""<h3>{record.topic}</h3>"""
             if i > 0:
                 print_score = print_score_func(topic_score)
-            
+
         html += f"""
 {print_score}
 <tr>
@@ -134,6 +154,6 @@ if __name__ == "__main__":
     # path = asyncio.run(generate_session_report("b8ce68f0-f754-4af8-8822-97dac817250d"))
     # print(f"Check path {path}")
     report_path = asyncio.run(
-        generate_html_report("cf19c46c-5011-432f-bdf6-8e979ed47d23")
+        generate_pdf_report("cf19c46c-5011-432f-bdf6-8e979ed47d23")
     )
     print(report_path)
