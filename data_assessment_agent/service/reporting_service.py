@@ -97,7 +97,7 @@ async def generate_pdf_report(session_id: str) -> Path:
         report_path.read_text(encoding="utf-8"),
         pdf_file,
         configuration=config,
-        options={"enable-local-file-access": ""},
+        options={"enable-local-file-access": "", "footer-center": "[page] of [topage]"},
     )
     return pdf_file
 
@@ -134,8 +134,10 @@ def generate_qa_scored(qa_scored: List[QAScored]) -> str:
         html += f"""
 {print_score}
 <tr>
+    <td colspan="2">{topic}</td>
+</tr>
+<tr>
     <td>
-        {topic}
         <p>Q: {record.question}</p>
         <p>A: {record.answer}</p>
     </td>

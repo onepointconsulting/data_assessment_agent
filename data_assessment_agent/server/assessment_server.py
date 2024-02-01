@@ -19,7 +19,10 @@ from data_assessment_agent.model.db_model import (
     SelectedConfiguration,
 )
 from data_assessment_agent.service.sentiment_service import get_answer_sentiment
-from data_assessment_agent.service.reporting_service import generate_combined_report
+from data_assessment_agent.service.reporting_service import (
+    generate_combined_report,
+    generate_pdf_report,
+)
 from data_assessment_agent.service.persistence_service_async import (
     select_last_empty_question,
     calculate_simple_total_score,
@@ -294,9 +297,9 @@ async def handle_final_question(session_message: SessionMessage):
             Commands.SERVER_MESSAGE,
             ServerMessage(
                 response=f"""
-### Thank you for finishing the {cfg.product_name} quizz
+### Thank you for finishing the {cfg.product_name} quiz
 
-You can download the report from [{report_url}]({report_url}).
+You can download the [PDF report]({report_url}) with the results.
 
 
 | Result      | Score                         |
@@ -366,14 +369,30 @@ def disconnect(sid, _environ):
 
 # HTTP part
 @routes.get("/report/{session_id}")
-async def get_handler(request: web.Request) -> web.Response:
+async def get_report(request: web.Request) -> web.Response:
+    return await generate_report(request, generate_combined_report)
+
+
+# HTTP part
+@routes.get("/pdf/{session_id}")
+async def get_pdf(request: web.Request) -> web.Response:
+    return await generate_report(request, generate_pdf_report, "inline")
+
+
+async def generate_report(
+    request: web.Request,
+    process_func: Callable,
+    content_disposition: str = "attachment",
+) -> web.Response:
     session_id = request.match_info.get("session_id", None)
     if session_id is None:
         raise web.HTTPNotFound(text="No session id specified")
-    report_path = await generate_combined_report(session_id)
+    report_path = await process_func(session_id)
     return web.FileResponse(
         report_path,
-        headers={"CONTENT-DISPOSITION": f'attachment; filename="{report_path.name}"'},
+        headers={
+            "CONTENT-DISPOSITION": f'{content_disposition}; filename="{report_path.name}"'
+        },
     )
 
 
