@@ -465,18 +465,20 @@ SET SESSION_ID = %(session_id)s,
 	QUESTION = CAST(%(question)s AS VARCHAR),
 	ANSWER = %(answer)s,
 	SCORE = (
-        SELECT SCORE from (SELECT CASE
+        SELECT SCORE from (
+            SELECT CASE
                 WHEN STRPOS(%(sentiment)s, 'positive') > 0 THEN SCORE.AFFIRMATIVE_SCORE
                 WHEN STRPOS(%(sentiment)s, 'negative') > 0 THEN SCORE.NEGATIVE_SCORE
                 WHEN STRPOS(%(sentiment)s, 'undecided') > 0 THEN SCORE.UNDECIDED_SCORE
                 ELSE 0
             END SCORE
-        FROM PUBLIC.TB_QUESTION_SCORE SCORE
-        INNER JOIN TB_QUESTION Q ON Q.ID = SCORE.QUESTION_ID
-        INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
-        WHERE Q.QUESTION = CAST(%(question)s AS VARCHAR) AND T.NAME = CAST(%(topic)s AS VARCHAR))
-        UNION ALL (SELECT 0) OFFSET 0 LIMIT 1
-    ) score_query,
+            FROM PUBLIC.TB_QUESTION_SCORE SCORE
+                INNER JOIN TB_QUESTION Q ON Q.ID = SCORE.QUESTION_ID
+                INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
+                WHERE Q.QUESTION = CAST(%(question)s AS VARCHAR) AND T.NAME = CAST(%(topic)s AS VARCHAR)
+        ) AS q1
+        UNION ALL (SELECT 0) AS q2 OFFSET 0 LIMIT 1
+    ),
 	SENTIMENT_ID =
 	(SELECT ID
 		FROM TB_SENTIMENT_SCORE
