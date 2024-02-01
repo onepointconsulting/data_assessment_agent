@@ -290,7 +290,7 @@ async def handle_final_question(session_message: SessionMessage):
         session_message.session_id,
     )
     if next_question.final:
-        report_url = f"{cfg.report_url_base}/{session_id}"
+        report_url = f"/pdf/{session_id}"
         # Get the final score
         total_score = await calculate_simple_total_score(session_id)
         await sio.emit(
