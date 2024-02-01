@@ -477,7 +477,7 @@ SET SESSION_ID = %(session_id)s,
                 INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
                 WHERE Q.QUESTION = CAST(%(question)s AS VARCHAR) AND T.NAME = CAST(%(topic)s AS VARCHAR)
         ) AS q1
-        UNION ALL (SELECT 0) AS q2 OFFSET 0 LIMIT 1
+        UNION ALL (SELECT 0) OFFSET 0 LIMIT 1
     ),
 	SENTIMENT_ID =
 	(SELECT ID
