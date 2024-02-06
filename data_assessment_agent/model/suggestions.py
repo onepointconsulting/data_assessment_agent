@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 
 class ClosestSuggestion(BaseModel):
-    suggestion: str = Field(..., description="The closest suggestion to the answer")
+    closest_suggestion: str = Field(..., description="The closest suggestion to the answer")
 
 
 closest_suggestion_spec = {

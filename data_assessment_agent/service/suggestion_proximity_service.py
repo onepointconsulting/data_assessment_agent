@@ -29,7 +29,7 @@ async def closest_suggestion(answer: str, suggestions: List[str]) -> Optional[st
 
 
 def extract_closest_suggestion(
-    chat_completion: Optional[ChatCompletion], key="suggestion"
+    chat_completion: Optional[ChatCompletion], key="closest_suggestion"
 ) -> Optional[str]:
     arguments = extract_function_call_arguments(chat_completion)
     if key in arguments:
@@ -40,10 +40,10 @@ def extract_closest_suggestion(
 if __name__ == "__main__":
     import asyncio
     from data_assessment_agent.test.provider.suggestion_provider import (
-        create_multiple_suggestions,
+        create_multiple_suggestions_2,
     )
 
-    answer, suggestions = create_multiple_suggestions()
+    answer, suggestions = create_multiple_suggestions_2()
     res = asyncio.run(closest_suggestion(answer, suggestions))
     assert res is not None
     print(res)

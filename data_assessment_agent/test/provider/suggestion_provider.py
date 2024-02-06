@@ -19,3 +19,13 @@ def create_multiple_suggestions() -> Tuple[str, List[str]]:
         "Data transformations and computations are highly complex, involving sophisticated algorithms for machine learning, predictive analytics, and data mining. This complexity level is necessary for tasks that demand a comprehensive analysis and insights from large and diverse datasets.",
     ]
     return answer, suggestions
+
+
+def create_multiple_suggestions_2() -> Tuple[str, List[str]]:
+    answer = "Increased profitability and work life balance for employees."
+    suggestions = [
+        "No, this is sensitive information that we cannot disclose at this moment.",
+        "Partially, while improving customer satisfaction is a clear objective, I need to further understand the full scope of our business goals.",
+        "Yes, the main goals include increasing profitability, expanding market share, and enhancing customer satisfaction to ensure long-term success.",
+    ]
+    return answer, suggestions

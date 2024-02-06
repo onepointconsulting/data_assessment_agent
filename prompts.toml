@@ -122,12 +122,8 @@ Please generate only 3 answers at most.
 """
 
 [suggestion_proximity]
-system_message = "You are a helpful assistant"
-user_message = """Given the following answer between === START ANSWER === and === END ANSWER ===, can you please find the most related suggestion which you can find between === START SUGGESTIONS === and === END SUGGESTIONS === ?
-
-=== START ANSWER ===
-{answer}
-=== END ANSWER ===
+system_message = "You are a careful question analyst"
+user_message = """Given the following answer `{answer}`, can you please find the most related suggestion which you can find between === START SUGGESTIONS === and === END SUGGESTIONS === ?
 
 === START SUGGESTIONS ===
 {suggestions}

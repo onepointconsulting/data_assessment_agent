@@ -297,7 +297,7 @@ async def handle_final_question(session_message: SessionMessage):
             Commands.SERVER_MESSAGE,
             ServerMessage(
                 response=f"""
-### Thank you for finishing the {cfg.product_name} quiz
+### Thank you for finishing the {cfg.product_name} questionnaire.
 
 You can download the [PDF report]({report_url}) with the results.
 
@@ -337,7 +337,7 @@ async def score_and_save_questionnaire_status(
             if questionnaire_status.score is None:
                 suggestions = await fetch_all_suggestions(question.id)
                 # Ask ChatGPT to get the most appropriate answer for scoring.
-                closest = closest_suggestion(answer, suggestions)
+                closest = await closest_suggestion(answer, suggestions)
                 questionnaire_status.score = await score_on_suggested_response(
                     question.id, closest
                 )
