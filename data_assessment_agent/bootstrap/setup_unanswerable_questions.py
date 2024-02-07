@@ -6,25 +6,23 @@ from data_assessment_agent.service.persistence_service import load_questions
 from data_assessment_agent.service.persistence_service_async import (
     update_yes_no_question,
 )
-from data_assessment_agent.config.toml_support import prompts
-from data_assessment_agent.service.answerable_question_service_together import (
-    create_user_message,
-    answerable_question,
-)
+
+
+from data_assessment_agent.service.yes_no_question_service_openai import is_yes_no_question
 
 
 if __name__ == "__main__":
     logger.info("Clearing suggested responses")
     logger.info("Getting all questions")
     questions = load_questions()
-    prompt_template = prompts["unanswerable"]["user_message"]
     for question_obj in questions:
-        prompt = create_user_message(question_obj)
-        answerable = asyncio.run(answerable_question(question_obj))
-        print("======================")
-        print(question_obj.question)
-        print(f"answerable: {answerable}")
-        print("======================")
-        question_obj.yes_no_question = answerable
-        asyncio.run(update_yes_no_question(question_obj))
-        time.sleep(1.0)
+        try:
+            print("======================")
+            print(question_obj.question)
+            question_obj.yes_no_question = asyncio.run(is_yes_no_question(question_obj.question))
+            print(f"answerable: {question_obj.yes_no_question}")
+            print("======================")
+            asyncio.run(update_yes_no_question(question_obj))
+            time.sleep(1.0)
+        except:
+            logger.exception(f"Cannot process question {question_obj.question}")  
