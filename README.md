@@ -71,7 +71,7 @@ python ./data_assessment_agent/bootstrap/import_framework.py
 ```
 
 ```
-python .\data_assessment_agent\bootstrap\setup_unanswerable_questions.py
+python .\data_assessment_agent\bootstrap\setup_yes_no_questions.py
 ```
 
 You can also generate all of the suggestions for responses using this command:
@@ -79,6 +79,8 @@ You can also generate all of the suggestions for responses using this command:
 ```
 python ./data_assessment_agent/bootstrap/import_suggested_responses.py
 ```
+
+Note: if you do this, you should perhaps delete the existing suggestions first with `delete from public.tb_suggested_response;`
 
 This last command requires ChatGPT, so it will also cost some money.
 

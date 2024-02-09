@@ -19,4 +19,6 @@ if __name__ == "__main__":
             ]
         )
     df = pd.DataFrame(data, columns=["id", "question", "topic", "yes no", "scored"])
-    df.to_csv(cfg.exports_tmp_folder / "questions.csv")
+    export_file = cfg.exports_tmp_folder / "questions.csv"
+    df.to_csv(export_file)
+    logger.info(f"Exported to file {export_file}")

@@ -236,4 +236,4 @@ WHERE Q.SCORED = true;
 
 -- Initial scoring
 -- Run this after all questions have been imported. Do not run after creating the tables.
-insert into tb_question_score(question_id, affirmative_score, undecided_score, negative_score) select id, 10, 5, 0 from tb_question;
+insert into tb_question_score(question_id, affirmative_score, undecided_score, negative_score) select id, 10, 5, 0 from tb_question where yes_no_question = true;
