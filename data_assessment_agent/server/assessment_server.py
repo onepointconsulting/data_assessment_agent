@@ -290,7 +290,7 @@ async def handle_final_question(session_message: SessionMessage):
         session_message.session_id,
     )
     if next_question.final:
-        report_url = f"/pdf/{session_id}"
+        report_url = f"{cfg.report_url_base}/pdf/{session_id}"
         # Get the final score
         total_score = await calculate_simple_total_score(session_id)
         await sio.emit(
@@ -385,9 +385,11 @@ async def generate_report(
     content_disposition: str = "attachment",
 ) -> web.Response:
     session_id = request.match_info.get("session_id", None)
+    logger.info('PDF session_id', session_id)
     if session_id is None:
         raise web.HTTPNotFound(text="No session id specified")
     report_path = await process_func(session_id)
+    logger.info('PDF report_path', report_path)
     return web.FileResponse(
         report_path,
         headers={

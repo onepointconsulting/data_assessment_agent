@@ -1,7 +1,11 @@
 from pydantic import BaseModel, Field
 
+
 class QuestionType(BaseModel):
-    is_yes_no_question: bool = Field(..., description="Indicates whether you can answer this question using a yes or no response")
+    is_yes_no_question: bool = Field(
+        ...,
+        description="Indicates whether you can answer this question using a yes or no response",
+    )
 
 
 question_type_spec = {

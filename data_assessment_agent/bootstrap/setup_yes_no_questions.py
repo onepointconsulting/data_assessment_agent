@@ -8,7 +8,9 @@ from data_assessment_agent.service.persistence_service_async import (
 )
 
 
-from data_assessment_agent.service.yes_no_question_service_openai import is_yes_no_question
+from data_assessment_agent.service.yes_no_question_service_openai import (
+    is_yes_no_question,
+)
 
 
 if __name__ == "__main__":
@@ -19,10 +21,12 @@ if __name__ == "__main__":
         try:
             print("======================")
             print(question_obj.question)
-            question_obj.yes_no_question = asyncio.run(is_yes_no_question(question_obj.question))
+            question_obj.yes_no_question = asyncio.run(
+                is_yes_no_question(question_obj.question)
+            )
             print(f"answerable: {question_obj.yes_no_question}")
             print("======================")
             asyncio.run(update_yes_no_question(question_obj))
             time.sleep(1.0)
         except:
-            logger.exception(f"Cannot process question {question_obj.question}")  
+            logger.exception(f"Cannot process question {question_obj.question}")

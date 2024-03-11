@@ -273,57 +273,10 @@ LIMIT 1""",
     )
 
 
-def select_remaining_questions(session_id: str, topic: str) -> Union[List[str], None]:
-    query = """
-SELECT Q.QUESTION
-FROM PUBLIC.TB_QUESTION Q
-INNER JOIN PUBLIC.TB_TOPIC T ON Q.TOPIC_ID = T.ID
-WHERE T.NAME = %(topic)s
-	AND NOT EXISTS
-		(SELECT QUESTION
-			FROM PUBLIC.TB_QUESTIONNAIRE_STATUS
-			WHERE SESSION_ID = %(session_id)s
-				AND Q.QUESTION = QUESTION
-				AND TOPIC = %(topic)s
-                AND ANSWER IS NOT NULL
-			GROUP BY QUESTION)"""
-    parameter_map = {"session_id": session_id, "topic": topic}
-    return handle_select_remaining(query, parameter_map)
-
-
 def handle_select_remaining(query: str, parameter_map: dict) -> Union[List[str], None]:
     handle_select = handle_select_func(query, parameter_map)
     remaining_questions: list = create_cursor(handle_select)
     return [t[0] for t in remaining_questions]
-
-
-def select_answered_questions_in_topic(
-    session_id: str, topic: str
-) -> Union[List[str], None]:
-    query = """
-SELECT QUESTION,
-	(SELECT ANSWER
-		FROM TB_QUESTIONNAIRE_STATUS
-		WHERE ID = MAX(S.ID))
-FROM TB_QUESTIONNAIRE_STATUS S
-WHERE SESSION_ID = %(session_id)s
-	AND TOPIC = %(topic)s
-	AND ANSWER IS NOT NULL
-GROUP BY QUESTION"""
-    parameter_map = {"session_id": session_id, "topic": topic}
-    return handle_question_answers_select(query, parameter_map)
-
-
-def select_answered_questions_in_session(session_id: str) -> Union[List[str], None]:
-    query = """
-SELECT S.QUESTION,
-	S.ANSWER
-FROM TB_QUESTIONNAIRE_STATUS S
-WHERE SESSION_ID = %(session_id)s
-	AND S.ANSWER IS NOT NULL
-ORDER BY S.ID"""
-    parameter_map = {"session_id": session_id}
-    return handle_question_answers_select(query, parameter_map)
 
 
 def handle_question_answers_select(
@@ -383,19 +336,6 @@ if __name__ == "__main__":
     assert questions is not None
     last_question = select_last_question("")
     assert last_question is None
-    print("== remaining questions ==")
-    questions = select_remaining_questions(
-        "b8ce68f0-f754-4af8-8822-97dac817250d", "Advanced Analytics"
-    )
-    for i, question in enumerate(questions):
-        print(question)
-
-    print("== answered_question in topic ==")
-    answered_questions = select_answered_questions_in_topic(
-        "b8ce68f0-f754-4af8-8822-97dac817250d", "Advanced Analytics"
-    )
-    for i, answered_question in enumerate(answered_questions):
-        print(answered_question)
 
     print("== answered_question overall ==")
     answered_questions = select_answered_questions_in_session(

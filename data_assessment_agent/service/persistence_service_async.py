@@ -25,6 +25,9 @@ from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.model.assessment_framework import SuggestedResponse
 
 
+QUESTION_FILTER = "(Q.YES_NO_QUESTION != false OR Q.SCORED != false)"
+
+
 def create_pool():
     async_pool = AsyncConnectionPool(conninfo=db_cfg.db_conn_str, open=False)
     logger.info("Using %s", db_cfg.db_conn_str)
@@ -103,7 +106,7 @@ async def select_from(query: str, parameter_map: dict) -> list:
 
 
 async def select_initial_question(session_id: str) -> Union[Question, None]:
-    query = """
+    query = f"""
 SELECT Q.ID,
 	Q.QUESTION,
 	Q.SCORE,
@@ -115,7 +118,7 @@ SELECT Q.ID,
 FROM TB_QUESTION Q
 INNER JOIN PUBLIC.TB_TOPIC T ON T.ID = Q.TOPIC_ID
 INNER JOIN PUBLIC.TB_SELECTED_TOPICS ST ON ST.TOPIC_ID = T.ID
-WHERE ST.SESSION_ID = %(session_id)s
+WHERE ST.SESSION_ID = %(session_id)s AND {QUESTION_FILTER}
 ORDER BY Q.ID LIMIT 1
 """
     parameter_map = {"session_id": session_id}
@@ -140,6 +143,67 @@ ORDER BY Q.ID LIMIT 1
             yes_no_question=yes_no_question,
         )
     return None
+
+
+async def select_remaining_questions(
+    session_id: str, topic: str
+) -> Union[List[str], None]:
+    query = f"""
+SELECT Q.QUESTION
+FROM PUBLIC.TB_QUESTION Q
+INNER JOIN PUBLIC.TB_TOPIC T ON Q.TOPIC_ID = T.ID
+WHERE T.NAME = %(topic)s
+    AND {QUESTION_FILTER}
+	AND NOT EXISTS
+		(SELECT QUESTION
+			FROM PUBLIC.TB_QUESTIONNAIRE_STATUS
+			WHERE SESSION_ID = %(session_id)s
+				AND Q.QUESTION = QUESTION
+				AND TOPIC = %(topic)s
+                AND ANSWER IS NOT NULL
+			GROUP BY QUESTION)"""
+    logger.info("select_remaining_questions: %s", query)
+    parameter_map = {"session_id": session_id, "topic": topic}
+    questions: list = await select_from(query, parameter_map)
+    return [q[0] for q in questions]
+
+
+async def handle_question_answers_select(
+    query: str, parameter_map: dict
+) -> Union[List[str], None]:
+    answered_questions: list = await select_from(query, parameter_map)
+    return [f"{t[0]}\n{t[1]}" for t in answered_questions]
+
+
+async def select_answered_questions_in_topic(
+    session_id: str, topic: str
+) -> Union[List[str], None]:
+    query = """
+SELECT QUESTION,
+	(SELECT ANSWER
+		FROM TB_QUESTIONNAIRE_STATUS
+		WHERE ID = MAX(S.ID))
+FROM TB_QUESTIONNAIRE_STATUS S
+WHERE SESSION_ID = %(session_id)s
+	AND TOPIC = %(topic)s
+	AND ANSWER IS NOT NULL
+GROUP BY QUESTION"""
+    parameter_map = {"session_id": session_id, "topic": topic}
+    return await handle_question_answers_select(query, parameter_map)
+
+
+async def select_answered_questions_in_session(
+    session_id: str,
+) -> Union[List[str], None]:
+    query = """
+SELECT S.QUESTION,
+	S.ANSWER
+FROM TB_QUESTIONNAIRE_STATUS S
+WHERE SESSION_ID = %(session_id)s
+	AND S.ANSWER IS NOT NULL
+ORDER BY S.ID"""
+    parameter_map = {"session_id": session_id}
+    return await handle_question_answers_select(query, parameter_map)
 
 
 async def select_last_question(session_id: str) -> Union[QuestionnaireStatus, None]:
@@ -218,10 +282,13 @@ async def select_random_session() -> Union[str, None]:
     async def handle_select(cur: AsyncCursor):
         await cur.execute(
             """
-select session_id from public.tb_questionnaire_status qs
-INNER JOIN PUBLIC.TB_TPICS T ON QS.TOPIC = T.NAME
+SELECT ST.SESSION_ID
+FROM PUBLIC.TB_QUESTIONNAIRE_STATUS QS
+INNER JOIN PUBLIC.TB_TOPIC T ON QS.TOPIC = T.NAME
 INNER JOIN PUBLIC.TB_SELECTED_TOPICS ST ON ST.TOPIC_ID = T.ID
-where answer is not null order by random() limit 1
+WHERE ANSWER IS NOT NULL
+ORDER BY RANDOM()
+LIMIT 1
 """
         )
         return list(await cur.fetchall())
@@ -233,11 +300,20 @@ where answer is not null order by random() limit 1
 
 
 async def select_random_question() -> Union[Question, None]:
-    query = """
-select q.id, question, score, topic_id, preferred_question_order, yes_no_question, scored, t.name
-from tb_question q inner join tb_topic t
-on q.topic_id = t.id
-order by random() limit 1
+    query = f"""
+SELECT Q.ID,
+	QUESTION,
+	SCORE,
+	TOPIC_ID,
+	PREFERRED_QUESTION_ORDER,
+	YES_NO_QUESTION,
+	SCORED,
+	T.NAME
+FROM TB_QUESTION Q
+INNER JOIN TB_TOPIC T ON Q.TOPIC_ID = T.ID
+WHERE {QUESTION_FILTER}
+ORDER BY RANDOM()
+LIMIT 1
 """
     parameter_map = {}
     questions = await select_from(query, parameter_map)
@@ -304,7 +380,7 @@ LEFT JOIN
 	SUM(CASE WHEN Q.SCORED = TRUE and QS.ANSWER IS NOT NULL THEN 1 ELSE 0 END) * 10 MAX_SCORE
 FROM TB_QUESTIONNAIRE_STATUS QS
 INNER JOIN PUBLIC.TB_TOPIC T ON T.NAME = QS.TOPIC
-INNER JOIN PUBLIC.TB_QUESTION Q ON Q.QUESTION = QS.QUESTION
+INNER JOIN PUBLIC.TB_QUESTION Q ON Q.QUESTION = QS.QUESTION AND Q.SCORED = true
 AND Q.TOPIC_ID = T.ID
 WHERE SESSION_ID = %(session_id)s
 GROUP BY QS.TOPIC) TOPIC_COUNTS ON TOPIC_COUNTS.TOPIC_NAME = T.NAME
@@ -320,29 +396,11 @@ WHERE ST.SESSION_ID = %(session_id)s
     ]
 
 
-async def select_question_scores(session_id: str) -> Union[List[QuestionScore], None]:
-    query = """
-select score, max_score, sentiment_name, topic_name, session_id from vw_question_scores where session_id = %(session_id)s
-"""
-    parameter_map = {"session_id": session_id}
-    scores_raw: list = await select_from(query, parameter_map)
-    return [
-        QuestionScore(
-            score=score,
-            max_score=max_score,
-            sentiment_name=sentiment_name,
-            topic_name=topic_name,
-            session_id=session_id,
-        )
-        for (score, max_score, sentiment_name, topic_name, session_id) in scores_raw
-    ]
-
-
 async def select_initial_question_from_topic(
     topic: str, session_id
 ) -> Union[Question, None]:
-    # This query makes sure the an hallucinated topic is replaced by a random topic.
-    query = """
+    # This query makes sure an hallucinated topic is replaced by a random topic.
+    query = f"""
 SELECT Q.ID,
 	Q.QUESTION,
 	Q.SCORE,
@@ -371,9 +429,11 @@ WHERE T.NAME = (
                         WHERE SESSION_ID = %(session_id)s)
             ORDER BY RANDOM() LIMIT 1))
 )
+    AND {QUESTION_FILTER}
 ORDER BY preferred_question_order
 LIMIT 1
 """
+    logger.info(f"select_initial_question_from_topic: {query}")
     parameter_map = {"topic": topic, "session_id": session_id}
     questions: list = await select_from(query, parameter_map)
     if len(questions) > 0:
@@ -600,11 +660,14 @@ async def handle_select_remaining(
 
 async def calculate_simple_total_score(session_id: str) -> TotalScore:
     query = """
-SELECT SUM(SCORE) TOTAL_SCORE,
-	SUM(MAX_SCORE) MAX_SCORE,
-	(SUM(SCORE * 1.0) / SUM(MAX_SCORE)) * 100 PCT_SCORE
-FROM VW_QUESTION_SCORES
-WHERE SESSION_ID = %(session_id)s
+SELECT TOTAL_SCORE, MAX_SCORE, TOTAL_SCORE * 1.0 / MAX_SCORE * 100 PCT_SCORE 
+FROM
+	(SELECT SUM(QS.SCORE) TOTAL_SCORE,
+		SUM(CASE WHEN Q.SCORED = TRUE THEN 10 ELSE 0 END) MAX_SCORE
+	FROM PUBLIC.TB_QUESTIONNAIRE_STATUS QS
+	INNER JOIN TB_TOPIC T ON T.NAME = QS.TOPIC
+	INNER JOIN TB_QUESTION Q ON Q.QUESTION = QS.QUESTION
+	WHERE SESSION_ID = %(session_id)s)
 """
     parameter_map = {"session_id": session_id}
     scoring: list = await select_from(query, parameter_map)
@@ -848,13 +911,6 @@ if __name__ == "__main__":
         for topic_score in topic_scores:
             logger.info(topic_score)
 
-    async def test_select_question_scores():
-        session_id = await select_random_session()
-        logger.info(session_id)
-        topic_scores = await select_question_scores(session_id)
-        for topic_score in topic_scores:
-            logger.info(topic_score)
-
     async def test_select_suggestions():
         logger.info("=== Suggestions ===")
         suggestions = await select_suggestions(
@@ -953,6 +1009,27 @@ if __name__ == "__main__":
         assert questionnaire_status_saved.id is not None
         await update_questionnaire_status_score(questionnaire_status_saved.id, 5)
 
+    async def test_select_remaining_questions():
+        remaining = await select_remaining_questions(
+            "7562def8-24ed-4756-83b2-1ec124ae4baf", "Business Alignment"
+        )
+        for r in remaining:
+            print(r)
+
+    async def test_select_answered_questions_in_topic():
+        remaining = await select_answered_questions_in_topic(
+            "7562def8-24ed-4756-83b2-1ec124ae4baf", "Business Alignment"
+        )
+        for r in remaining:
+            print(r)
+
+    async def test_select_answered_questions_in_session():
+        answered = await select_answered_questions_in_session(
+            "7562def8-24ed-4756-83b2-1ec124ae4baf"
+        )
+        for r in answered:
+            print(r)
+
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
     # asyncio.run(test_select_suggestions())
@@ -966,4 +1043,6 @@ if __name__ == "__main__":
     # asyncio.run(test_select_remaining_topics())
     # asyncio.run(test_find_question())
     # asyncio.run(test_fetch_all_suggestions())
-    asyncio.run(test_update_questionnaire_status_score())
+    # asyncio.run(test_select_remaining_questions())
+    # asyncio.run(test_select_answered_questions_in_topic())
+    asyncio.run(test_select_answered_questions_in_session())

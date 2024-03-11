@@ -105,5 +105,5 @@ insert into tb_question_score(question_id, affirmative_score, undecided_score, n
 Please run the server like this from the project's directory:
 
 ```
-python ./data_assessment_agent/server/assessment_server.py
+python ./data_assessment_agent/server/assessment_server_main.py
 ```

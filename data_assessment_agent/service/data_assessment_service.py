@@ -3,9 +3,6 @@ from typing import Union, List
 from data_assessment_agent.model.assessment_framework import Question
 from data_assessment_agent.service.persistence_service import (
     load_questions,
-    select_remaining_questions,
-    select_answered_questions_in_topic,
-    select_answered_questions_in_session,
 )
 from data_assessment_agent.model.db_model import Question as DbQuestion
 from data_assessment_agent.service.persistence_service_async import (
@@ -13,6 +10,9 @@ from data_assessment_agent.service.persistence_service_async import (
     select_initial_question_from_topic,
     select_initial_question,
     select_remaining_topics,
+    select_remaining_questions,
+    select_answered_questions_in_topic,
+    select_answered_questions_in_session,
 )
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
 from data_assessment_agent.service.ranking_service_together import (
@@ -50,13 +50,13 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
         if missing_in_topic > 0:
             logger.info("There are missing questions in topic")
             # Get all previously answered questions
-            question_answers_list = select_answered_questions_in_topic(
+            question_answers_list = await select_answered_questions_in_topic(
                 session_id, topic
             )
             question_answers = "\n".join(question_answers_list)
             logger.info("Answered questions: %s", question_answers)
             # There are missing questions in this topic
-            questions = select_remaining_questions(session_id, topic)
+            questions = await select_remaining_questions(session_id, topic)
             if questions is None:
                 return None
             logger.info("== Remaining questions ==")
@@ -64,35 +64,42 @@ async def select_next_question(session_id: str) -> Union[Question, None]:
                 logger.info(q)
             ranking_questions = "\n".join(questions)
             # Let ChatGPT sort the questions
-            return await safe_question_rank(
+            question_ranked = await safe_question_rank(
                 topic, question_answers, ranking_questions, questions
             )
+            if question_ranked is not None:
+                return question_ranked
+            else:
+                # We ran out of questions in this topic.
+                return await select_next_topic(session_id)
         else:
-            logger.info("Selecting next topic")
-            # There are no questions left. Select the next topic
-            # Get all question and answers from this session
-            # Get all topics covered in this session
-            question_answers_list = select_answered_questions_in_session(session_id)
-            question_answers = "\n".join(question_answers_list)
-            ranking_topics = await select_remaining_topics(session_id)
-            if len(ranking_topics) == 0:
-                # We reached probably the end of the questionnaire
-                return Question(question="", category="", score=0, final=True)
-            ranking_topics_str = "\n".join(ranking_topics)
-            # Ask ChatGPT to rank the topics
-            logger.info("ranking_topics_str: %s", ranking_topics_str)
-            missing_topics = await rank_topics(question_answers, ranking_topics_str)
-            if len(missing_topics) == 0:
-                return None
-            selected_topic = missing_topics[0]
-            logger.info("selected topic: %s", selected_topic)
-            # Start with a random question in this topic
-            selected_question = await select_initial_question_from_topic(
-                selected_topic, session_id
-            )
-            return create_question(
-                selected_question.topic.name, selected_question.question
-            )
+            return await select_next_topic(session_id)
+
+
+async def select_next_topic(session_id: str) -> Union[Question, None]:
+    logger.info("Selecting next topic")
+    # There are no questions left. Select the next topic
+    # Get all question and answers from this session
+    # Get all topics covered in this session
+    question_answers_list = await select_answered_questions_in_session(session_id)
+    question_answers = "\n".join(question_answers_list)
+    ranking_topics = await select_remaining_topics(session_id)
+    if len(ranking_topics) == 0:
+        # We reached probably the end of the questionnaire
+        return Question(question="", category="", score=0, final=True)
+    ranking_topics_str = "\n".join(ranking_topics)
+    # Ask ChatGPT to rank the topics
+    logger.info("ranking_topics_str: %s", ranking_topics_str)
+    missing_topics = await rank_topics(question_answers, ranking_topics_str)
+    if len(missing_topics) == 0:
+        return None
+    selected_topic = missing_topics[0]
+    logger.info("selected topic: %s", selected_topic)
+    # Start with a random question in this topic
+    selected_question = await select_initial_question_from_topic(
+        selected_topic, session_id
+    )
+    return create_question(selected_question.topic.name, selected_question.question)
 
 
 async def safe_question_rank(

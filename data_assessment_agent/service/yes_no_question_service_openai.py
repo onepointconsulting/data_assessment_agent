@@ -36,11 +36,12 @@ def create_user_message(question: str) -> str:
 if __name__ == "__main__":
     import asyncio
 
-    response = asyncio.run(is_yes_no_question("Do you have a clearly defined business strategy?"))
+    response = asyncio.run(
+        is_yes_no_question("Do you have a clearly defined business strategy?")
+    )
     assert response is True
 
-    response = asyncio.run(is_yes_no_question("Which kind of data are you processing in your company?"))
+    response = asyncio.run(
+        is_yes_no_question("Which kind of data are you processing in your company?")
+    )
     assert response is False
-
-
-
