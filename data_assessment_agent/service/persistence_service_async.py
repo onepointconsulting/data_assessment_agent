@@ -666,8 +666,11 @@ FROM
 		SUM(CASE WHEN Q.SCORED = TRUE THEN 10 ELSE 0 END) MAX_SCORE
 	FROM PUBLIC.TB_QUESTIONNAIRE_STATUS QS
 	INNER JOIN TB_TOPIC T ON T.NAME = QS.TOPIC
-	INNER JOIN TB_QUESTION Q ON Q.QUESTION = QS.QUESTION
-	WHERE SESSION_ID = %(session_id)s)
+	INNER JOIN TB_QUESTION Q ON Q.QUES
+    
+    
+    TION = QS.QUESTION
+	WHERE SESSION_ID = %(session_id)s) q
 """
     parameter_map = {"session_id": session_id}
     scoring: list = await select_from(query, parameter_map)
