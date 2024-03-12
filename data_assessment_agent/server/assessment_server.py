@@ -38,6 +38,7 @@ from data_assessment_agent.service.persistence_service_async import (
     fetch_all_suggestions,
     update_questionnaire_status_score,
 )
+from data_assessment_agent.service.clarification_service import stream_clarification
 from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
 from data_assessment_agent.service.chart.barchart import generate_bar_chart_for
 from data_assessment_agent.service.suggestion_proximity_service import (
@@ -54,6 +55,7 @@ routes = web.RouteTableDef()
 class Commands(StrEnum):
     START_SESSION = "start_session"
     SERVER_MESSAGE = "server_message"
+    CLARIFICATION_MESSAGE = "clarification_message"
     QUIZ_CONFIGURATION = "quiz_configuration"
     QUIZ_CONFIGURATION_SAVE_OK = "quiz_configuration_save_ok"
     QUIZ_CONFIGURATION_SAVE_ERROR = "quiz_configuration_save_error"
@@ -363,6 +365,25 @@ async def save_incomplete_answer(session_id, next_question):
 
 
 @sio.event
+async def clarify(sid: str, clarification_request: str):
+    clarification = json.loads(clarification_request)
+    topic = clarification["topic"]
+    question = clarification["question"]
+    async def write_to_client(msg: str):
+        print(msg, end='', flush=True)
+        await sio.emit(
+            Commands.CLARIFICATION_MESSAGE,
+            msg,
+            room=sid,
+        )
+    await stream_clarification(
+        question,
+        topic,
+        write_to_client
+    )
+
+
+@sio.event
 def disconnect(sid, _environ):
     logger.info("disconnect %s ", sid)
 
@@ -385,11 +406,11 @@ async def generate_report(
     content_disposition: str = "attachment",
 ) -> web.Response:
     session_id = request.match_info.get("session_id", None)
-    logger.info('PDF session_id', session_id)
+    logger.info("PDF session_id", session_id)
     if session_id is None:
         raise web.HTTPNotFound(text="No session id specified")
     report_path = await process_func(session_id)
-    logger.info('PDF report_path', report_path)
+    logger.info("PDF report_path", report_path)
     return web.FileResponse(
         report_path,
         headers={

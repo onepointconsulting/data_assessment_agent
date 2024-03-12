@@ -32,7 +32,7 @@ async def extract_answer_sentiment(chat_completion: ChatCompletion) -> str:
     arguments = extract_function_call_arguments(chat_completion)
     key = "sentiment"
     value = arguments.get(key, Sentiment.UNKNOWN)
-    logger.info("Sentiment value type %s", type(value))
+    logger.info("Sentiment value %s", value)
     return value if isinstance(value, str) else Sentiment.UNKNOWN
 
 
@@ -41,6 +41,7 @@ if __name__ == "__main__":
     from data_assessment_agent.test.provider.sentiment_provider import (
         create_sentiment_qa,
         create_sentiment_negative_qa,
+        create_positive_intention,
     )
 
     question, answer = create_sentiment_qa()
@@ -48,3 +49,6 @@ if __name__ == "__main__":
 
     question, answer = create_sentiment_negative_qa()
     print("Sentiment 2: ", asyncio.run(get_answer_sentiment(question, answer)))
+
+    question, answer = create_positive_intention()
+    print("Sentiment 3: ", asyncio.run(get_answer_sentiment(question, answer)))

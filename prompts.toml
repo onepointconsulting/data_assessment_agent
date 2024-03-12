@@ -138,3 +138,12 @@ user_message = """Can the following question be answered with a simple 'yes' or 
 {question}
 ```
 """
+
+[clarification]
+system_message = "You are a helpful assistant and an expert in data analysis"
+user_message = """Can you please explain the following question related this topic `{topic}`:
+
+```
+{question}
+```
+"""
