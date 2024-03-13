@@ -585,19 +585,17 @@ SELECT S.TOPIC,
 		FROM PUBLIC.TB_QUIZ_MODE QM
 		INNER JOIN PUBLIC.TB_SELECTED_QUIZ_MODE SQM ON QM.ID = SQM.QUIZ_MODE_ID
 		WHERE SQM.SESSION_ID = %(session_id)s) QUESTION_TOTAL,
-
 	(SELECT COUNT(*)
 		FROM TB_TOPIC TF
 		WHERE TF.NAME IN
 				(SELECT SF.TOPIC
-					FROM PUBLIC.TB_QUESTIONNAIRE_STATUS SF
-					INNER JOIN TB_TOPIC TF1 ON TF1.NAME = SF.TOPIC
-					WHERE SF.ANSWER IS NOT NULL
-						AND SESSION_ID = %(session_id)s
-					GROUP BY SF.TOPIC,
-						TF1.QUESTION_AMOUNT
-					HAVING COUNT(*) = TF1.QUESTION_AMOUNT)) FINISHED_TOPIC_COUNT,
-
+                    FROM PUBLIC.TB_QUESTIONNAIRE_STATUS SF
+                    INNER JOIN TB_TOPIC TF1 ON TF1.NAME = SF.TOPIC
+                    WHERE SF.ANSWER IS NOT NULL
+                        AND SESSION_ID = %(session_id)s
+                    GROUP BY SF.TOPIC
+                    HAVING COUNT(*) = (select question_count from tb_selected_quiz_mode qm 
+                    inner join tb_quiz_mode m on m.id = qm.quiz_mode_id where session_id = %(session_id)s))) FINISHED_TOPIC_COUNT,
 	(SELECT COUNT(*)
 		FROM PUBLIC.TB_SELECTED_TOPICS
 		WHERE SESSION_ID = %(session_id)s) TOPIC_COUNT
