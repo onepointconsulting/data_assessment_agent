@@ -14,6 +14,9 @@ class ServerMessage(BaseModel):
     suggestions: List[SuggestedResponse] = Field(
         default=[], description="The list of suggested responses"
     )
+    topic: str = Field(default="", description="The current topic")
+    finished_topic_count: int = Field(default = -1, description="The number of processed topics")
+    topic_total: int = Field(default = -1, description="The total number of processed topics")
 
 
 class ConfigMessage(BaseModel):

@@ -56,6 +56,7 @@ class Commands(StrEnum):
     START_SESSION = "start_session"
     SERVER_MESSAGE = "server_message"
     CLARIFICATION_MESSAGE = "clarification_message"
+    STOP_STREAMING = "stopstreaming"
     QUIZ_CONFIGURATION = "quiz_configuration"
     QUIZ_CONFIGURATION_SAVE_OK = "quiz_configuration_save_ok"
     QUIZ_CONFIGURATION_SAVE_ERROR = "quiz_configuration_save_error"
@@ -232,9 +233,7 @@ async def handle_next_question(session_message: SessionMessage):
 
 
 async def send_question_to_client(sid: str, session_id: str, next_question: Question):
-    response = f"""Topic: {next_question.category} ({next_question.finished_topic_count} out of {next_question.topic_total} topics)
-
-Question {next_question.question_count} out of {next_question.total_questions_in_topic} in this topic
+    response = f"""Question {next_question.question_count} out of {next_question.total_questions_in_topic} in this topic
 
 **{next_question.question}**
 """
@@ -245,6 +244,9 @@ Question {next_question.question_count} out of {next_question.total_questions_in
             sources=None,
             sessionId=session_id,
             suggestions=next_question.suggestions,
+            topic=next_question.category,
+            finished_topic_count=next_question.finished_topic_count,
+            topic_total=next_question.topic_total
         ).model_dump_json(),
         room=sid,
     )
@@ -280,6 +282,7 @@ The data assessment framework chatbot will now guide you through a set of questi
 {topics_str}
 """,
                 sessionId=session_id,
+                topic=next_question.category,
             ).model_dump_json(),
             room=sid,
         )
@@ -369,17 +372,20 @@ async def clarify(sid: str, clarification_request: str):
     clarification = json.loads(clarification_request)
     topic = clarification["topic"]
     question = clarification["question"]
+
     async def write_to_client(msg: str):
-        print(msg, end='', flush=True)
+        print(msg, end="", flush=True)
         await sio.emit(
             Commands.CLARIFICATION_MESSAGE,
             msg,
             room=sid,
         )
-    await stream_clarification(
-        question,
-        topic,
-        write_to_client
+
+    await stream_clarification(question, topic, write_to_client)
+    await sio.emit(
+        Commands.STOP_STREAMING,
+        "",
+        room=sid,
     )
 
 
