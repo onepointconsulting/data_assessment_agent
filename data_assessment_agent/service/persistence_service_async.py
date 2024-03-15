@@ -11,7 +11,6 @@ from data_assessment_agent.config.config import db_cfg
 from data_assessment_agent.model.db_model import (
     QuestionnaireStatus,
     TopicScore,
-    QuestionScore,
     Question,
     Topic,
     TotalScore,
@@ -784,7 +783,9 @@ INNER JOIN TB_QUESTION Q ON Q.ID = S.QUESTION_ID
 INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
 WHERE Q.QUESTION = %(question)s AND T.NAME = %(topic)s order by S.TITLE desc
 """
+    logger.info("select_suggestions: %s", query)
     parameter_map = {"question": question, "topic": topic}
+    logger.info("select_suggestions parameter_map: %s", parameter_map)
     response_list: list = await select_from(query, parameter_map)
     return [
         SuggestedResponse(

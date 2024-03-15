@@ -229,6 +229,7 @@ async def handle_next_question(session_message: SessionMessage):
     next_question.suggestions = await select_suggestions(
         session_message.next_question.question, session_message.next_question.category
     )
+    logger.info('next_question.suggestions: %s', next_question.suggestions)
     await send_question_to_client(sid, session_id, next_question)
 
 
