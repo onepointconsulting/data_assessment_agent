@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Optional
 from pydantic import BaseModel, Field
 
 from data_assessment_agent.model.assessment_framework import SuggestedResponse
@@ -17,6 +17,13 @@ class ServerMessage(BaseModel):
     topic: str = Field(default="", description="The current topic")
     finished_topic_count: int = Field(default = -1, description="The number of processed topics")
     topic_total: int = Field(default = -1, description="The total number of processed topics")
+    question_count: Optional[int] = Field(
+        default=None, description="Answered question count out of n in topic"
+    )
+    total_questions_in_topic: Optional[int] = Field(
+        default=None, description="Question number out of n in topic"
+    )
+
 
 
 class ConfigMessage(BaseModel):

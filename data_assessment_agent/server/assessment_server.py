@@ -234,10 +234,7 @@ async def handle_next_question(session_message: SessionMessage):
 
 
 async def send_question_to_client(sid: str, session_id: str, next_question: Question):
-    response = f"""Question {next_question.question_count} out of {next_question.total_questions_in_topic} in this topic
-
-**{next_question.question}**
-"""
+    response = f"""**{next_question.question}**"""
     await sio.emit(
         Commands.SERVER_MESSAGE,
         ServerMessage(
@@ -247,7 +244,9 @@ async def send_question_to_client(sid: str, session_id: str, next_question: Ques
             suggestions=next_question.suggestions,
             topic=next_question.category,
             finished_topic_count=next_question.finished_topic_count,
-            topic_total=next_question.topic_total
+            topic_total=next_question.topic_total,
+            question_count=next_question.question_count,
+            total_questions_in_topic=next_question.total_questions_in_topic
         ).model_dump_json(),
         room=sid,
     )
@@ -283,7 +282,7 @@ The data assessment framework chatbot will now guide you through a set of questi
 {topics_str}
 """,
                 sessionId=session_id,
-                topic=next_question.category,
+                topic=next_question.category
             ).model_dump_json(),
             room=sid,
         )
