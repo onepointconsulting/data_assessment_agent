@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 
 plt.style.use("ggplot")
 
+INTERNAL_COLOR = "#4dc48d"
+
 
 def generate_spider_chart(
     topic_score_result: TopicScoreResult,
@@ -22,7 +24,6 @@ def generate_spider_chart(
     topic_scores = topic_score_result.topic_scores
     topic_names = [score.topic_name for score in topic_scores]
     scores = [score.score for score in topic_scores]
-    max_scores = [score.max_score for score in topic_scores]
     # Obtain Angles
     topic_names_length = len(topic_names)
     if topic_names_length == 0:
@@ -40,7 +41,7 @@ def generate_spider_chart(
         np.concatenate((angles, [angles[0]])),
         np.concatenate((scores, [scores[0]])),
         "o--",
-        color="g",
+        color=INTERNAL_COLOR,
     )
 
     if add_label_positions:
@@ -55,7 +56,7 @@ def generate_spider_chart(
         )
 
     # fill plot
-    ax.fill(angles, scores, alpha=0.25, color="g")
+    ax.fill(angles, scores, alpha=0.25, color=INTERNAL_COLOR)
 
     # Add labels
     ax.set_thetagrids(angles * 180 / np.pi, topic_names)
