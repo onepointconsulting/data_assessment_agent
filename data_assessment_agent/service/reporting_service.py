@@ -103,7 +103,7 @@ async def generate_pdf_report(session_id: str) -> Path:
         "footer-html": footer_file.as_posix(),
         "footer-left": "[page]",
         "header-html": header_file.as_posix(),
-        "footer-font-size": "8",
+        "footer-font-size": "7",
     }
     pdfkit.from_string(
         report_path.read_text(encoding="utf-8"),

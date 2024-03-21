@@ -412,11 +412,11 @@ async def generate_report(
     content_disposition: str = "attachment",
 ) -> web.Response:
     session_id = request.match_info.get("session_id", None)
-    logger.info("PDF session_id", session_id)
+    logger.info("PDF session_id: %s", session_id)
     if session_id is None:
         raise web.HTTPNotFound(text="No session id specified")
     report_path = await process_func(session_id)
-    logger.info("PDF report_path", report_path)
+    logger.info("PDF report_path: %s", report_path)
     return web.FileResponse(
         report_path,
         headers={
