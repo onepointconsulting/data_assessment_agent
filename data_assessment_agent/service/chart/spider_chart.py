@@ -44,6 +44,8 @@ def generate_spider_chart(
         color=INTERNAL_COLOR,
     )
 
+    ax.set_facecolor("#d3d3d3")
+
     if add_label_positions:
         label_position = ax.get_rlabel_position()
         ax.text(

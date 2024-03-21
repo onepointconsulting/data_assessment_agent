@@ -229,7 +229,7 @@ async def handle_next_question(session_message: SessionMessage):
     next_question.suggestions = await select_suggestions(
         session_message.next_question.question, session_message.next_question.category
     )
-    logger.info('next_question.suggestions: %s', next_question.suggestions)
+    logger.info("next_question.suggestions: %s", next_question.suggestions)
     await send_question_to_client(sid, session_id, next_question)
 
 
@@ -246,7 +246,7 @@ async def send_question_to_client(sid: str, session_id: str, next_question: Ques
             finished_topic_count=next_question.finished_topic_count,
             topic_total=next_question.topic_total,
             question_count=next_question.question_count,
-            total_questions_in_topic=next_question.total_questions_in_topic
+            total_questions_in_topic=next_question.total_questions_in_topic,
         ).model_dump_json(),
         room=sid,
     )
@@ -282,7 +282,7 @@ The data assessment framework chatbot will now guide you through a set of questi
 {topics_str}
 """,
                 sessionId=session_id,
-                topic=next_question.category
+                topic=next_question.category,
             ).model_dump_json(),
             room=sid,
         )

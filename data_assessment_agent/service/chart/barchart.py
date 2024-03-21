@@ -19,11 +19,13 @@ def generate_bar_chart(
         logger.error(f"No results to print for {scores_result.session_id}")
         return None
     topics = [topic_score.topic_name for topic_score in scores_result.topic_scores]
+    key_actual_score = "Actual Score"
+    key_max_score = "Max score"
     scores = {
-        "Actual Score": np.array(
+        key_actual_score: np.array(
             [topic_score.score for topic_score in scores_result.topic_scores]
         ),
-        "Max score": np.array(
+        key_max_score: np.array(
             [
                 topic_score.max_score - topic_score.score
                 for topic_score in scores_result.topic_scores
@@ -33,8 +35,11 @@ def generate_bar_chart(
 
     _, ax = plt.subplots(figsize=[int(size * 1.5), size])
     bottom = np.zeros(len(topics))
+    colors = {key_actual_score: "#4dc48d", key_max_score: "#d61d45"}
     for scores_type, score_counts in scores.items():
-        p = ax.bar(topics, score_counts, width, label=scores_type, bottom=bottom)
+        p = ax.bar(
+            topics, score_counts, width, label=scores_type, bottom=bottom, color=colors[scores_type]
+        )
         bottom += score_counts
         ax.bar_label(p, label_type="center")
 

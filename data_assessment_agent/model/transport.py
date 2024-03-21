@@ -15,15 +15,18 @@ class ServerMessage(BaseModel):
         default=[], description="The list of suggested responses"
     )
     topic: str = Field(default="", description="The current topic")
-    finished_topic_count: int = Field(default = -1, description="The number of processed topics")
-    topic_total: int = Field(default = -1, description="The total number of processed topics")
+    finished_topic_count: int = Field(
+        default=-1, description="The number of processed topics"
+    )
+    topic_total: int = Field(
+        default=-1, description="The total number of processed topics"
+    )
     question_count: Optional[int] = Field(
         default=None, description="Answered question count out of n in topic"
     )
     total_questions_in_topic: Optional[int] = Field(
         default=None, description="Question number out of n in topic"
     )
-
 
 
 class ConfigMessage(BaseModel):

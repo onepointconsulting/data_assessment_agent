@@ -1,6 +1,7 @@
 from typing import List
 import csv
 import zipfile
+import shutil
 from pathlib import Path
 import datetime
 from collections import defaultdict
@@ -16,6 +17,7 @@ from data_assessment_agent.model.db_model import QAScored
 from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
 from data_assessment_agent.service.chart.barchart import generate_bar_chart_for
 from data_assessment_agent.config.config import cfg
+from data_assessment_agent.utils.date_utils import generate_footer_date
 
 
 async def generate_session_report(session_id: str) -> Path:
@@ -66,7 +68,7 @@ def compress_zip_file(zip_file: Path, files_to_zip: List[Path]):
                 zf.write(file, file.name, compress_type=compression)
 
 
-async def generate_html_report(session_id: str) -> Path:
+async def generate_html_report(session_id: str, template_env: Environment) -> Path:
     spider_chart = await generate_spider_chart_for(session_id)
     bar_chart = await generate_bar_chart_for(session_id)
     qa_scored = await select_session_qa(session_id)
@@ -80,8 +82,6 @@ async def generate_html_report(session_id: str) -> Path:
         "questionnaire": questionnaire_html,
         "timestamp": report_date_str,
     }
-    template_loader = FileSystemLoader(cfg.templates_folder)
-    template_env = Environment(loader=template_loader, enable_async=True)
     template = template_env.get_template("results-template.html")
     results_template = await template.render_async(context)
     report_path: Path = cfg.report_tmp_path / f"{session_id}.html"
@@ -90,16 +90,40 @@ async def generate_html_report(session_id: str) -> Path:
 
 
 async def generate_pdf_report(session_id: str) -> Path:
-    report_path: Path = await generate_html_report(session_id)
+    template_loader = FileSystemLoader(cfg.templates_folder)
+    template_env = Environment(loader=template_loader, enable_async=True)
+
+    report_path: Path = await generate_html_report(session_id, template_env)
     pdf_file: Path = cfg.pdf_generation_folder / f"{session_id}.pdf"
     config = pdfkit.configuration(wkhtmltopdf=cfg.wkhtmltopdf_binary.as_posix())
+    footer_file = await generate_footer_file(template_env, session_id)
+    header_file = cfg.templates_folder / "header.html"
+    pdfkit_options = {
+        "enable-local-file-access": "",
+        "footer-html": footer_file.as_posix(),
+        "footer-left": "[page]",
+        "header-html": header_file.as_posix(),
+        "footer-font-size": "8",
+    }
     pdfkit.from_string(
         report_path.read_text(encoding="utf-8"),
         pdf_file,
         configuration=config,
-        options={"enable-local-file-access": "", "footer-center": "[page] of [topage]"},
+        options=pdfkit_options,
     )
     return pdf_file
+
+
+async def generate_footer_file(template_env: Environment, session_id: str) -> Path:
+    footer_date = generate_footer_date()
+    template = template_env.get_template("footer.html")
+    context = {"date": footer_date}
+    results_template = await template.render_async(context)
+    for img in cfg.templates_folder.glob("*.png"):
+        shutil.copyfile(img, cfg.report_tmp_path / img.name)
+    footer_path: Path = cfg.report_tmp_path / f"{session_id}_footer.html"
+    footer_path.write_text(results_template)
+    return footer_path
 
 
 def generate_qa_scored(qa_scored: List[QAScored]) -> str:
@@ -109,7 +133,7 @@ def generate_qa_scored(qa_scored: List[QAScored]) -> str:
 
     def print_score_func(topic_score):
         return f"""
-<tr>
+<tr ckass="total-row">
     <td>
         <b>Total:</b>
     </td>
@@ -133,10 +157,10 @@ def generate_qa_scored(qa_scored: List[QAScored]) -> str:
 
         html += f"""
 {print_score}
-<tr>
+<tr ckass="topic-row">
     <td colspan="2">{topic}</td>
 </tr>
-<tr>
+<tr ckass="question-row">
     <td>
         <p>Q: {record.question}</p>
         <p>A: {record.answer}</p>

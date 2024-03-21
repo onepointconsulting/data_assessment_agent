@@ -764,7 +764,12 @@ where SESSION_ID = %(session_id)s order by created_at
     parameter_map = {"session_id": session_id}
     report_list: list = await select_from(query, parameter_map)
     return [
-        QAScored(topic=topic, question=question, answer=answer, score=score)
+        QAScored(
+            topic=topic,
+            question=question,
+            answer=answer if answer is not None else "",
+            score=score if score is not None else 0,
+        )
         for (topic, question, answer, score) in report_list
     ]
 
