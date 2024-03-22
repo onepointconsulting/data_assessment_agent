@@ -58,7 +58,7 @@ def generate_spider_chart(
         )
 
     # fill plot
-    ax.fill(angles, scores, alpha=0.25, color=INTERNAL_COLOR)
+    ax.fill(angles, scores, alpha=0.5, color=INTERNAL_COLOR)
 
     # Add labels
     ax.set_thetagrids(angles * 180 / np.pi, topic_names)

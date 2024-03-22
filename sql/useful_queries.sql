@@ -52,3 +52,8 @@ FROM TB_SUGGESTED_RESPONSE S
 INNER JOIN TB_QUESTION Q ON Q.ID = S.QUESTION_ID
 INNER JOIN TB_TOPIC T ON T.ID = Q.TOPIC_ID
 WHERE Q.QUESTION = 'Are there any quality metrics or Key Performance Metrics (KPIs) in place?' AND T.NAME = 'Data Quality' order by S.TITLE desc
+
+select t.name, count(*) from public.tb_question q
+inner join tb_topic t on t.id = q.topic_id
+where not (q.yes_no_question = false and q.scored = false)
+group by t.name order by 2;
