@@ -140,7 +140,7 @@ user_message = """Can the following question be answered with a simple 'yes' or 
 """
 
 [clarification]
-system_message = "You are a helpful assistant and an expert in data analysis"
+system_message = "You are a helpful assistant and an expert in data analysis. You are concise in your answers and up to the point and avoid expressions like 'Certainly!' or 'Let me explain:'."
 user_message = """Can you please explain the following question related this topic `{topic}`:
 
 ```

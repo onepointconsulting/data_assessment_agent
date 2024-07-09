@@ -38,7 +38,12 @@ def generate_bar_chart(
     colors = {key_actual_score: "#4dc48d", key_max_score: "#d61d45"}
     for scores_type, score_counts in scores.items():
         p = ax.bar(
-            topics, score_counts, width, label=scores_type, bottom=bottom, color=colors[scores_type]
+            topics,
+            score_counts,
+            width,
+            label=scores_type,
+            bottom=bottom,
+            color=colors[scores_type],
         )
         bottom += score_counts
         ax.bar_label(p, label_type="center")

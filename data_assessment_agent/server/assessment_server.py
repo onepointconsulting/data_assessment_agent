@@ -400,7 +400,6 @@ async def get_report(request: web.Request) -> web.Response:
     return await generate_report(request, generate_combined_report)
 
 
-# HTTP part
 @routes.get("/pdf/{session_id}")
 async def get_pdf(request: web.Request) -> web.Response:
     return await generate_report(request, generate_pdf_report, "inline")

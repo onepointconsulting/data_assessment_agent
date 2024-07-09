@@ -64,7 +64,7 @@ def generate_spider_chart(
     ax.set_thetagrids(angles * 180 / np.pi, topic_names)
 
     ax.tick_params(axis="both", which="major", pad=25, labelsize=legend_size - 3)
-    ax.set_yticklabels([])
+    # ax.set_yticklabels()
 
     ax.set_title(
         "Topic Scores",
