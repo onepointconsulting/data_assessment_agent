@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+
 plt.style.use("ggplot")
 
 INTERNAL_COLOR = "#4dc48d"
@@ -37,12 +38,16 @@ def generate_spider_chart(
     ax = fig.add_subplot(polar=True)
     # Basic plot
 
+    # [topic_scores[0].max_score] if len(topic_scores) > 0 else 10
+
     ax.plot(
         np.concatenate((angles, [angles[0]])),
-        np.concatenate((scores, [topic_scores[0].max_score] if len(topic_scores) > 0 else 10)),
+        np.concatenate((scores, [scores[0]])),
         "o--",
         color=INTERNAL_COLOR,
     )
+    max_score = max([ts.max_score for ts in topic_scores]) if len(topic_scores) > 0 else 30
+    ax.set_rmax(max_score)
 
     ax.set_facecolor("#d3d3d3")
 
@@ -59,12 +64,12 @@ def generate_spider_chart(
 
     # fill plot
     ax.fill(angles, scores, alpha=0.5, color=INTERNAL_COLOR)
+    ax.set_rmax(max_score)
 
     # Add labels
     ax.set_thetagrids(angles * 180 / np.pi, topic_names)
 
     ax.tick_params(axis="both", which="major", pad=25, labelsize=legend_size - 3)
-    # ax.set_yticklabels()
 
     ax.set_title(
         "Topic Scores",
