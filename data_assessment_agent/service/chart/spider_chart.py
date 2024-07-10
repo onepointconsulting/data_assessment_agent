@@ -39,7 +39,7 @@ def generate_spider_chart(
 
     ax.plot(
         np.concatenate((angles, [angles[0]])),
-        np.concatenate((scores, [scores[0]])),
+        np.concatenate((scores, [topic_scores[0].max_score] if len(topic_scores) > 0 else 10)),
         "o--",
         color=INTERNAL_COLOR,
     )
