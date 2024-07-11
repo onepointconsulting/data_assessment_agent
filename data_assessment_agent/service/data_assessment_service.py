@@ -88,12 +88,20 @@ async def select_next_topic(session_id: str) -> Union[Question, None]:
         # We reached probably the end of the questionnaire
         return Question(question="", category="", score=0, final=True)
     ranking_topics_str = "\n".join(ranking_topics)
-    # Ask ChatGPT to rank the topics
-    logger.info("ranking_topics_str: %s", ranking_topics_str)
-    missing_topics = await rank_topics(question_answers, ranking_topics_str)
-    if len(missing_topics) == 0:
-        return None
-    selected_topic = missing_topics[0]
+    if len(ranking_topics) == 1:
+        # Only one topic left
+        selected_topic = ranking_topics[0]
+    else:
+        # Ask ChatGPT to rank the topics
+        logger.info("ranking_topics_str: %s", ranking_topics_str)
+        missing_topics = await rank_topics(question_answers, ranking_topics_str)
+        if len(missing_topics) == 0:
+            return None
+        selected_topic = missing_topics[0]
+        if selected_topic not in ranking_topics:
+            # Prevent not selected topic from magically showing up.
+            selected_topic = ranking_topics[0]
+        
     logger.info("selected topic: %s", selected_topic)
     # Start with a random question in this topic
     selected_question = await select_initial_question_from_topic(
