@@ -811,6 +811,16 @@ WHERE Q.QUESTION = %(question)s AND T.NAME = %(topic)s order by S.TITLE desc
     ]
 
 
+async def select_selected_topics(session_id: str) -> List[str]:
+    query = """
+select distinct t.name from public.tb_selected_topics st inner join public.tb_topic t on st.topic_id = t.id
+where session_id = %(session_id)s
+"""
+    parameter_map = {"session_id": session_id}
+    response_list: list = await select_from(query, parameter_map)
+    return [response[0] for response in response_list]
+
+
 async def find_question(question: str, topic: str) -> Union[Question, None]:
     query = """
 SELECT Q.ID, Q.QUESTION, Q.SCORE, Q.TOPIC_ID, Q.PREFERRED_QUESTION_ORDER, Q.YES_NO_QUESTION, Q.SCORED, T.NAME topic_name, T.DESCRIPTION topic_description
@@ -1034,6 +1044,12 @@ if __name__ == "__main__":
         for r in answered:
             print(r)
 
+    async def test_select_selected_topics():
+        selected_topics = await select_selected_topics("60bc8eca-e06c-4a6f-8fb3-c84c33c7a34a")
+        assert isinstance(selected_topics, list)
+        for st in selected_topics:
+            print(st)
+
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
     # asyncio.run(test_select_suggestions())
@@ -1049,4 +1065,5 @@ if __name__ == "__main__":
     # asyncio.run(test_fetch_all_suggestions())
     # asyncio.run(test_select_remaining_questions())
     # asyncio.run(test_select_answered_questions_in_topic())
-    asyncio.run(test_select_answered_questions_in_session())
+    # asyncio.run(test_select_answered_questions_in_session())
+    asyncio.run(test_select_selected_topics())

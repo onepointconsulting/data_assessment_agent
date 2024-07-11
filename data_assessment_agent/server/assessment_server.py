@@ -37,6 +37,7 @@ from data_assessment_agent.service.persistence_service_async import (
     score_on_suggested_response,
     fetch_all_suggestions,
     update_questionnaire_status_score,
+    select_selected_topics
 )
 from data_assessment_agent.service.clarification_service import stream_clarification
 from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
@@ -269,7 +270,7 @@ async def handle_initial_question(session_message: SessionMessage):
         session_message.sid,
         session_message.session_id,
     )
-    topics = await select_topics()
+    topics = await select_selected_topics(session_id)
     topics_str = ", ".join(topics)
     if next_question.initial:
         await sio.emit(
