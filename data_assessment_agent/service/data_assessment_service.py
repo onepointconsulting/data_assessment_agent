@@ -15,9 +15,9 @@ from data_assessment_agent.service.persistence_service_async import (
     select_answered_questions_in_session,
 )
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
-from data_assessment_agent.service.ranking_service_together import (
-    rank_questions_together,
-)
+# from data_assessment_agent.service.ranking_service_together import (
+#     rank_questions_together,
+# )
 from data_assessment_agent.config.log_factory import logger
 
 questionnaire_questions = load_questions()

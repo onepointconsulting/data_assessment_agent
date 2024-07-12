@@ -146,4 +146,18 @@ user_message = """Can you please explain the following question related this top
 ```
 {question}
 ```
+
+Please do not answer the question, but instead explain the concepts in the question. Here are some examples on how you should answer:
+
+Question: Are there any know issues with data silos and centralization?
+Answer: ```The question refers to two concepts: 
+
+- data silos
+- centralization
+
+"Data silos" refer to isolated pockets of data within an organization that are inaccessible to other parts of the organization. These silos typically occur when data is stored and managed independently by different departments or business units, leading to a lack of integration and communication across the organization. Data silos can be a significant challenge for data governance, impacting the quality, accessibility, and consistency of data.
+
+"centralization" refers to a data management strategy in which data from various sources and systems within an organization is consolidated into a single, unified repository. This central repository, often referred to as a data warehouse, data lake, or central database, serves as the authoritative source of truth for the organization's data. The centralized approach contrasts with decentralized or siloed data architectures, where data is fragmented across multiple systems and departments.
+```
+
 """
