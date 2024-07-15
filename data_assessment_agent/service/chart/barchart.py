@@ -20,7 +20,7 @@ def generate_bar_chart(
         return None
     topics = [topic_score.topic_name for topic_score in scores_result.topic_scores]
     key_actual_score = "Actual Score"
-    key_max_score = "Max score"
+    key_max_score = "Missed Score"
     scores = {
         key_actual_score: np.array(
             [topic_score.score for topic_score in scores_result.topic_scores]

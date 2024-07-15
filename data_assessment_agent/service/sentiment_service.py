@@ -42,13 +42,16 @@ if __name__ == "__main__":
         create_sentiment_qa,
         create_sentiment_negative_qa,
         create_positive_intention,
+        create_mixed_intention
     )
 
-    question, answer = create_sentiment_qa()
-    print("Sentiment 1: ", asyncio.run(get_answer_sentiment(question, answer)))
+    # question, answer = create_sentiment_qa()
+    # print("Sentiment 1: ", asyncio.run(get_answer_sentiment(question, answer)))
 
-    question, answer = create_sentiment_negative_qa()
-    print("Sentiment 2: ", asyncio.run(get_answer_sentiment(question, answer)))
+    # question, answer = create_sentiment_negative_qa()
+    # print("Sentiment 2: ", asyncio.run(get_answer_sentiment(question, answer)))
 
-    question, answer = create_positive_intention()
-    print("Sentiment 3: ", asyncio.run(get_answer_sentiment(question, answer)))
+    # question, answer = create_positive_intention()
+    # print("Sentiment 3: ", asyncio.run(get_answer_sentiment(question, answer)))
+
+    print("Sentiment 4: ", asyncio.run(get_answer_sentiment(*create_mixed_intention())))

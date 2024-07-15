@@ -15,6 +15,7 @@ from data_assessment_agent.service.persistence_service_async import (
     select_answered_questions_in_session,
 )
 from data_assessment_agent.service.ranking_service import rank_questions, rank_topics
+
 # from data_assessment_agent.service.ranking_service_together import (
 #     rank_questions_together,
 # )
@@ -101,7 +102,7 @@ async def select_next_topic(session_id: str) -> Union[Question, None]:
         if selected_topic not in ranking_topics:
             # Prevent not selected topic from magically showing up.
             selected_topic = ranking_topics[0]
-        
+
     logger.info("selected topic: %s", selected_topic)
     # Start with a random question in this topic
     selected_question = await select_initial_question_from_topic(

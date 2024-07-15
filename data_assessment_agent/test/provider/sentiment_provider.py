@@ -16,3 +16,11 @@ def create_positive_intention():
         "Yes, there are large gaps available between our data and business strategy."
     )
     return question, answer
+
+
+def create_mixed_intention():
+    question = (
+        "Do you have a strategy in place to handle customer and employee data privacy?"
+    )
+    answer = "Yes, but it is not fully documented and socialized."
+    return question, answer

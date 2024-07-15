@@ -9,7 +9,30 @@ can you please re-rank the questions (from most relevant to most irrelevant) you
 
 === START RANKING_QUESTIONS ===
 {ranking_questions}
-=== END RANKING_QUESTIONS ==="""
+=== END RANKING_QUESTIONS ===
+
+Please make sure that when you choose the next question, you look at the answer too and do not ask questions which make no sense given a response.
+
+For example if you have a question like: 
+
+```
+Do you use tokenization as a means to protect sensitive data?
+```
+
+And the user replies:
+
+```
+No, we are not using tokenization.
+```
+
+You should NOT select as the next question the following question - even if it seems related to it:
+
+```
+Do you use any tokenization tools to tokenize PII data fields?
+```
+
+"""
+
 
 [ranking.together]
 user_message = """Given these questions and answers between === START QUESTION_ANSWER === and === END QUENSTION_ANSWER ===, 

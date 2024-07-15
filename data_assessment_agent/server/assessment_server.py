@@ -37,7 +37,7 @@ from data_assessment_agent.service.persistence_service_async import (
     score_on_suggested_response,
     fetch_all_suggestions,
     update_questionnaire_status_score,
-    select_selected_topics
+    select_selected_topics,
 )
 from data_assessment_agent.service.clarification_service import stream_clarification
 from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for

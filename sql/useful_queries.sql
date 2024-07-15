@@ -17,7 +17,11 @@ where question = 'Are there any quality metrics or Key Performance Metrics (KPIs
 update tb_suggested_response set body = 'Even though there is a need, there are currently no plans to consolidate reporting.'
 where id = 2524;
 
-update tb_suggested_response set title = 'Affirmative' where id = 2483
+update tb_suggested_response set title = 'Affirmative' where id = 2483;
+
+insert into public.tb_question(question, score, topic_id, preferred_question_order, yes_no_question, scored)
+values('Are consent in the data entry forms requests explicit and separate from general terms and conditions?', 10,
+	  (select id from public.tb_topic where name = 'Data Privacy'), 9, true, true);
 
 insert into tb_suggested_response(title, subtitle, body, question_id, score)
 	values('Affirmative', 'Metrics available', 'We have a wide range  of Key Performance Metrics (KPIs) in place.', 
@@ -57,3 +61,51 @@ select t.name, count(*) from public.tb_question q
 inner join tb_topic t on t.id = q.topic_id
 where not (q.yes_no_question = false and q.scored = false)
 group by t.name order by 2;
+
+
+-- 
+insert into public.tb_question(question, score, topic_id, preferred_question_order, yes_no_question, scored)
+values('Are consents in the data entry forms requests explicit and separate from general terms and conditions?', 10,
+	  (select id from public.tb_topic where name = 'Data Privacy'), 9, true, true);
+	  
+insert into tb_suggested_response(title, subtitle, body, question_id, score)
+	values('Affirmative', 'Clear and explicit consents available', 'Our consents in the data entry forms requests are explicit and separate from general terms and conditions', 
+	  (select id from tb_question where question = 'Are consents in the data entry forms requests explicit and separate from general terms and conditions?'), 10);
+	  
+insert into tb_suggested_response(title, subtitle, body, question_id, score)
+	values('Undecided', 'Clear and explicit consents somethimes available', 'Some consents in the data entry forms requests are explicit and separate from general terms and conditions', 
+	  (select id from tb_question where question = 'Are consents in the data entry forms requests explicit and separate from general terms and conditions?'), 5);
+	  
+insert into tb_suggested_response(title, subtitle, body, question_id, score)
+	values('Negative', 'Clear and explicit consents are not available', 'Consents in the data entry forms requests are not explicit or mixed with the general terms and conditions', 
+	  (select id from tb_question where question = 'Are consents in the data entry forms requests explicit and separate from general terms and conditions?'), 0);
+
+
+insert into public.tb_question(question, score, topic_id, preferred_question_order, yes_no_question, scored)
+values('Are consents in the data entry forms requests informed: do they specify the name of the organisation and the names of any other controllers who will rely on the consent, the purpose of the processing, the processing activities and that they can be withdrawn?', 10,
+	  (select id from public.tb_topic where name = 'Data Privacy'), 9, true, true);
+	  
+insert into tb_suggested_response(title, subtitle, body, question_id, score)
+	values('Affirmative', 'Informed consents available', 'Our consents in the data entry forms requests are informed.', 
+	  (select id from tb_question where question = 'Are consents in the data entry forms requests informed: do they specify the name of the organisation and the names of any other controllers who will rely on the consent, the purpose of the processing, the processing activities and that they can be withdrawn?'), 10);
+	  
+insert into tb_suggested_response(title, subtitle, body, question_id, score)
+	values('Undecided', 'Somehow informed consents available', 'Our consents in the data entry forms requests are somewhat informed.', 
+	  (select id from tb_question where question = 'Are consents in the data entry forms requests informed: do they specify the name of the organisation and the names of any other controllers who will rely on the consent, the purpose of the processing, the processing activities and that they can be withdrawn?'), 5);
+
+insert into tb_suggested_response(title, subtitle, body, question_id, score)
+	values('Negative', 'No informed consents', 'Our consents in the data entry forms requests are not informed.', 
+	  (select id from tb_question where question = 'Are consents in the data entry forms requests informed: do they specify the name of the organisation and the names of any other controllers who will rely on the consent, the purpose of the processing, the processing activities and that they can be withdrawn?'), 0);
+
+
+insert into tb_suggested_response(title, subtitle, body, question_id, score)
+	values('Affirmative', 'Audit compliance tools in use', 'We are using audit compliance tools similar to Splunk and Guardium', 
+	  (select id from tb_question where question = 'Are you using any audit compliance tools, like e.g. Splunk, Guardium?'), 10);
+	  
+insert into tb_suggested_response(title, subtitle, body, question_id, score)
+	values('Undecided', 'Audit compliance tools available and somewhat used', 'We are using aduit compliance tools in some cases, but could use them more.', 
+	  (select id from tb_question where question = 'Are you using any audit compliance tools, like e.g. Splunk, Guardium?'), 5);
+
+insert into tb_suggested_response(title, subtitle, body, question_id, score)
+	values('Negative', 'No audit compliance tools', 'We are not using audit compliance tools.', 
+	  (select id from tb_question where question = 'Are you using any audit compliance tools, like e.g. Splunk, Guardium?'), 0);

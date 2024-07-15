@@ -46,7 +46,9 @@ def generate_spider_chart(
         "o--",
         color=INTERNAL_COLOR,
     )
-    max_score = max([ts.max_score for ts in topic_scores]) if len(topic_scores) > 0 else 30
+    max_score = (
+        max([ts.max_score for ts in topic_scores]) if len(topic_scores) > 0 else 30
+    )
     ax.set_rmax(max_score)
 
     ax.set_facecolor("#d3d3d3")

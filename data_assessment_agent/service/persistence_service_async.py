@@ -528,7 +528,7 @@ SET SESSION_ID = %(session_id)s,
             SELECT CASE
                 WHEN STRPOS(%(sentiment)s, 'positive') > 0 THEN SCORE.AFFIRMATIVE_SCORE
                 WHEN STRPOS(%(sentiment)s, 'negative') > 0 THEN SCORE.NEGATIVE_SCORE
-                WHEN STRPOS(%(sentiment)s, 'undecided') > 0 THEN SCORE.UNDECIDED_SCORE
+                WHEN STRPOS(%(sentiment)s, 'undecided') > 0 OR STRPOS(%(sentiment)s, 'ambiguous') > 0 THEN SCORE.UNDECIDED_SCORE
                 ELSE 0
             END SCORE
             FROM PUBLIC.TB_QUESTION_SCORE SCORE
@@ -663,7 +663,7 @@ FROM
 		SUM(CASE WHEN Q.SCORED = TRUE THEN 10 ELSE 0 END) MAX_SCORE
 	FROM PUBLIC.TB_QUESTIONNAIRE_STATUS QS
 	INNER JOIN TB_TOPIC T ON T.NAME = QS.TOPIC
-	INNER JOIN TB_QUESTION Q ON Q.QUESTION = QS.QUESTION
+	INNER JOIN TB_QUESTION Q ON Q.QUESTION = QS.QUESTION AND Q.TOPIC_ID = T.ID
 	WHERE SESSION_ID = %(session_id)s) q
 """
     parameter_map = {"session_id": session_id}
@@ -1045,7 +1045,9 @@ if __name__ == "__main__":
             print(r)
 
     async def test_select_selected_topics():
-        selected_topics = await select_selected_topics("60bc8eca-e06c-4a6f-8fb3-c84c33c7a34a")
+        selected_topics = await select_selected_topics(
+            "60bc8eca-e06c-4a6f-8fb3-c84c33c7a34a"
+        )
         assert isinstance(selected_topics, list)
         for st in selected_topics:
             print(st)
