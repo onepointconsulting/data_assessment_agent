@@ -315,6 +315,9 @@ You can download the [PDF report]({report_url}) with the results.
 | max score                   | {total_score.max_score}                             |
 | percentage                  | {total_score.pct_score:.2f} %                       | 
 
+
+| Evaluation                  |                                                     |
+|-----------------------------|-----------------------------------------------------|
 | overall classification      | **{total_score.classification}**                    |
 | Overall advice              | *{CLASSIFICATION_TEXT[total_score.classification]}* |
 
