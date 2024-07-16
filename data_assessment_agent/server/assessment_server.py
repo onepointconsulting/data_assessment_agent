@@ -314,12 +314,9 @@ You can download the [PDF report]({report_url}) with the results.
 | total score                 | {total_score.total_score}                           |
 | max score                   | {total_score.max_score}                             |
 | percentage                  | {total_score.pct_score:.2f} %                       | 
-
-
-| Evaluation                  |                                                     |
-|-----------------------------|-----------------------------------------------------|
+| **Evaluation**              |                                                     |
 | overall classification      | **{total_score.classification}**                    |
-| Overall advice              | *{CLASSIFICATION_TEXT[total_score.classification]}* |
+| overall advice              | *{CLASSIFICATION_TEXT[total_score.classification]}* |
 
 """,
                 sessionId=session_id,
