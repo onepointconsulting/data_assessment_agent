@@ -14,6 +14,7 @@ from data_assessment_agent.model.db_model import (
     Question,
     Topic,
     TotalScore,
+    ScoreClassificationEnum,
     SessionReport,
     QuizzMode,
     SelectedConfiguration,
@@ -670,10 +671,28 @@ FROM
     scoring: list = await select_from(query, parameter_map)
     if len(scoring) > 0:
         (total_score, max_score, pct_score) = scoring[0]
+        if pct_score > 90:
+            classification = ScoreClassificationEnum.excellent
+        elif pct_score > 70:
+            classification = ScoreClassificationEnum.good
+        elif pct_score > 50:
+            classification = ScoreClassificationEnum.acceptable
+        elif pct_score > 30:
+            classification = ScoreClassificationEnum.mediocre
+        else:
+            classification = ScoreClassificationEnum.low
         return TotalScore(
-            total_score=total_score, max_score=max_score, pct_score=pct_score
+            total_score=total_score,
+            max_score=max_score,
+            pct_score=pct_score,
+            classification=classification,
         )
-    return TotalScore(total_score=0, max_score=0, pct_score=0.0)
+    return TotalScore(
+        total_score=0,
+        max_score=0,
+        pct_score=0.0,
+        classification=ScoreClassificationEnum.unknown,
+    )
 
 
 async def update_questionnaire_status_score(questionnaire_status: QuestionnaireStatus):

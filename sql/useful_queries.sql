@@ -46,7 +46,7 @@ update public.tb_question_score set affirmative_score = 10, negative_score = 0
 where id = 833
 
 insert into public.tb_question_score(question_id, affirmative_score, undecided_score, negative_score)
-values((select id from tb_question where question = 'Are there gaps or misalignments to address between your data strategy and your business strategy?'), 0, 5, 10)
+values((select id from tb_question where question = 'Are there pain points or challenges related to data that stakeholders have identified?'), 10, 5, 0);
 
 update public.tb_question_score qs set affirmative_score = 0, negative_score = 10
 where id = 1013

@@ -42,7 +42,7 @@ if __name__ == "__main__":
         create_sentiment_qa,
         create_sentiment_negative_qa,
         create_positive_intention,
-        create_mixed_intention
+        create_mixed_intention,
     )
 
     # question, answer = create_sentiment_qa()

@@ -1,4 +1,5 @@
 from typing import Union, Optional, List
+from enum import StrEnum
 from datetime import datetime
 
 from pydantic import BaseModel, Field
@@ -110,11 +111,33 @@ class SessionScores(BaseModel):
     topic_scores: List[TopicScore] = Field(..., description="The topic scores")
 
 
+class ScoreClassificationEnum(StrEnum):
+    unknown = "unknown"
+    low = "low"
+    mediocre = "mediocre"
+    acceptable = "acceptable"
+    good = "good"
+    excellent = "excellent"
+
+
+CLASSIFICATION_TEXT = {
+    ScoreClassificationEnum.unknown: "",
+    ScoreClassificationEnum.low: "Your company's maturity is low and a significant effort is needed to improve it.",
+    ScoreClassificationEnum.mediocre: "Your company's maturity is low and effort is needed to get to an acceptable level.",
+    ScoreClassificationEnum.acceptable: "Your company has achieved an acceptable level of maturity. However there is still a large margin for improvement.",
+    ScoreClassificationEnum.good: "Your company's maturity is good. With some more effort you can reach an outstanding level of maturity.",
+    ScoreClassificationEnum.good: "Your company's maturity is excellent. Your goal is to keep this level of maturity for the next years to come.",
+}
+
+
 class TotalScore(BaseModel):
     total_score: int = Field(..., description="The sum of all question scores")
     max_score: int = Field(..., description="The maximum possible score")
     pct_score: float = Field(
         ..., description="The percentage of the score relatively to the final score"
+    )
+    classification: ScoreClassificationEnum = Field(
+        ..., description="The classification of the final output"
     )
 
 

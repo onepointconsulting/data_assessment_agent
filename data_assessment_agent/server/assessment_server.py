@@ -17,6 +17,7 @@ from data_assessment_agent.model.db_model import (
     create_questionnaire_status,
     QuestionnaireStatus,
     SelectedConfiguration,
+    CLASSIFICATION_TEXT,
 )
 from data_assessment_agent.service.sentiment_service import get_answer_sentiment
 from data_assessment_agent.service.reporting_service import (
@@ -42,6 +43,7 @@ from data_assessment_agent.service.persistence_service_async import (
 from data_assessment_agent.service.clarification_service import stream_clarification
 from data_assessment_agent.service.chart.spider_chart import generate_spider_chart_for
 from data_assessment_agent.service.chart.barchart import generate_bar_chart_for
+from data_assessment_agent.service.chart.piechart import generate_pie
 from data_assessment_agent.service.suggestion_proximity_service import (
     closest_suggestion,
 )
@@ -307,12 +309,13 @@ async def handle_final_question(session_message: SessionMessage):
 
 You can download the [PDF report]({report_url}) with the results.
 
-
-| Result      | Score                         |
-|-------------|-------------------------------|
-| total score | {total_score.total_score}     |
-| max score   | {total_score.max_score}       |
-| percentage  | {total_score.pct_score:.2f} % |
+| Result                      | Score                                               |
+|-----------------------------|-----------------------------------------------------|
+| total score                 | {total_score.total_score}                           |
+| max score                   | {total_score.max_score}                             |
+| percentage                  | {total_score.pct_score:.2f} %                       | 
+| overall classification      | **{total_score.classification}**                    |
+| Overall advice              | *{CLASSIFICATION_TEXT[total_score.classification]}* |
 
 """,
                 sessionId=session_id,
@@ -437,6 +440,19 @@ async def generate_spider_chart(request: web.Request) -> web.Response:
 async def generate_spider_chart(request: web.Request) -> web.Response:
     async def chart_func(session_id: str):
         return await generate_bar_chart_for(session_id, size=12, width=0.6)
+
+    return await generate_chart(request, chart_func)
+
+
+@routes.get("/piechart/{session_id}")
+async def generate_pie_chart(request: web.Request) -> web.Response:
+    """
+    http://127.0.0.1:8083/piechart/5a910d89-28f4-465a-a336-d4abb44af733
+    """
+
+    async def chart_func(session_id: str):
+        total_score = await calculate_simple_total_score(session_id)
+        return generate_pie(total_score, session_id)
 
     return await generate_chart(request, chart_func)
 

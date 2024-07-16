@@ -4,6 +4,7 @@ from data_assessment_agent.config.config import cfg
 from data_assessment_agent.service.chart.common import generate_topic_scores_result
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.service.chart.common import save_figure
+from data_assessment_agent.service.chart.common import CHART_GRAY, INTERNAL_COLOR
 
 import numpy as np
 import matplotlib
@@ -11,8 +12,6 @@ import matplotlib.pyplot as plt
 
 
 plt.style.use("ggplot")
-
-INTERNAL_COLOR = "#4dc48d"
 
 
 def generate_spider_chart(
@@ -51,7 +50,7 @@ def generate_spider_chart(
     )
     ax.set_rmax(max_score)
 
-    ax.set_facecolor("#d3d3d3")
+    ax.set_facecolor(CHART_GRAY)
 
     if add_label_positions:
         label_position = ax.get_rlabel_position()
