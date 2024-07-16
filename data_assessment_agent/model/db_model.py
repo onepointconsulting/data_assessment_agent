@@ -126,7 +126,7 @@ CLASSIFICATION_TEXT = {
     ScoreClassificationEnum.mediocre: "Your company's maturity is low and effort is needed to get to an acceptable level.",
     ScoreClassificationEnum.acceptable: "Your company has achieved an acceptable level of maturity. However there is still a large margin for improvement.",
     ScoreClassificationEnum.good: "Your company's maturity is good. With some more effort you can reach an outstanding level of maturity.",
-    ScoreClassificationEnum.good: "Your company's maturity is excellent. Your goal is to keep this level of maturity for the next years to come.",
+    ScoreClassificationEnum.excellent: "Your company's maturity is excellent. Your goal is to keep this level of maturity for the next years to come.",
 }
 
 
