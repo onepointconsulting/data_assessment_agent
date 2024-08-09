@@ -27,6 +27,9 @@ class ServerMessage(BaseModel):
     total_questions_in_topic: Optional[int] = Field(
         default=None, description="Question number out of n in topic"
     )
+    final_message: bool = Field(
+        default=False, description="Tells whether this is the final message or not"
+    )
 
 
 class ConfigMessage(BaseModel):
