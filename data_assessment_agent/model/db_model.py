@@ -186,6 +186,7 @@ class SessionReport(BaseModel):
     question: str = Field(..., description="The question")
     answer: str = Field(..., description="The answer to the question")
     score: int = Field(..., description="The calculated score")
+    max_score: int = Field(..., description="The maximum score")
     sentiment: str = Field(
         ..., description="The sentiment of the answer towards the question"
     )

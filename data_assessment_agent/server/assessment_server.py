@@ -320,7 +320,7 @@ You can download the [PDF report]({report_url}) with the results.
 
 """,
                 sessionId=session_id,
-                final_message=True
+                final_message=True,
             ).model_dump_json(),
             room=sid,
         )

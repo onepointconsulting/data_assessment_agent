@@ -51,6 +51,53 @@ async def generate_session_report(session_id: str) -> Path:
     return tmp_path
 
 
+async def generate_session_report_text(session_id: str) -> str:
+    sessions = await select_session_report(session_id)
+    str = ""
+    topic_scores = defaultdict(int)
+    topic_scores_max = defaultdict(int)
+    current_topic = ""
+
+    def generate_topic_score(current_topic: str):
+        return f"""
+Topic '{current_topic}' score: {topic_scores[current_topic]} out of {topic_scores_max[current_topic]}
+Percentage: {topic_scores[current_topic] / topic_scores_max[current_topic] * 100}% 
+"""
+
+    for session in sessions:
+        question, answer, topic, score, max_score = (
+            session.question,
+            session.answer,
+            session.topic,
+            session.score,
+            session.max_score,
+        )
+        topic_scores[topic] += score
+        topic_scores_max[topic] += max_score
+        topic_change = current_topic != topic
+        if topic_change:
+            if len(current_topic) > 0:
+                str += generate_topic_score(
+                    current_topic
+                )
+            current_topic = topic
+            str += f"""
+# {topic}
+"""
+        str += f"""
+Question: {question}
+Answer: {answer}
+Score: {score}
+"""
+        
+    if len(current_topic) > 0:
+        str += generate_topic_score(
+            current_topic
+        )
+
+    return str
+
+
 async def generate_combined_report(session_id: str) -> Path:
     qa_report = await generate_session_report(session_id)
     spider_chart = await generate_spider_chart_for(session_id)
@@ -179,7 +226,11 @@ if __name__ == "__main__":
 
     # path = asyncio.run(generate_session_report("b8ce68f0-f754-4af8-8822-97dac817250d"))
     # print(f"Check path {path}")
-    report_path = asyncio.run(
-        generate_pdf_report("cf19c46c-5011-432f-bdf6-8e979ed47d23")
+    # report_path = asyncio.run(
+    #     generate_pdf_report("cf19c46c-5011-432f-bdf6-8e979ed47d23")
+    # )
+    # print(report_path)
+    text = asyncio.run(
+        generate_session_report_text("da437e34-e64f-45a6-9042-36808d8fc8ea")
     )
-    print(report_path)
+    print(text)
