@@ -318,7 +318,7 @@ You can download the detailed [PDF report]({report_url}) with the results.
 | percentage:                 | {total_score.pct_score:.2f} %                         |
 | **Evaluation**              |                                                       |
 | overall classification:     | **{scored_maturity_level.maturity_level.value}**      |
-| overall score:              | {scored_maturity_level.score} out of {LEVEL_COUNT}    |
+| overall score:              | {scored_maturity_level.score:.2f} out of {LEVEL_COUNT}    |
 | overall advice:             | *{scored_maturity_level.overall_evaluation}*          |
 
 The evaluation is made according to the [DAMA-DMBOK2](https://datacrossroads.nl/2021/04/19/dama-dmbok2-vs-dcam-2-2-maturity-assessment/#:~:text=The%20frameworks%20use%20different%20criteria,%2C%20risks%2C%20and%20associated%20controls.) maturity model.
