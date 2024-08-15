@@ -336,6 +336,13 @@ if __name__ == "__main__":
     last_question = select_last_question("")
     assert last_question is None
 
+    print("== answered_question overall ==")
+    answered_questions = select_answered_questions_in_session(
+        "b8ce68f0-f754-4af8-8822-97dac817250d"
+    )
+    for i, answered_question in enumerate(answered_questions):
+        print(answered_question)
+
     print("=== Save suggested response ===")
     suggestion = create_suggestion_response()
     suggestion.question = first_question

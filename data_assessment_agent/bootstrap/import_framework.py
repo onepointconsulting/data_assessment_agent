@@ -28,7 +28,7 @@ if __name__ == "__main__":
                         preferred_order=i,
                     )
                     asyncio.run(save_question(db_question))
-                except:
+                except Exception:
                     logger.exception("Failed to insert question")
-        except:
+        except Exception:
             logger.exception("Failed to insert topic")

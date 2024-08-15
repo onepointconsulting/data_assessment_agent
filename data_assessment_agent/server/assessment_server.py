@@ -16,9 +16,9 @@ from data_assessment_agent.model.transport import ServerMessage, ConfigMessage
 from data_assessment_agent.model.db_model import (
     create_questionnaire_status,
     QuestionnaireStatus,
-    SelectedConfiguration,
-    CLASSIFICATION_TEXT,
+    SelectedConfiguration
 )
+from data_assessment_agent.model.maturity_level import ScoredMaturityLevelResponse, LEVEL_COUNT
 from data_assessment_agent.service.sentiment_service import get_answer_sentiment
 from data_assessment_agent.service.reporting_service import (
     generate_combined_report,
@@ -47,6 +47,7 @@ from data_assessment_agent.service.chart.piechart import generate_pie
 from data_assessment_agent.service.suggestion_proximity_service import (
     closest_suggestion,
 )
+from data_assessment_agent.service.maturity_level_service import create_maturity_report_for_session
 
 sio = socketio.AsyncServer(cors_allowed_origins=cfg.websocket_cors_allowed_origins)
 app = web.Application()
@@ -298,6 +299,7 @@ async def handle_final_question(session_message: SessionMessage):
         session_message.session_id,
     )
     if next_question.final:
+        scored_maturity_level: ScoredMaturityLevelResponse = await create_maturity_report_for_session(session_id)
         report_url = f"{cfg.report_url_base}/pdf/{session_id}"
         # Get the final score
         total_score = await calculate_simple_total_score(session_id)
@@ -307,16 +309,21 @@ async def handle_final_question(session_message: SessionMessage):
                 response=f"""
 ### Thank you for finishing the {cfg.product_name} questionnaire.
 
-You can download the [PDF report]({report_url}) with the results.
+You can download the detailed [PDF report]({report_url}) with the results.
 
-| Result                      |                                                     |
-|-----------------------------|-----------------------------------------------------|
-| total score:                | {total_score.total_score}                           |
-| max score:                  | {total_score.max_score}                             |
-| percentage:                 | {total_score.pct_score:.2f} %                       | 
-| **Evaluation**              |                                                     |
-| overall classification:     | {total_score.classification}                        |
-| overall advice:             | *{CLASSIFICATION_TEXT[total_score.classification]}* |
+| Result                      |                                                       |
+|-----------------------------|-------------------------------------------------------|
+| total score:                | {total_score.total_score}                             |
+| max score:                  | {total_score.max_score}                               |
+| percentage:                 | {total_score.pct_score:.2f} %                         |
+
+| Evaluation                  |                                                       |
+|-----------------------------|-------------------------------------------------------|
+| overall classification:     | **{scored_maturity_level.maturity_level.value}**      |
+| overall score:              | {scored_maturity_level.score} out of {LEVEL_COUNT}    |
+| overall advice:             | *{scored_maturity_level.overall_evaluation}*          |
+
+The evaluation is made according to the [DAMA-DMBOK2](https://datacrossroads.nl/2021/04/19/dama-dmbok2-vs-dcam-2-2-maturity-assessment/#:~:text=The%20frameworks%20use%20different%20criteria,%2C%20risks%2C%20and%20associated%20controls.) maturity model.
 
 """,
                 sessionId=session_id,

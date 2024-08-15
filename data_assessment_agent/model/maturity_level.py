@@ -23,6 +23,8 @@ MATURITY_LEVEL_DICT = {
 
 MATURITY_LEVEL_DICT_INVERTED = {v: k for k, v in MATURITY_LEVEL_DICT.items()}
 
+LEVEL_COUNT = len(MATURITY_LEVEL_DICT)
+
 
 class CategoryMaturityLevel(BaseModel):
     category: str = Field(
@@ -43,6 +45,10 @@ class MaturityLevelResponse(BaseModel):
     maturity_levels: List[CategoryMaturityLevel] = Field(
         ...,
         description="The list of categories with the corresponding maturity levels and reasoning around it.",
+    )
+    overall_evaluation: str = Field(
+        ...,
+        description="Overall evalutaion comments on how well the client is performing on all categories."
     )
 
 

@@ -220,12 +220,6 @@ def generate_qa_scored(qa_scored: List[QAScored]) -> str:
 if __name__ == "__main__":
     import asyncio
 
-    # path = asyncio.run(generate_session_report("b8ce68f0-f754-4af8-8822-97dac817250d"))
-    # print(f"Check path {path}")
-    # report_path = asyncio.run(
-    #     generate_pdf_report("cf19c46c-5011-432f-bdf6-8e979ed47d23")
-    # )
-    # print(report_path)
     text = asyncio.run(
         generate_session_report_text("da437e34-e64f-45a6-9042-36808d8fc8ea")
     )

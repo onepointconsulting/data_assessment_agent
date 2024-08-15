@@ -36,7 +36,7 @@ def generate_suggestion(
             question_counter,
         )
         return counter
-    except:
+    except Exception as _:
         logger.exception("Could not save suggestions for %s", question_obj)
 
 

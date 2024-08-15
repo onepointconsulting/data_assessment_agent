@@ -23,6 +23,7 @@ from data_assessment_agent.model.db_model import (
 )
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.model.assessment_framework import SuggestedResponse
+from data_assessment_agent.model.maturity_level import ScoredMaturityLevelResponse
 
 
 QUESTION_FILTER = "(Q.YES_NO_QUESTION != false OR Q.SCORED != false)"
@@ -926,6 +927,45 @@ async def select_config_parameters() -> List[dict]:
     return {r[0]: r[1] for r in config_rows}
 
 
+async def insert_report(
+    session_id: str, maturity_level_report: ScoredMaturityLevelResponse
+) -> int:
+    async def process_save(cur: AsyncCursor):
+        await cur.execute(
+            """
+INSERT INTO public.tb_report(session_id, report) VALUES (%(session_id)s, %(maturity_level_report)s) RETURNING id;
+""",
+            {
+                "session_id": session_id,
+                "maturity_level_report": maturity_level_report.model_dump_json(),
+            },
+        )
+        row = await cur.fetchone()
+        return row[0]
+
+    return await create_cursor(process_save, True)
+
+
+async def select_report(session_id: str) -> Union[ScoredMaturityLevelResponse, None]:
+    query = "select report from tb_report where session_id = %(session_id)s order by id desc limit 1"
+    config_rows = await select_from(query, {"session_id": session_id})
+    if len(config_rows) > 0:
+        return config_rows[0][0]
+    return None
+
+
+async def delete_report(session_id: str) -> int:
+    async def process_delete(cur: AsyncCursor):
+        await cur.execute(
+            """
+DELETE FROM public.tb_report where session_id = %(session_id)s;
+""",
+            {"session_id": session_id},
+        )
+
+    return await create_cursor(process_delete, True)
+
+
 if __name__ == "__main__":
 
     async def test_select_last_session():
@@ -1074,6 +1114,21 @@ if __name__ == "__main__":
         for st in selected_topics:
             print(st)
 
+    async def test_insert_report():
+        session_id = "dummy"
+        from data_assessment_agent.model.maturity_level import MaturityLevelEnum
+
+        report_id = await insert_report(
+            session_id,
+            ScoredMaturityLevelResponse(
+                maturity_levels=[], score=0, maturity_level=MaturityLevelEnum.AD_HOC
+            ),
+        )
+        assert report_id is not None
+        report = await select_report(session_id)
+        assert report is not None
+        await delete_report(session_id)
+
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
     # asyncio.run(test_select_suggestions())
@@ -1090,4 +1145,5 @@ if __name__ == "__main__":
     # asyncio.run(test_select_remaining_questions())
     # asyncio.run(test_select_answered_questions_in_topic())
     # asyncio.run(test_select_answered_questions_in_session())
-    asyncio.run(test_select_selected_topics())
+    # asyncio.run(test_select_selected_topics())
+    asyncio.run(test_insert_report())

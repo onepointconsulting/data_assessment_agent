@@ -220,6 +220,13 @@ INSERT INTO
 VALUES
 ('minimum topics', 3);
 
+
+CREATE TABLE public.tb_report (
+    id serial NOT NULL,
+    session_id character varying(36) NOT NULL,
+    report character varying(16384) NULL
+);
+
 -- Scoring view
 CREATE
 OR REPLACE VIEW public.vw_question_scores AS

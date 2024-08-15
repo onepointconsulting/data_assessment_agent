@@ -13,6 +13,24 @@ from data_assessment_agent.model.maturity_level import (
     MATURITY_LEVEL_DICT,
     MATURITY_LEVEL_DICT_INVERTED,
 )
+from data_assessment_agent.service.reporting_service import generate_session_report_text
+from data_assessment_agent.service.persistence_service_async import (
+    insert_report,
+    select_report,
+)
+
+
+async def create_maturity_report_for_session(
+    session_id: str,
+) -> Union[ScoredMaturityLevelResponse, None]:
+    report = await select_report(session_id)
+    if report is None:
+        report_text = await generate_session_report_text(session_id)
+        maturity_level_report = await create_maturity_report(report_text)
+        await insert_report(session_id, maturity_level_report)
+        return maturity_level_report
+    else:
+        return ScoredMaturityLevelResponse.model_validate_json(report)
 
 
 async def create_maturity_report(
@@ -58,6 +76,7 @@ def calculate_overall_score(
         score=score,
         maturity_level=maturity_level,
         maturity_levels=maturity_level_response.maturity_levels,
+        overall_evaluation=maturity_level_response.overall_evaluation
     )
 
 
@@ -84,3 +103,4 @@ if __name__ == "__main__":
         f"out of {MATURITY_LEVEL_DICT[MaturityLevelEnum.OPTIMIZED]} **",
     )
     print("Overall maturity: **", maturity_response.maturity_level, " **")
+    print(maturity_response.model_dump_json())
