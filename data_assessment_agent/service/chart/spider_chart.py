@@ -1,6 +1,5 @@
 from pathlib import Path
 from data_assessment_agent.model.db_model import TopicScoreResult
-from data_assessment_agent.config.config import cfg
 from data_assessment_agent.service.chart.common import generate_topic_scores_result
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.service.chart.common import save_figure

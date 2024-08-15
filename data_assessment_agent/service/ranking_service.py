@@ -1,4 +1,3 @@
-import json
 from typing import Optional, List
 
 
@@ -6,7 +5,6 @@ from openai.types.chat.chat_completion import ChatCompletion
 
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.config.toml_support import prompts
-from data_assessment_agent.config.config import cfg
 from data_assessment_agent.model.ranking import (
     question_ranking_spec,
     topic_ranking_spec,

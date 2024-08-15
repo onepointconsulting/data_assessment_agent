@@ -77,23 +77,19 @@ Percentage: {topic_scores[current_topic] / topic_scores_max[current_topic] * 100
         topic_change = current_topic != topic
         if topic_change:
             if len(current_topic) > 0:
-                str += generate_topic_score(
-                    current_topic
-                )
+                str += generate_topic_score(current_topic)
             current_topic = topic
             str += f"""
-# {topic}
+# Category: {topic}
 """
         str += f"""
 Question: {question}
 Answer: {answer}
 Score: {score}
 """
-        
+
     if len(current_topic) > 0:
-        str += generate_topic_score(
-            current_topic
-        )
+        str += generate_topic_score(current_topic)
 
     return str
 
@@ -233,4 +229,5 @@ if __name__ == "__main__":
     text = asyncio.run(
         generate_session_report_text("da437e34-e64f-45a6-9042-36808d8fc8ea")
     )
-    print(text)
+    target_file = Path("./docs/session_output.txt")
+    target_file.write_text(text, encoding="utf-8")

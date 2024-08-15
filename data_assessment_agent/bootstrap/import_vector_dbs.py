@@ -1,4 +1,3 @@
-from typing import List
 from collections import defaultdict
 
 from data_assessment_agent.service.persistence_service import load_questions

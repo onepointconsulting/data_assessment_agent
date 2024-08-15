@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Union
 from openai.types.chat.chat_completion import ChatCompletion
 
 from data_assessment_agent.config.toml_support import prompts

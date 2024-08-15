@@ -60,7 +60,7 @@ if __name__ == "__main__":
                     question_counter, counter, question_obj, PROMPT_CATEGORY_YES_NO
                 )
         else:
-            if is_yes_no == False and not suggestion_exists_for(question_obj):
+            if not is_yes_no and not suggestion_exists_for(question_obj):
                 question_counter += 1
                 counter += generate_suggestion(
                     question_counter, counter, question_obj, PROMPT_CATEGORY_OPEN_ENDED

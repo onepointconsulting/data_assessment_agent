@@ -184,3 +184,49 @@ Answer: ```The question refers to two concepts:
 ```
 
 """
+
+[report]
+system_message = "You are a helpful assistant and an expert in maturity models in ITIL (Information Technology Infrastructure Library) & ITSM (Information Technology Service Management)"
+user_message = """Can you assess the maturity level of each category inside of the area which starts with === ASSESSMENT_REPORT === and ends with === ASSESSMENT_REPORT END === based on the question and answers provided for each category. Note that each category has questions and answers which are the basis for your assessment. When returning your assessment makre sure you give one single maturity level per category and an explanation of this maturity level. The maturity level can have the following categories:
+
+- No capability
+No organized data management practices or format enterprise processes for managing data. Adhoc data managment (performed by heroes)
+
+- Ad-hoc
+ITIL functions play a key role in how organizations implement ITSM functions, aligning IT systems and processes with business goals. At this stage of the maturity model, processes and functions, and the way systems and vendors are integrated and deployed to support ITSM operations are disorganized.
+Significant improvement is needed when a maturity model assessment identifies that an ITIL and ITSM functions are only at the ad-hoc, or initial stage of operational maturity.
+Characteristics: little or no govenance, limited tool set, roles defined within silos, controls applied inconsistently, data quality issues not addressed
+
+- Repeatable
+At this stage, an organization has attempted to bring some order to ITIL operational functions, processes, systems, and vendor integration. Although far from perfect, KPIs are now in use and stakeholders and outcomes are identified before any service improvements are implemented.
+Characteristics: emerging governance, introduction of a consistent tool set, some roles and processes defined, growing awareness of impact of data quality issues
+
+- Defined
+At the controlled, or defined level, there's a more regulated, qualitative and quantitative approach to ITIL operations. For example, organizations at this stage of maturity have usually:
+Characteristics: data viewed as an organisational enabler, scalable processes and tools, redution in manual processes, process outcomes are more predictable
+
+Documented ITIL functions and how they relate to ITSM and business objectives and goals, with clear and continuously monitored KPIs and other performance indicators
+Implemented appropriate measures and processes
+Applied corporate knowledge, approaches, and an awareness of external stakeholder needs, including customers, to ITIL process execution
+Provided regular training to ITIL and ITSM staff, with far greater integration and coordination between IT functions and vendors
+
+- Managed
+At this level, the fourth within the ITIL maturity model framework, organizations should have implemented the following:
+
+A clear alignment between high-level organizational and corporate goals and objectives and ITIL and ITSM functions
+Continuous wide-scale monitoring of appropriate metrics, including KPIs, OKRs, Service Level Agreements (SLAs), response times, and internal and external customer help desk satisfaction scores
+IT Software as a Service (SaaS) automation monitoring tools are widely used
+Cross-functional collaboration and knowledge sharing has been facilitated and is contributing to performance improvements and iterative best practice learnings
+Characteristics: centralized planning and governance, managed of risks related to data, data management performance metrics, measurable improvements in data quality
+
+- Optimized
+At the fifth and final maturity model level, ITIL processes are robust, reducing the risk of IT systems failures, and they are subject to strong governance controls.
+
+Automation and monitoring tools are implemented throughout every system and process touchpoint. At this stage, there are constant iterative feedback loops, and carefully managed, consistent governance controls across ITIL and ITSM functions. Naturally, at this stage in the maturity model, ITIL operations are integrated seamlessly across the organization.
+Characteristics: highly predictable processes, reduced risk, well understood metrics to manage data and process quality 
+
+=== ASSESSMENT_REPORT ===
+{report}
+=== ASSESSMENT_REPORT END ===
+
+"""

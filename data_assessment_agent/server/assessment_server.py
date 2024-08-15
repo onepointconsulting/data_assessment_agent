@@ -439,7 +439,7 @@ async def generate_spider_chart(request: web.Request) -> web.Response:
 
 
 @routes.get("/barchart/{session_id}")
-async def generate_spider_chart(request: web.Request) -> web.Response:
+async def generate_bar_chart(request: web.Request) -> web.Response:
     async def chart_func(session_id: str):
         return await generate_bar_chart_for(session_id, size=12, width=0.6)
 

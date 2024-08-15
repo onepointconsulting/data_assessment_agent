@@ -13,7 +13,7 @@ class TestConfig(unittest.TestCase):
         assert framework is not None
         assert isinstance(framework, dict)
 
-    def test_import_framework(self):
+    def test_import_framework_2(self):
         framework = import_framework_objects()
         assert framework is not None
         assert isinstance(framework, AssessmentFramework)

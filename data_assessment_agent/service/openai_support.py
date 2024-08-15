@@ -1,5 +1,5 @@
 import json
-from typing import Optional, List
+from typing import Optional
 
 from data_assessment_agent.config.log_factory import logger
 from data_assessment_agent.config.config import cfg

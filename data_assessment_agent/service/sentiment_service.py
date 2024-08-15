@@ -1,5 +1,3 @@
-from typing import List
-
 from openai.types.chat.chat_completion import ChatCompletion
 
 from data_assessment_agent.config.log_factory import logger
@@ -39,9 +37,6 @@ async def extract_answer_sentiment(chat_completion: ChatCompletion) -> str:
 if __name__ == "__main__":
     import asyncio
     from data_assessment_agent.test.provider.sentiment_provider import (
-        create_sentiment_qa,
-        create_sentiment_negative_qa,
-        create_positive_intention,
         create_mixed_intention,
     )
 
