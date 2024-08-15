@@ -316,9 +316,7 @@ You can download the detailed [PDF report]({report_url}) with the results.
 | total score:                | {total_score.total_score}                             |
 | max score:                  | {total_score.max_score}                               |
 | percentage:                 | {total_score.pct_score:.2f} %                         |
-
-| Evaluation                  |                                                       |
-|-----------------------------|-------------------------------------------------------|
+| **Evaluation**              |                                                       |
 | overall classification:     | **{scored_maturity_level.maturity_level.value}**      |
 | overall score:              | {scored_maturity_level.score} out of {LEVEL_COUNT}    |
 | overall advice:             | *{scored_maturity_level.overall_evaluation}*          |
