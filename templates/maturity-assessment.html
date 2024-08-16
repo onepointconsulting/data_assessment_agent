@@ -8,27 +8,8 @@
         <!-- <img src="http://176.34.128.143:8085/logo-one-point.png"
             class="banner" /> -->
         {% include 'include_report_prefix.html' %}
-        <p>
-            Here you have the questions we asked and the answers you gave, followed
-            by the scores.
-        </p>
-        <h2 class="questionnaire">Transcript</h2>
-        <table>
-            <tbody>
-                {{questionnaire}}
-            </tbody>
-        </table>
-
-        <h2>Maturity Level Report</h2>
-
+        
         {% include 'include_maturity_report.html' %}
-
-        <h2>Charts</h2>
-        <section class="charts">
-            <img src="{{spider_chart}}" class="image" />
-            <br />
-            <img src="{{bar_chart}}" class="image" />
-        </section>
 
         <h2 class="personalOffer">A personal offer for you</h2>
         <p>

@@ -1,0 +1,121 @@
+
+# Category: Advanced Analytics
+
+Question: Do you provide self-service capability to analytical users in production environment, and how it is currently managed?
+Answer: We provide self-service capability to users in production environment using a platform we developed ourselves.
+Score: 10
+
+Question: Are there any use cases for Analytics as a Service or use cases to support self service by business?
+Answer: Yes, there are use cases for Analytics as a service and use cases to support self service by business
+Score: 10
+
+Question: Has the team explored the use of a data science platform?
+Answer: Yes, indeed, we have explored the use of a data science platform.
+Score: 10
+
+Question: Do you use AutoML to automate model selection and hyperparameter tuning?
+Answer: No, we have not implemented AutoML for automating model selection and hyperparameter tuning yet.
+Score: 0
+
+Question: Do you version the models?
+Answer: We use model versioning for all our ML models.
+Score: 10
+
+Topic 'Advanced Analytics' score: 40 out of 50
+Percentage: 80.0% 
+
+# Category: Data Modelling
+
+Question: Is there a conceptual, logical and physical data model for the entire organization or just few selected data domains?
+Answer: Yes, indeed, we have a conceptual, logical, and physical data model for the entire organisation.
+Score: 10
+
+Question: Do data modellers model messages/events that are to be published on an event stream such as Kafka?
+Answer: No, data modellers do not typically model messages/events for an event stream such as Kafka.
+Score: 0
+
+Question: Do the data modellers use a tool to generate the physical data models or generate DML?
+Answer: Yes, our data modellers utilise a specific tool to generate the physical data models and DML.
+Score: 10
+
+Question: Is there a data dictionary for the data models?
+Answer: Yes, indeed, we do have a data dictionary for our data models.
+Score: 10
+
+Topic 'Data Modelling' score: 30 out of 40
+Percentage: 75.0% 
+
+# Category: Data Architecture
+
+Question: How is data accessed (dashboards, reports, APIs, etc.)?
+Answer: The data can be accessed via dashboards.
+Score: 10
+
+Question: Are there data access restrictions or security measures in place?
+Answer: Yes, indeed, we have robust data access restrictions and security measures in place.
+Score: 10
+
+Question: Do you have specific pain points or challenges in your current data ecosystem?
+Answer: We have specific pain points and challenges in our current data ecosystem.
+Score: 0
+
+Question: Are there data analytics skills and resources within the organization?
+Answer: Yes, indeed, we have a dedicated team of data analysts who are well-versed in data analytics.
+Score: 10
+
+Question: How is data used for analytics and reporting?
+Answer: The data for reporting is scattered among different databases.
+Score: 5
+
+Topic 'Data Architecture' score: 35 out of 50
+Percentage: 70.0% 
+
+# Category: Reporting
+
+Question: If there are multiple tools, is there a plan to rationalize reporting tools?
+Answer: No, at the moment, we do not have a plan to rationalise our reporting tools.
+Score: 0
+
+Question: Is there a plan to consolidate reporting?
+Answer: Even though there is a need, there are currently no plans to consolidate reporting.
+Score: 0
+
+Question: Is there a semantic layer defined within the reporting tool?
+Answer: No, unfortunately, we have not yet defined a semantic layer within our reporting tool.
+Score: 0
+
+Question: Is there a DR environment for the reporting server?
+Answer: No, unfortunately, we do not have a DR environment for the reporting server.
+Score: 0
+
+Question: Is the reporting server on-prem or on cloud?
+Answer: Our reporting server is the cloud.
+Score: 10
+
+Topic 'Reporting' score: 10 out of 50
+Percentage: 20.0% 
+
+# Category: Data Security
+
+Question: Are there specific industry regulations or legal requirements that impact your data strategy?
+Answer: Yes, indeed. We are bound by specific industry regulations and legal requirements that significantly influence our data strategy.
+Score: 10
+
+Question: Are you compliant with relevant data regulations such as GDPR?
+Answer: Yes, absolutely, we are fully compliant with all relevant data regulations, including GDPR.
+Score: 10
+
+Question: Are data access permissions aligned with business needs and regulations?
+Answer: Yes, absolutely. Our data access permissions are meticulously aligned with both business needs and regulatory requirements.
+Score: 10
+
+Question: Do you have a well defined Role Based access control policy in place with roles aligned to AD groups?
+Answer: No, unfortunately, we do not have a well-defined Role Based Access Control policy in place with roles aligned to AD groups.
+Score: 0
+
+Question: Do you implement regular key rotation procedures to minimize the risk associated with long-lived encryption keys?
+Answer: No, unfortunately, we have not yet implemented regular key rotation procedures.
+Score: 0
+
+Topic 'Data Security' score: 30 out of 50
+Percentage: 60.0% 

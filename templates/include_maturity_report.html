@@ -1,0 +1,56 @@
+<h2>Overall Maturity Level</h2>
+<table style="margin: 0 auto">
+    <tr>
+        <td style="padding: 5px">Category:</td>
+        <td style="padding: 5px"><strong>{{maturity_level}}</strong></td>
+    </tr>
+    <tr>
+        <td style="padding: 5px; text-align: right;">Score:</td>
+        <td style="padding: 5px">{{score}}</td>
+    </tr>
+</table>
+<p>{{maturity_level_overall_evaluation}}</p>
+
+<h2>Details</h2>
+
+{% for maturity_level in maturity_levels %}
+<h3>{{maturity_level.category}}</h3>
+<div>
+    <table>
+        <tr>
+            <td style="padding: 5px; min-width: 180px">Maturity level:</td>
+            <td style="padding: 5px"><strong>{{maturity_level.maturity_level.name}} / {{maturity_level.maturity_level.level()}}</strong></td>
+        </tr>
+        <tr>
+            <td style="padding: 5px">Reasoning:</td>
+            <td style="padding: 5px">{{maturity_level.reasoning}}</td>
+        </tr>
+        <tr>
+            <td style="padding: 5px">Missing information:</td>
+            <td style="padding: 5px">{{maturity_level.missing_information_comments}}</td>
+        </tr>
+    </table>
+</div>
+{% endfor %}
+
+<h3>About</h3>
+
+<p>
+    This maturity assessment was evaluated according to 
+    <a class="pb-4 font-sans underline sm:pb-2" href="https://datacrossroads.nl/2021/04/19/dama-dmbok2-vs-dcam-2-2-maturity-assessment/#:~:text=The%20frameworks%20use%20different%20criteria,%2C%20risks%2C%20and%20associated%20controls." node="[object Object]" target="_blank">DAMA-DMBOK2</a>.
+</p>
+
+<p>These are the maturity levels according to DAMA-DMBOK2:</p>
+
+<table>
+    <tr>
+        <th style="padding: 5px">Level</th>
+        <th style="padding: 5px">Level name</th>
+    </tr>
+    {% for ml in maturity_level_enum %}
+    <tr>
+        <td style="padding: 5px; text-align: center;">{{ml.level()}}</td>
+        <td style="padding: 5px">{{ml.name}}</td>
+    </tr>
+    {% endfor %}
+</table>

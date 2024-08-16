@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Iterable
 from enum import Enum
 from pydantic import BaseModel, Field
 
@@ -10,6 +10,14 @@ class MaturityLevelEnum(str, Enum):
     DEFINED = "Defined"
     MANAGED = "Managed"
     OPTIMIZED = "Optimized"
+
+    def level(self) -> int:
+        return MATURITY_LEVEL_DICT[self] - 1
+
+    @classmethod
+    def levels(cls) -> Iterable:
+        for level in cls:
+            yield level
 
 
 MATURITY_LEVEL_DICT = {
@@ -48,7 +56,7 @@ class MaturityLevelResponse(BaseModel):
     )
     overall_evaluation: str = Field(
         ...,
-        description="Overall evalutaion comments on how well the client is performing on all categories."
+        description="Overall evalutaion comments on how well the client is performing on all categories.",
     )
 
 

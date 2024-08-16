@@ -16,9 +16,12 @@ from data_assessment_agent.model.transport import ServerMessage, ConfigMessage
 from data_assessment_agent.model.db_model import (
     create_questionnaire_status,
     QuestionnaireStatus,
-    SelectedConfiguration
+    SelectedConfiguration,
 )
-from data_assessment_agent.model.maturity_level import ScoredMaturityLevelResponse, LEVEL_COUNT
+from data_assessment_agent.model.maturity_level import (
+    ScoredMaturityLevelResponse,
+    LEVEL_COUNT,
+)
 from data_assessment_agent.service.sentiment_service import get_answer_sentiment
 from data_assessment_agent.service.reporting_service import (
     generate_combined_report,
@@ -47,7 +50,9 @@ from data_assessment_agent.service.chart.piechart import generate_pie
 from data_assessment_agent.service.suggestion_proximity_service import (
     closest_suggestion,
 )
-from data_assessment_agent.service.maturity_level_service import create_maturity_report_for_session
+from data_assessment_agent.service.maturity_level_service import (
+    create_maturity_report_for_session,
+)
 
 sio = socketio.AsyncServer(cors_allowed_origins=cfg.websocket_cors_allowed_origins)
 app = web.Application()
@@ -299,7 +304,9 @@ async def handle_final_question(session_message: SessionMessage):
         session_message.session_id,
     )
     if next_question.final:
-        scored_maturity_level: ScoredMaturityLevelResponse = await create_maturity_report_for_session(session_id)
+        scored_maturity_level: ScoredMaturityLevelResponse = (
+            await create_maturity_report_for_session(session_id)
+        )
         report_url = f"{cfg.report_url_base}/pdf/{session_id}"
         # Get the final score
         total_score = await calculate_simple_total_score(session_id)
@@ -406,11 +413,12 @@ def disconnect(sid, _environ):
 
 
 # HTTP part
+# Example: http://localhost:8083/report/da437e34-e64f-45a6-9042-36808d8fc8ea
 @routes.get("/report/{session_id}")
 async def get_report(request: web.Request) -> web.Response:
     return await generate_report(request, generate_combined_report)
 
-
+# Example: http://localhost:8083/odf/da437e34-e64f-45a6-9042-36808d8fc8ea
 @routes.get("/pdf/{session_id}")
 async def get_pdf(request: web.Request) -> web.Response:
     return await generate_report(request, generate_pdf_report, "inline")

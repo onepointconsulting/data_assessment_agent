@@ -3,7 +3,6 @@ import csv
 import zipfile
 import shutil
 from pathlib import Path
-import datetime
 from collections import defaultdict
 
 from jinja2 import FileSystemLoader, Environment
@@ -18,6 +17,11 @@ from data_assessment_agent.service.chart.spider_chart import generate_spider_cha
 from data_assessment_agent.service.chart.barchart import generate_bar_chart_for
 from data_assessment_agent.config.config import cfg
 from data_assessment_agent.utils.date_utils import generate_footer_date
+from data_assessment_agent.service.maturity_level_service import (
+    generate_maturity_level_report,
+    create_maturity_level_report_context,
+)
+from data_assessment_agent.service.report_helper import generate_report_date
 
 
 async def generate_session_report(session_id: str) -> Path:
@@ -51,53 +55,11 @@ async def generate_session_report(session_id: str) -> Path:
     return tmp_path
 
 
-async def generate_session_report_text(session_id: str) -> str:
-    sessions = await select_session_report(session_id)
-    str = ""
-    topic_scores = defaultdict(int)
-    topic_scores_max = defaultdict(int)
-    current_topic = ""
-
-    def generate_topic_score(current_topic: str):
-        return f"""
-Topic '{current_topic}' score: {topic_scores[current_topic]} out of {topic_scores_max[current_topic]}
-Percentage: {topic_scores[current_topic] / topic_scores_max[current_topic] * 100}% 
-"""
-
-    for session in sessions:
-        question, answer, topic, score, max_score = (
-            session.question,
-            session.answer,
-            session.topic,
-            session.score,
-            session.max_score,
-        )
-        topic_scores[topic] += score
-        topic_scores_max[topic] += max_score
-        topic_change = current_topic != topic
-        if topic_change:
-            if len(current_topic) > 0:
-                str += generate_topic_score(current_topic)
-            current_topic = topic
-            str += f"""
-# Category: {topic}
-"""
-        str += f"""
-Question: {question}
-Answer: {answer}
-Score: {score}
-"""
-
-    if len(current_topic) > 0:
-        str += generate_topic_score(current_topic)
-
-    return str
-
-
 async def generate_combined_report(session_id: str) -> Path:
     qa_report = await generate_session_report(session_id)
     spider_chart = await generate_spider_chart_for(session_id)
-    files_to_zip = [qa_report, spider_chart]
+    maturity_level_path = await generate_maturity_level_report(session_id)
+    files_to_zip = [qa_report, spider_chart, maturity_level_path]
     zip_file = cfg.report_tmp_path / f"{session_id}.zip"
     compress_zip_file(zip_file, files_to_zip)
     return zip_file
@@ -115,15 +77,15 @@ async def generate_html_report(session_id: str, template_env: Environment) -> Pa
     spider_chart = await generate_spider_chart_for(session_id)
     bar_chart = await generate_bar_chart_for(session_id)
     qa_scored = await select_session_qa(session_id)
-    results_template = cfg.templates_folder / "results-template.html"
     questionnaire_html = generate_qa_scored(qa_scored)
-    report_date = datetime.datetime.now()
-    report_date_str = report_date.strftime("%a, %d %b %Y")
+    report_date_str = generate_report_date()
+    ml_context = await create_maturity_level_report_context(session_id)
     context = {
         "spider_chart": spider_chart.as_posix(),
         "bar_chart": bar_chart.as_posix(),
         "questionnaire": questionnaire_html,
         "timestamp": report_date_str,
+        **ml_context,
     }
     template = template_env.get_template("results-template.html")
     results_template = await template.render_async(context)
@@ -220,8 +182,7 @@ def generate_qa_scored(qa_scored: List[QAScored]) -> str:
 if __name__ == "__main__":
     import asyncio
 
-    text = asyncio.run(
-        generate_session_report_text("da437e34-e64f-45a6-9042-36808d8fc8ea")
-    )
-    target_file = Path("./docs/session_output.txt")
-    target_file.write_text(text, encoding="utf-8")
+    session_id = "da437e34-e64f-45a6-9042-36808d8fc8ea"
+
+    target_file = asyncio.run(generate_pdf_report(session_id))
+    print(target_file)
