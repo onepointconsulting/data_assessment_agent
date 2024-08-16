@@ -34,6 +34,10 @@ def generate_bar_chart(
     }
 
     _, ax = plt.subplots(figsize=[int(size * 1.5), size])
+    
+    # Rotate the x-axis labels by 45 degrees
+    plt.xticks(rotation=10)
+
     bottom = np.zeros(len(topics))
     colors = {key_actual_score: "#4dc48d", key_max_score: "#d61d45"}
     for scores_type, score_counts in scores.items():

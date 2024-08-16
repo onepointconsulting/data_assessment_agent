@@ -418,7 +418,7 @@ def disconnect(sid, _environ):
 async def get_report(request: web.Request) -> web.Response:
     return await generate_report(request, generate_combined_report)
 
-# Example: http://localhost:8083/odf/da437e34-e64f-45a6-9042-36808d8fc8ea
+# Example: http://localhost:8083/pdf/da437e34-e64f-45a6-9042-36808d8fc8ea
 @routes.get("/pdf/{session_id}")
 async def get_pdf(request: web.Request) -> web.Response:
     return await generate_report(request, generate_pdf_report, "inline")
