@@ -35,3 +35,13 @@ Yellow - #f4a628
 - 
 
 Change disclaimer: needs re-wording
+
+## 2024-08-22
+
+- This maturity assessment was evaluated according to Onepoint Data & Analytics Body of Knowledge™ https://www.onepointltd.com/data-wellness/#BOK
+- Do not use underscores
+- Reference instead of About
+- Enforce the prompt to use British English.
+- Add disclaimer
+- AI-generated content may be incomplete or misleading. Validate with your domain specialist(s) or arrange a free consultation with an Onepoint Data Wellness expert.
+- Add table of contents
