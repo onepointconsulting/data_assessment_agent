@@ -1,7 +1,8 @@
 import random
+import asyncio
 from typing import Union, List
 from data_assessment_agent.model.assessment_framework import Question
-from data_assessment_agent.service.persistence_service import (
+from data_assessment_agent.service.persistence_service_async import (
     load_questions,
 )
 from data_assessment_agent.model.db_model import Question as DbQuestion
@@ -21,8 +22,7 @@ from data_assessment_agent.service.ranking_service import rank_questions, rank_t
 # )
 from data_assessment_agent.config.log_factory import logger
 
-questionnaire_questions = load_questions()
-
+questionnaire_questions = asyncio.run(load_questions())
 
 async def initial_question(session_id: str) -> Union[Question, None]:
     db_question: Union[DbQuestion, None] = await select_initial_question(session_id)

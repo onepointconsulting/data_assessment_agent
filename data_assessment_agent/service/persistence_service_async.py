@@ -106,6 +106,49 @@ async def select_from(query: str, parameter_map: dict) -> list:
     return await create_cursor(handle_select)
 
 
+async def load_questions() -> List[Question]:
+    sql = """
+SELECT Q.ID,
+	Q.QUESTION,
+	Q.SCORE,
+	T.ID TOPIC_ID,
+	T.NAME TOPIC_NAME,
+	T.DESCRIPTION TOPIC_DESCRIPTION,
+    T.QUESTION_AMOUNT,
+    Q.YES_NO_QUESTION
+FROM TB_QUESTION Q
+INNER JOIN TB_TOPIC T ON Q.TOPIC_ID = T.ID
+ORDER BY T.PREFERRED_TOPIC_ORDER, Q.ID"""
+    questions: list = await select_from(sql, {})
+    final_questions = []
+    for (
+        id,
+        question,
+        score,
+        topic_id,
+        topic_name,
+        topic_description,
+        question_amount,
+        yes_no_question,
+    ) in questions:
+        topic = Topic(
+            id=topic_id,
+            name=topic_name,
+            description=topic_description,
+            question_amount=question_amount,
+        )
+        final_questions.append(
+            Question(
+                id=id,
+                question=question,
+                score=score,
+                topic=topic,
+                yes_no_question=yes_no_question,
+            )
+        )
+    return final_questions
+
+
 async def select_initial_question(session_id: str) -> Union[Question, None]:
     query = f"""
 SELECT Q.ID,
@@ -1129,6 +1172,15 @@ if __name__ == "__main__":
         assert report is not None
         await delete_report(session_id)
 
+    async def test_load_questions():
+        questions = await load_questions()
+        assert questions is not None
+        assert len(questions) > 0
+        for question in questions:
+            print(question)
+        print(len(questions))
+
+
     # asyncio.run(test_select_topic_scores())
     # asyncio.run(test_select_question_scores())
     # asyncio.run(test_select_suggestions())
@@ -1146,4 +1198,5 @@ if __name__ == "__main__":
     # asyncio.run(test_select_answered_questions_in_topic())
     # asyncio.run(test_select_answered_questions_in_session())
     # asyncio.run(test_select_selected_topics())
-    asyncio.run(test_insert_report())
+    # asyncio.run(test_insert_report())
+    asyncio.run(test_load_questions())
