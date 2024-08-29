@@ -81,6 +81,7 @@ async def generate_html_report(session_id: str, template_env: Environment) -> Pa
     report_date_str = generate_report_date()
     ml_context = await create_maturity_level_report_context(session_id)
     context = {
+        "report_header_image": cfg.report_header_image,
         "spider_chart": spider_chart.as_posix(),
         "bar_chart": bar_chart.as_posix(),
         "questionnaire": questionnaire_html,
@@ -182,7 +183,7 @@ def generate_qa_scored(qa_scored: List[QAScored]) -> str:
 if __name__ == "__main__":
     import asyncio
 
-    session_id = "da437e34-e64f-45a6-9042-36808d8fc8ea"
+    session_id = "796bd5fd-cac8-40cb-8ebc-34ba197deeed"
 
     target_file = asyncio.run(generate_pdf_report(session_id))
     print(target_file)

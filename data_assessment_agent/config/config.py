@@ -71,6 +71,8 @@ class Config:
     create_if_not_exists(report_tmp_path)
     report_url_base = os.getenv("REPORT_URL_BASE")
     assert report_url_base is not None
+    report_header_image = os.getenv("REPORT_HEADER_IMAGE")
+    assert report_header_image is not None
 
     # Exports
     exports_tmp_folder = Path(os.getenv("EXPORTS_TMP_FOLDER"))
