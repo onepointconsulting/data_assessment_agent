@@ -330,6 +330,8 @@ You can download the detailed [PDF report]({report_url}) with the results.
 
 This maturity assessment was evaluated according to [Onepoint Data & Analytics Body of Knowledge™](https://www.onepointltd.com/data-wellness/#BOK)
 
+{cfg.report_disclaimer}
+
 """,
                 sessionId=session_id,
                 final_message=True,

@@ -73,6 +73,8 @@ class Config:
     assert report_url_base is not None
     report_header_image = os.getenv("REPORT_HEADER_IMAGE")
     assert report_header_image is not None
+    report_disclaimer = os.getenv("REPORT_DISCLAINER")
+    assert report_disclaimer is not None
 
     # Exports
     exports_tmp_folder = Path(os.getenv("EXPORTS_TMP_FOLDER"))

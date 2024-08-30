@@ -2,7 +2,7 @@
 <table style="margin: 0 auto">
     <tr>
         <td style="padding: 5px">Category:</td>
-        <td style="padding: 5px"><strong>{{maturity_level}}</strong></td>
+        <td style="padding: 5px"><strong>{{maturity_level.replace("_", " ")}}</strong></td>
     </tr>
     <tr>
         <td style="padding: 5px; text-align: right;">Score:</td>
@@ -33,7 +33,7 @@
 </div>
 {% endfor %}
 
-<h3>About</h3>
+<h3>Reference</h3>
 
 <p>
     This maturity assessment was evaluated according to 
@@ -50,7 +50,7 @@
     {% for ml in maturity_level_enum %}
     <tr>
         <td style="padding: 5px; text-align: center;">{{ml.level()}}</td>
-        <td style="padding: 5px">{{ml.name}}</td>
+        <td style="padding: 5px">{{ml.name.replace("_", " ")}}</td>
     </tr>
     {% endfor %}
 </table>

@@ -82,6 +82,7 @@ async def generate_html_report(session_id: str, template_env: Environment) -> Pa
     ml_context = await create_maturity_level_report_context(session_id)
     context = {
         "report_header_image": cfg.report_header_image,
+        "report_disclaimer": cfg.report_disclaimer,
         "spider_chart": spider_chart.as_posix(),
         "bar_chart": bar_chart.as_posix(),
         "questionnaire": questionnaire_html,
